@@ -1,0 +1,43 @@
+/* Normalize margins and paddings */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Set box-sizing for consistent width calculations */
+}
+
+/* Set default font for body */
+body {
+  font-family: sans-serif; /* Choose your preferred default font */
+  font-size: 16px; /* Set your preferred base font size */
+  line-height: 1.5; /* Set a baseline line-height */
+}
+
+/* Remove margin from headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
+/* Address list styling */
+ul,
+ol {
+  list-style: none; /* Remove default list markers */
+}
+
+/* Remove anchor link underline */
+a {
+  text-decoration: none; /* Remove underline */
+}
+
+/* Form elements */
+input,
+button,
+select,
+textarea {
+  font: inherit; /* Inherit font properties from body */
+  border: 1px solid #ccc; /* Set a basic border for forms */
+}

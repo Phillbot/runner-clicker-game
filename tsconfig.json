@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "noImplicitOverride": true,
+    "strictFunctionTypes": true,
+    "useDefineForClassFields": true,
+    "strictPropertyInitialization": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "sourceMap": true,
+    "jsx": "react",
+    "baseUrl": "./src",
+    "paths": {
+      "@common/*": ["common/*"],
+      "@app/*": ["app/*"]
+    }
+  },
+  "include": ["./src/**/*", "global.d.ts"]
+}
