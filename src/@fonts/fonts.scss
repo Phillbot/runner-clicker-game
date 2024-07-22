@@ -1,0 +1,17 @@
+@font-face {
+  font-family: OverdoseSans;
+  src: url('~@fonts/overdozesans.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Rubik;
+  src: url('~@fonts/rubik.woff2') format('woff2');
+}
+
+@mixin font-overdoze {
+  font-family: OverdoseSans, sans-serif;
+}
+
+@mixin font-rubik {
+  font-family: Rubik, sans-serif;
+}
