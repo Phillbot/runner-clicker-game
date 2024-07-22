@@ -1,5 +1,12 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@fonts/*": ["@fonts/*"],
+      "@styles/*": ["@styles/*"],
+      "@common/*": ["common/*"],
+      "@app/*": ["app/*"]
+    },
     "target": "es6",
     "module": "commonjs",
     "strict": true,
@@ -15,13 +22,23 @@
     "strictPropertyInitialization": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
     "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true,
     "jsx": "react",
-    "baseUrl": "./src",
-    "paths": {
-      "@common/*": ["common/*"],
-      "@app/*": ["app/*"]
-    }
+    "plugins": [
+      {
+        "name": "typescript-plugin-css-modules",
+        "options": {
+          "customMatcher": "\\.module\\.(sa|sc|c)ss$",
+          "declarationDir": "./src/types",
+          "exclude": "**/*.global.scss"
+        }
+      }
+    ]
   },
   "include": ["./src/**/*", "global.d.ts"]
 }
