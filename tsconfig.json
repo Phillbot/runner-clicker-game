@@ -7,12 +7,19 @@
       "@common/*": ["common/*"],
       "@app/*": ["app/*"]
     },
-    "target": "es6",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
     "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
@@ -27,18 +34,7 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
-    "resolveJsonModule": true,
-    "jsx": "react",
-    "plugins": [
-      {
-        "name": "typescript-plugin-css-modules",
-        "options": {
-          "customMatcher": "\\.module\\.(sa|sc|c)ss$",
-          "declarationDir": "./src/types",
-          "exclude": "**/*.global.scss"
-        }
-      }
-    ]
+    "resolveJsonModule": true
   },
   "include": ["./src/**/*", "global.d.ts"]
 }

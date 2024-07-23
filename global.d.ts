@@ -36,8 +36,3 @@ declare module '*.bmp' {
   const content: ImageContent;
   export default content;
 }
-
-declare module '*md.scss' {
-  const content: { [className: string]: string };
-  export default content;
-}

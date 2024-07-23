@@ -9,6 +9,7 @@ import '@styles/reset.scss';
 import '@styles/styles.scss';
 
 import 'reflect-metadata';
+import './i18n/i18n';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
