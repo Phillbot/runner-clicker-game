@@ -1,3 +1,4 @@
 {
-  "greetings": "Привіт, {{name}}"
+  "greetings": "Привіт, {{name}}!",
+  "test": "Це тест"
 }

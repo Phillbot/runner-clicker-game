@@ -1,28 +1,25 @@
 import React, { Component, ReactNode } from 'react';
-import { ReactSVG } from 'react-svg';
+import { withTranslation } from 'react-i18next';
 import { t } from 'i18next';
+import { observer } from 'mobx-react';
 
-import mySvg from './images/react.svg';
+import { GameStore } from '@app/game/game.store';
 
 import styles from './screen-unsupported.md.scss';
+import { resolve } from 'inversify-react';
 
 type Props = {
   telegram: WebApp;
 };
 
+@observer
 export class ScreenUnsupported extends Component<Props> {
-  override componentDidMount(): void {
-    const {
-      telegram: { expand, disableVerticalSwipes },
-    } = this.props;
-
-    disableVerticalSwipes();
-    expand();
-  }
+  @resolve
+  private declare readonly _gameStore: GameStore;
 
   override render(): ReactNode {
     const {
-      telegram: { initDataUnsafe, showAlert, headerColor },
+      telegram: { initDataUnsafe },
     } = this.props;
 
     return (
@@ -32,12 +29,13 @@ export class ScreenUnsupported extends Component<Props> {
             name: initDataUnsafe?.user?.first_name,
             lng: initDataUnsafe?.user?.language_code,
           })}
-          {/* Здравствуй, {initDataUnsafe?.user?.first_name} */}
-        </div>
-        <div className={styles.unsupportedIcon}>
-          <ReactSVG className={styles.unsupportedIconSvg} src={mySvg} />
         </div>
         <button
+          onClick={() => this._gameStore.setTest(this._gameStore.test + 1)}
+        >
+          {this._gameStore.test}
+        </button>
+        {/* <button
           type="button"
           onClick={() => {
             try {
@@ -48,8 +46,10 @@ export class ScreenUnsupported extends Component<Props> {
           }}
         >
           1sss
-        </button>
+        </button> */}
       </div>
     );
   }
 }
+
+export default withTranslation()(ScreenUnsupported);
