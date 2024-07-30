@@ -2,11 +2,8 @@
   "compilerOptions": {
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
-
     "noImplicitAny": true,
-
     "noImplicitOverride": true,
-
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -33,8 +30,10 @@
       "@fonts/*": ["@fonts/*"],
       "@styles/*": ["@styles/*"],
       "@common/*": ["common/*"],
-      "@app/*": ["app/*"]
+      "@app/*": ["app/*"],
+      "@locales/*": ["locales/*"],
+      "@types/*": ["types/*"]
     }
   },
-  "include": ["./src/**/*", "global.d.ts"]
+  "include": ["./src/**/*", "src/@types", "global.d.ts"]
 }

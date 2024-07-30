@@ -1,10 +1,11 @@
 import React, { Component, ReactNode } from 'react';
-
+import { withTranslation, WithTranslation } from 'react-i18next';
 import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
-
 import styles from './entry.md.scss';
 
-export class Entry extends Component {
+type Props = WithTranslation;
+
+class Entry extends Component<Props> {
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   override componentDidMount(): void {
@@ -19,3 +20,5 @@ export class Entry extends Component {
     );
   }
 }
+
+export default withTranslation()(Entry);

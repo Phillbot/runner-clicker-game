@@ -7,13 +7,16 @@ import uk from './locales/uk.json';
 
 i18n.use(initReactI18next).init({
   debug: true,
+  lng: 'en',
+  fallbackLng: 'en',
+  defaultNS: 'translation',
   resources: {
     en: { translation: en },
     ru: { translation: ru },
     uk: { translation: uk },
   },
   interpolation: {
-    escapeValue: false, // Не экранируем значение, так как React уже делает это
+    escapeValue: false,
   },
 });
 

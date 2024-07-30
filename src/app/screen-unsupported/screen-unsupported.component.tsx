@@ -1,5 +1,4 @@
 import React, { Component, ReactNode } from 'react';
-import { withTranslation } from 'react-i18next';
 import { t } from 'i18next';
 import { observer } from 'mobx-react';
 
@@ -51,5 +50,3 @@ export class ScreenUnsupported extends Component<Props> {
     );
   }
 }
-
-export default withTranslation()(ScreenUnsupported);

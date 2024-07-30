@@ -21,7 +21,7 @@ module.exports = {
   },
   devtool: isProduction ? false : 'source-map',
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.scss'],
+    extensions: ['.tsx', '.ts', '.js', '.scss', '.json'],
     plugins: [
       new TsconfigPathsPlugin({
         configFile: './tsconfig.json',
@@ -32,6 +32,8 @@ module.exports = {
       '@styles': path.resolve(__dirname, 'src/@styles'),
       '@common': path.resolve(__dirname, 'src/common'),
       '@app': path.resolve(__dirname, 'src/app'),
+      '@locales': path.resolve(__dirname, 'src/locales'),
+      '@types': path.resolve(__dirname, 'src/types'),
     },
   },
   optimization: {
@@ -125,7 +127,7 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|svg|jpg|gif|woff|woff2|eot|ttf|otf)$/,
+        test: /\.(png|svg|jpg|gif)$/,
         type: 'asset',
         parser: {
           dataUrlCondition: {
@@ -135,6 +137,20 @@ module.exports = {
         generator: {
           filename: 'assets/[name][hash:8][ext][query]',
         },
+      },
+      {
+        test: /\.json$/,
+        type: 'javascript/auto',
+        include: [path.resolve(__dirname, 'src/locales')],
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[hash:8].[ext]',
+              outputPath: 'locales',
+            },
+          },
+        ],
       },
     ],
   },

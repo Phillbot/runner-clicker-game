@@ -1,4 +1,4 @@
-import translation from '../i18n/locales/en.json';
+import translation from './locales/en.json';
 
 const resources = {
   translation,
