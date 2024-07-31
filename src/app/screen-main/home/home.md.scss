@@ -1,0 +1,9 @@
+.home {
+  display: flex;
+  flex-direction: column;
+
+  &__game {
+    width: 250px;
+    height: 250px;
+  }
+}

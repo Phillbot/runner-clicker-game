@@ -1,0 +1,27 @@
+@import '~@fonts/fonts.scss';
+
+.nav-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  &__bottom-navigation {
+    background-color: #8c6188 !important;
+  }
+
+  &__bottom-navigation-element {
+    span {
+      @include font-overdoze;
+    }
+
+    &_active {
+      color: #fff !important;
+
+      span {
+        font-size: 1.25em;
+        color: #fff !important;
+      }
+    }
+  }
+}

@@ -1,11 +1,11 @@
 import React, { Component, ReactNode } from 'react';
+import { resolve } from 'inversify-react';
 import { t } from 'i18next';
 import { observer } from 'mobx-react';
 
 import { GameStore } from '@app/game/game.store';
 
 import styles from './screen-unsupported.md.scss';
-import { resolve } from 'inversify-react';
 
 type Props = {
   telegram: WebApp;
@@ -29,11 +29,12 @@ export class ScreenUnsupported extends Component<Props> {
             lng: initDataUnsafe?.user?.language_code,
           })}
         </div>
-        <button
+
+        {/* <button
           onClick={() => this._gameStore.setTest(this._gameStore.test + 1)}
         >
           {this._gameStore.test}
-        </button>
+        </button> */}
         {/* <button
           type="button"
           onClick={() => {

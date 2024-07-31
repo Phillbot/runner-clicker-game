@@ -1,6 +1,10 @@
 import React, { Component, ReactNode } from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
+import { BrowserRouter } from 'react-router-dom';
+
+import ScreenMain from '@app/screen-main/screen-main.component';
 import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
+
 import styles from './entry.md.scss';
 
 type Props = WithTranslation;
@@ -15,9 +19,20 @@ class Entry extends Component<Props> {
   override render(): ReactNode {
     return (
       <div className={styles.entry}>
-        <ScreenUnsupported telegram={this._telegram} />
+        {!this.isDesktop ? (
+          <ScreenUnsupported telegram={this._telegram} />
+        ) : (
+          <BrowserRouter>
+            <ScreenMain />
+          </BrowserRouter>
+        )}
       </div>
     );
+  }
+
+  private get isDesktop() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    return /windows|macintosh|linux/.test(userAgent);
   }
 }
 

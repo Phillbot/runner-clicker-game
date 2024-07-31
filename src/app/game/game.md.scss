@@ -52,11 +52,11 @@
 @keyframes fly-up {
   0% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(-20px);
   }
 
   100% {
     opacity: 0;
-    transform: translateY(-35px);
+    transform: translateY(-45px);
   }
 }

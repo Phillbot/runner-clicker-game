@@ -8,7 +8,6 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "strictPropertyInitialization": false,
-    "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
@@ -20,20 +19,19 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "sourceMap": true,
-    "declaration": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "incremental": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./src",
     "paths": {
       "@fonts/*": ["@fonts/*"],
       "@styles/*": ["@styles/*"],
+      "@types/*": ["@types/*"],
       "@common/*": ["common/*"],
       "@app/*": ["app/*"],
-      "@locales/*": ["locales/*"],
-      "@types/*": ["types/*"]
+      "@locales/*": ["locales/*"]
     }
   },
-  "include": ["./src/**/*", "src/@types", "global.d.ts"]
+  "include": ["./src/**/*", "src/@types", "global.d.ts"],
+  "exclude": ["node_modules"]
 }
