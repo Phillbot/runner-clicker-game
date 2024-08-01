@@ -1,15 +1,15 @@
 import React, { Component, createRef, ReactNode } from 'react';
 import { resolve } from 'inversify-react';
-import { ReactSVG } from 'react-svg';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
-import { fromEvent, merge, Subscription } from 'rxjs';
+import { fromEvent, race, Subscription } from 'rxjs';
 import { map, throttleTime } from 'rxjs/operators';
 
 import { GameStore } from './game.store';
 import { GameBalance } from './game-balance.component';
+import { ScaleBar } from './game-scale-bar.component';
+import { ReactSVG } from './react-svg.component';
 
-import mySvg from './images/react.svg';
 import styles from './game.md.scss';
 
 type Props = NonNullable<unknown>;
@@ -22,10 +22,12 @@ export class Game extends Component<Props> {
   private declare readonly _gameStore: GameStore;
   private subscription: Subscription | null = null;
 
+  private readonly isBoosted = false; // need add this feature separately
+
   override componentDidMount(): void {
     if (this.gameIconRef.current) {
       const clicks$ = fromEvent<MouseEvent>(
-        this.gameIconRef.current,
+        this.gameIconRef.current!,
         'click',
       ).pipe(
         throttleTime(10),
@@ -38,7 +40,7 @@ export class Game extends Component<Props> {
       );
 
       const touches$ = fromEvent<TouchEvent>(
-        this.gameIconRef.current,
+        this.gameIconRef.current!,
         'touchend',
       ).pipe(
         throttleTime(10),
@@ -50,8 +52,10 @@ export class Game extends Component<Props> {
         }),
       );
 
-      this.subscription = merge(clicks$, touches$).subscribe(({ x, y }) => {
-        this._gameStore.handleEvent(x, y);
+      this.subscription = race(clicks$, touches$).subscribe(event => {
+        if (event) {
+          this._gameStore.handleEvent(event.x, event.y);
+        }
       });
     }
   }
@@ -63,11 +67,13 @@ export class Game extends Component<Props> {
   }
 
   override render(): ReactNode {
-    const { isScaled, scaleValue, activeClickMessages, isClickable } =
-      this._gameStore;
-
-    const scalePercentage = (scaleValue / 5000) * 100;
-    const scaleColor = `rgb(${255 - (255 * scalePercentage) / 100}, ${(255 * scalePercentage) / 100}, 0)`;
+    const {
+      isScaled,
+      scaleValue,
+      activeClickMessages,
+      isClickable,
+      initScaleValue,
+    } = this._gameStore;
 
     return (
       <div className={styles.game} ref={this.gameContainerRef}>
@@ -78,27 +84,24 @@ export class Game extends Component<Props> {
         <div
           className={classNames(styles.gameIcon, {
             [styles.gameIconUnclickable]: !isClickable,
+            [styles.gameIconBoosted]: this.isBoosted,
           })}
           ref={this.gameIconRef}
         >
           <ReactSVG
-            className={classNames(styles.gameIconSvg, {
+            svgClasses={classNames(styles.gameIconSvg, {
               [styles.gameIconSvgScale]: isScaled,
               [styles.gameIconSvgDisabled]: !isClickable,
             })}
-            src={mySvg}
+            reactElementsClasses={classNames(styles.gameIconSvgElements, {
+              [styles.gameIconSvgElementsBoosted]: this.isBoosted,
+            })}
+            reactDotsClasses={classNames(styles.gameIconSvgDots, {
+              [styles.gameIconSvgDotsBoosted]: this.isBoosted,
+            })}
           />
         </div>
-        <div className={styles.gameScaleContainer}>
-          <div
-            className={styles.gameScaleFill}
-            style={{
-              width: `${scalePercentage}%`,
-              backgroundColor: scaleColor,
-            }}
-          ></div>
-          <span className={styles.gameScaleText}>{scaleValue}/5000</span>
-        </div>
+        <ScaleBar scaleValue={scaleValue} initScaleValue={initScaleValue} />
         {activeClickMessages.map(click => (
           <div
             key={click.id}

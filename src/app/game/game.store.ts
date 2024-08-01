@@ -12,13 +12,14 @@ type ClickMessage = { id: number; x: number; y: number; removeAt: number };
 @injectable()
 export class GameStore {
   @observable clickMessages: ClickMessage[] = [];
-  @observable scaleValue: number = 5000;
+  @observable scaleValue: number = 1000;
   @observable isScaled: boolean = false;
   @observable isClickable: boolean = true;
   private clickId: number = 0;
   private intervalId: NodeJS.Timeout | null = null;
-  private readonly _clickCost: number = 100;
-  private readonly regenirationSpeed: number = 1000;
+  private readonly _initScaleValue: number = 1000;
+  private readonly _clickCost: number = 10;
+  private readonly regenirationSpeed: number = 500;
 
   constructor() {
     makeObservable(this);
@@ -27,6 +28,10 @@ export class GameStore {
 
   get clickCost(): number {
     return this._clickCost;
+  }
+
+  get initScaleValue(): number {
+    return this._initScaleValue;
   }
 
   @action
@@ -57,7 +62,7 @@ export class GameStore {
 
   @action
   regeneratePoints = () => {
-    this.scaleValue = Math.min(this.scaleValue + 5, 5000);
+    this.scaleValue = Math.min(this.scaleValue + 1, this._initScaleValue);
     this.setClickable(this.scaleValue >= this._clickCost);
     this.removeOldMessages();
   };

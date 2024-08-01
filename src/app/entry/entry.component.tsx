@@ -3,7 +3,7 @@ import { withTranslation, WithTranslation } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 
 import ScreenMain from '@app/screen-main/screen-main.component';
-import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
+// import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
 
 import styles from './entry.md.scss';
 
@@ -19,13 +19,13 @@ class Entry extends Component<Props> {
   override render(): ReactNode {
     return (
       <div className={styles.entry}>
-        {!this.isDesktop ? (
+        {/* {this.isDesktop ? (
           <ScreenUnsupported telegram={this._telegram} />
-        ) : (
-          <BrowserRouter>
-            <ScreenMain />
-          </BrowserRouter>
-        )}
+        ) : ( */}
+        <BrowserRouter>
+          <ScreenMain />
+        </BrowserRouter>
+        {/* )} */}
       </div>
     );
   }
