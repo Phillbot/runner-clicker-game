@@ -14,7 +14,7 @@
     height: 100%;
     display: block;
     outline: none;
-    pointer-events: auto;
+    pointer-events: none;
 
     &_scale {
       animation: scale-up 100ms forwards;
@@ -22,6 +22,7 @@
   }
 
   &__click-message {
+    pointer-events: none;
     position: absolute;
     color: #fff;
     font-size: 1.5em;

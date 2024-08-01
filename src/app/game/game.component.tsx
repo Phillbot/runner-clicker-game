@@ -1,98 +1,68 @@
 import React, { Component, createRef, ReactNode } from 'react';
 import { ReactSVG } from 'react-svg';
 import classNames from 'classnames';
-import { fromEvent } from 'rxjs';
+import { observer } from 'mobx-react';
+import { fromEvent, merge, Subscription } from 'rxjs';
+import { map, throttleTime } from 'rxjs/operators';
 
 import mySvg from './images/react.svg';
 
 import styles from './game.md.scss';
+import { resolve } from 'inversify-react';
+import { GameStore } from './game.store';
 
 type Props = NonNullable<unknown>;
 
-type State = {
-  isScaled: boolean;
-  clickMessages: { id: number; x: number; y: number }[];
-};
-
-export class Game extends Component<Props, State> {
+@observer
+export class Game extends Component<Props> {
   private gameContainerRef = createRef<HTMLDivElement>();
-  private clickId = 0;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      isScaled: false,
-      clickMessages: [],
-    };
-  }
+  @resolve
+  private declare readonly _gameStore: GameStore;
+  private subscription: Subscription | null = null;
 
   override componentDidMount(): void {
     if (this.gameContainerRef.current) {
       const clicks$ = fromEvent<MouseEvent>(
         this.gameContainerRef.current,
         'click',
+      ).pipe(
+        throttleTime(0),
+        map(event => {
+          const rect = this.gameContainerRef.current?.getBoundingClientRect();
+          const x = event.clientX - (rect?.left || 0);
+          const y = event.clientY - (rect?.top || 0);
+          return { x, y };
+        }),
       );
+
       const touches$ = fromEvent<TouchEvent>(
         this.gameContainerRef.current,
         'touchend',
+      ).pipe(
+        throttleTime(0),
+        map(event => {
+          const rect = this.gameContainerRef.current?.getBoundingClientRect();
+          const x = event.changedTouches[0].clientX - (rect?.left || 0);
+          const y = event.changedTouches[0].clientY - (rect?.top || 0);
+          return { x, y };
+        }),
       );
 
-      const handleEvent = (event: MouseEvent | TouchEvent): void => {
-        event.preventDefault();
-        const rect = this.gameContainerRef.current?.getBoundingClientRect();
-        let x: number;
-        let y: number;
-
-        if (event instanceof MouseEvent) {
-          x = event.clientX - (rect?.left || 0);
-          y = event.clientY - (rect?.top || 0);
-        } else {
-          x = event.changedTouches[0].clientX - (rect?.left || 0);
-          y = event.changedTouches[0].clientY - (rect?.top || 0);
-        }
-
-        const newClickId = this.clickId++;
-
-        this.setState(prevState => ({
-          isScaled: true,
-          clickMessages: [...prevState.clickMessages, { id: newClickId, x, y }],
-        }));
-
-        // Перезапуск анимации скейла
-        this.restartScaleAnimation();
-
-        // Удаление сообщения после анимации
-        setTimeout(() => {
-          this.setState(prevState => ({
-            clickMessages: prevState.clickMessages.filter(
-              click => click.id !== newClickId,
-            ),
-          }));
-        }, 500);
-
-        setTimeout(() => {
-          this.setState({ isScaled: false });
-        }, 500);
-      };
-
-      clicks$.subscribe(handleEvent);
-      touches$.subscribe(handleEvent);
+      this.subscription = merge(clicks$, touches$).subscribe(({ x, y }) => {
+        this._gameStore.handleEvent(x, y);
+      });
     }
   }
 
-  private restartScaleAnimation(): void {
-    this.setState({ isScaled: false }, () => {
-      setTimeout(() => {
-        this.setState({ isScaled: true });
-        setTimeout(() => {
-          this.setState({ isScaled: false });
-        }, 100);
-      }, 0);
-    });
+  override componentWillUnmount(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    this._gameStore.stopRegeneration();
   }
 
   override render(): ReactNode {
-    const { isScaled, clickMessages } = this.state;
+    const { isScaled, scaleValue, activeClickMessages } = this._gameStore;
 
     return (
       <div className={styles.game} ref={this.gameContainerRef}>
@@ -104,13 +74,14 @@ export class Game extends Component<Props, State> {
             src={mySvg}
           />
         </div>
-        {clickMessages.map(click => (
+        <div>Scale Value: {scaleValue}</div>
+        {activeClickMessages.map(click => (
           <div
             key={click.id}
             className={styles.gameClickMessage}
             style={{ left: click.x, top: click.y }}
           >
-            +100
+            -100
           </div>
         ))}
       </div>
