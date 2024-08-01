@@ -1,0 +1,17 @@
+@import '~@fonts/fonts.scss';
+
+.game-balance {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: black;
+  text-align: center;
+
+  &__label {
+    color: #fff;
+    font-size: 2.5em;
+    -webkit-text-stroke: 1px #58458d;
+
+    @include font-overdoze;
+  }
+}

@@ -1,5 +1,11 @@
 import { injectable } from 'inversify';
-import { observable, action, computed, makeObservable } from 'mobx';
+import {
+  observable,
+  action,
+  computed,
+  makeObservable,
+  runInAction,
+} from 'mobx';
 
 type ClickMessage = { id: number; x: number; y: number; removeAt: number };
 
@@ -8,25 +14,42 @@ export class GameStore {
   @observable clickMessages: ClickMessage[] = [];
   @observable scaleValue: number = 5000;
   @observable isScaled: boolean = false;
+  @observable isClickable: boolean = true;
   private clickId: number = 0;
   private intervalId: NodeJS.Timeout | null = null;
+  private readonly _clickCost: number = 100;
+  private readonly regenirationSpeed: number = 1000;
 
   constructor() {
     makeObservable(this);
     this.startRegeneration();
   }
 
+  get clickCost(): number {
+    return this._clickCost;
+  }
+
   @action
   handleEvent = (x: number, y: number) => {
+    if (this.scaleValue < this._clickCost) {
+      this.setClickable(false);
+      return;
+    }
+
     const newClickId = this.clickId++;
     const removeAt = Date.now() + 500;
 
     this.clickMessages.push({ id: newClickId, x, y, removeAt });
-    this.scaleValue = Math.max(this.scaleValue - 100, 0);
+    this.scaleValue = Math.max(this.scaleValue - this._clickCost, 0);
     this.isScaled = true;
+    this.setClickable(this.scaleValue >= this._clickCost);
 
     setTimeout(() => {
-      this.removeClickMessage(newClickId);
+      runInAction(() => {
+        this.clickMessages = this.clickMessages.filter(
+          click => click.id !== newClickId,
+        );
+      });
     }, 500);
 
     this.restartScaleAnimation();
@@ -35,14 +58,18 @@ export class GameStore {
   @action
   regeneratePoints = () => {
     this.scaleValue = Math.min(this.scaleValue + 5, 5000);
+    this.setClickable(this.scaleValue >= this._clickCost);
     this.removeOldMessages();
   };
 
   startRegeneration = () => {
-    console.log('HERE');
-    this.intervalId = setInterval(() => {
-      this.regeneratePoints();
-    }, 1000);
+    if (!this.intervalId) {
+      this.intervalId = setInterval(() => {
+        runInAction(() => {
+          this.regeneratePoints();
+        });
+      }, this.regenirationSpeed);
+    }
   };
 
   stopRegeneration = () => {
@@ -56,16 +83,13 @@ export class GameStore {
   restartScaleAnimation = () => {
     this.setScaled(false);
     setTimeout(() => {
-      this.setScaled(true);
-      setTimeout(() => {
-        this.setScaled(false);
-      }, 100);
+      runInAction(() => {
+        this.setScaled(true);
+        setTimeout(() => {
+          this.setScaled(false);
+        }, 100);
+      });
     }, 0);
-  };
-
-  @action
-  removeClickMessage = (id: number) => {
-    this.clickMessages = this.clickMessages.filter(click => click.id !== id);
   };
 
   @action
@@ -79,6 +103,11 @@ export class GameStore {
   @action
   setScaled = (value: boolean) => {
     this.isScaled = value;
+  };
+
+  @action
+  setClickable = (value: boolean) => {
+    this.isClickable = value;
   };
 
   @computed
