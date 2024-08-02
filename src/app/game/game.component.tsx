@@ -20,8 +20,6 @@ export class Game extends Component<Props> {
   private declare readonly _gameStore: GameStore;
   private subscription: Subscription | null = null;
 
-  private readonly isBoosted = false; // need add this feature separately
-
   override componentDidMount(): void {
     if (this.gameIconRef.current) {
       const clicks$ = fromEvent<MouseEvent>(
@@ -72,7 +70,7 @@ export class Game extends Component<Props> {
         <div
           className={classNames(styles.gameIcon, {
             [styles.gameIconUnclickable]: !isClickable,
-            [styles.gameIconBoosted]: this.isBoosted,
+            [styles.gameIconBoosted]: this._gameStore.isBoosted,
           })}
           ref={this.gameIconRef}
         >
@@ -82,10 +80,10 @@ export class Game extends Component<Props> {
               [styles.gameIconSvgDisabled]: !isClickable,
             })}
             reactElementsClasses={classNames(styles.gameIconSvgElements, {
-              [styles.gameIconSvgElementsBoosted]: this.isBoosted,
+              [styles.gameIconSvgElementsBoosted]: this._gameStore.isBoosted,
             })}
             reactDotsClasses={classNames(styles.gameIconSvgDots, {
-              [styles.gameIconSvgDotsBoosted]: this.isBoosted,
+              [styles.gameIconSvgDotsBoosted]: this._gameStore.isBoosted,
             })}
           />
         </div>

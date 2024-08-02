@@ -23,6 +23,9 @@ $size: 15.625em;
 
   &__scale-bar {
     width: $size;
+    position: relative;
+    bottom: 2em;
+    height: 1.875em;
     margin-top: auto;
     z-index: 2;
   }

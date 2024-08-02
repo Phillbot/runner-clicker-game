@@ -16,6 +16,8 @@ export class GameStore {
   @observable isScaled: boolean = false;
   @observable isClickable: boolean = true;
   @observable balance: number = 1000;
+  @observable isBoosted = false;
+
   private clickId: number = 0;
   private intervalId: NodeJS.Timeout | null = null;
   private readonly _initScaleValue: number = 1000;
@@ -124,6 +126,11 @@ export class GameStore {
   incrementBalance = (amount: number) => {
     this.balance += amount;
   };
+
+  @action
+  toggleBusted(): void {
+    this.isBoosted = !this.isBoosted;
+  }
 
   @computed
   get activeClickMessages() {

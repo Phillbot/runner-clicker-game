@@ -39,8 +39,10 @@ $size: 18.3em;
 
     &_boosted {
       pointer-events: none;
+      animation: rotate-turn linear 1s infinite;
+
       &::before {
-        box-shadow: 0 0 3.125em 0.7em red;
+        box-shadow: 0 0 3.125em 0.7em #ff0000;
       }
     }
   }
@@ -77,7 +79,7 @@ $size: 18.3em;
     fill: #2f4bff;
 
     &_boosted {
-      fill: red;
+      fill: #ff0000;
     }
   }
 
