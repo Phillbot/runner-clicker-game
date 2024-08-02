@@ -1,0 +1,19 @@
+.boost-button-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  align-items: center;
+}
+
+.boost-button {
+  background: transparent;
+  color: #ff0000;
+  cursor: pointer;
+  z-index: 1000;
+
+  &_disabled {
+    color: #ccc;
+    pointer-events: none;
+    opacity: 0.3;
+  }
+}

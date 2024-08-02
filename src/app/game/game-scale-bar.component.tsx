@@ -1,23 +1,35 @@
 import React from 'react';
+import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
+import Fit from 'react-fit';
+
+import { assertNever } from '@common/utils/assert-never';
+import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
+
 import { GameStore } from './game.store';
+
 import styles from './game-scale-bar.md.scss';
 
 @observer
 export class ScaleBar extends React.Component {
   @resolve
-  private readonly _gameStore!: GameStore;
+  private readonly _gameStore: GameStore;
+  @resolve
+  private readonly _boostStore: BoostStore;
 
   override render(): React.ReactNode {
     const { initScaleValue, scaleValue } = this._gameStore;
     const scalePercentage = (scaleValue / initScaleValue) * 100;
     const scaleColor = this.getScaleColor(scalePercentage);
     const boxShadowBrightness = scalePercentage / 100;
+    const { currentBoostType } = this._boostStore;
 
     return (
       <div
-        className={styles.scaleContainer}
+        className={classNames(styles.scaleContainer, {
+          [styles.scaleContainerBoostMega]: currentBoostType === BoostType.Mega,
+        })}
         style={
           {
             '--box-shadow-brightness': boxShadowBrightness,
@@ -32,11 +44,13 @@ export class ScaleBar extends React.Component {
             transition: 'width 0.3s, background-color 0.3s',
           }}
         />
-        <div className={styles.scaleContainerScaleText}>
-          <span className={styles.scaleContainerScaleTextLabel}>
-            {scaleValue}/{initScaleValue}
-          </span>
-        </div>
+        <Fit>
+          <div className={styles.scaleContainerScaleText}>
+            {currentBoostType !== null
+              ? mapBoostTypeToText(currentBoostType)
+              : `${scaleValue}/${initScaleValue}`}
+          </div>
+        </Fit>
       </div>
     );
   }
@@ -65,4 +79,17 @@ export class ScaleBar extends React.Component {
 
     return `rgb(${r}, ${g}, ${b})`;
   };
+}
+
+function mapBoostTypeToText(boostType: BoostType): string {
+  switch (boostType) {
+    case BoostType.Mega:
+      return 'MEGA BOOST';
+    case BoostType.Normal:
+      return 'BOOST';
+    case BoostType.Tiny:
+      return 'Tiny boost';
+    default:
+      return assertNever(boostType);
+  }
 }

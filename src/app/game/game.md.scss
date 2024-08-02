@@ -37,7 +37,12 @@ $size: 18.3em;
       }
     }
 
-    &_boosted {
+    &_boosted-tiny {
+      animation: rotate-turn linear 5s infinite;
+    }
+
+    &_boosted-mega,
+    &_boosted-normal {
       pointer-events: none;
       animation: rotate-turn linear 1s infinite;
 
@@ -69,7 +74,7 @@ $size: 18.3em;
   &_icon-svg-elements {
     fill: #ffffff;
 
-    &_boosted {
+    &_boosted-mega {
       fill: #ff5900;
       box-shadow: 120px 80px 40px 20px #0ff;
     }
@@ -78,7 +83,7 @@ $size: 18.3em;
   &_icon-svg-dots {
     fill: #2f4bff;
 
-    &_boosted {
+    &_boosted-mega {
       fill: #ff0000;
     }
   }
@@ -94,6 +99,11 @@ $size: 18.3em;
     animation: fly-up 2000ms forwards;
 
     @include font-press-start;
+
+    &_boost-mega {
+      -webkit-text-stroke: 0.025em #ff0000;
+      text-shadow: 2px 2px 2px #ff0000;
+    }
   }
 }
 

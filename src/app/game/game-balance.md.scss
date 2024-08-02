@@ -12,5 +12,10 @@
     text-shadow: 0.0125em 0em 0.185em #0ff;
 
     @include font-press-start;
+
+    &_boost-mega {
+      -webkit-text-stroke: 0.025em #ff0000;
+      text-shadow: 0.0125em 0em 0.185em #ff0000;
+    }
   }
 }

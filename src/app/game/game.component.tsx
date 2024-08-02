@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import { fromEvent, race, Subscription } from 'rxjs';
 import { map, throttleTime } from 'rxjs/operators';
 
+import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
 import { GameStore } from './game.store';
 import { ReactSVG } from './react-svg.component';
 
@@ -18,6 +19,8 @@ export class Game extends Component<Props> {
   private gameIconRef = createRef<HTMLDivElement>();
   @resolve
   private declare readonly _gameStore: GameStore;
+  @resolve
+  private declare readonly _boostStore: BoostStore;
   private subscription: Subscription | null = null;
 
   override componentDidMount(): void {
@@ -63,15 +66,32 @@ export class Game extends Component<Props> {
   }
 
   override render(): ReactNode {
-    const { isScaled, activeClickMessages, isClickable, isBoosted, clickCost } =
+    const { isScaled, activeClickMessages, isClickable, clickCost } =
       this._gameStore;
+    const { currentBoostType } = this._boostStore;
+
+    const getBoostedClickCost = () => {
+      switch (currentBoostType) {
+        case BoostType.Mega:
+          return clickCost * 20;
+        case BoostType.Normal:
+          return clickCost * 10;
+        case BoostType.Tiny:
+          return clickCost * 5;
+        default:
+          return clickCost;
+      }
+    };
 
     return (
       <div className={styles.game} ref={this.gameContainerRef}>
         <div
           className={classNames(styles.gameIcon, {
             [styles.gameIconUnclickable]: !isClickable,
-            [styles.gameIconBoosted]: isBoosted,
+            [styles.gameIconBoostedMega]: currentBoostType === BoostType.Mega,
+            [styles.gameIconBoostedNormal]:
+              currentBoostType === BoostType.Normal,
+            [styles.gameIconBoostedTiny]: currentBoostType === BoostType.Tiny,
           })}
           ref={this.gameIconRef}
         >
@@ -81,24 +101,29 @@ export class Game extends Component<Props> {
               [styles.gameIconSvgDisabled]: !isClickable,
             })}
             reactElementsClasses={classNames(styles.gameIconSvgElements, {
-              [styles.gameIconSvgElementsBoosted]: isBoosted,
+              [styles.gameIconSvgElementsBoostedMega]:
+                currentBoostType === BoostType.Mega,
             })}
             reactDotsClasses={classNames(styles.gameIconSvgDots, {
-              [styles.gameIconSvgDotsBoosted]: isBoosted,
+              [styles.gameIconSvgDotsBoostedMega]:
+                currentBoostType === BoostType.Mega,
             })}
           />
         </div>
         {activeClickMessages.map(click => (
           <div
             key={click.id}
-            className={styles.gameClickMessage}
+            className={classNames(styles.gameClickMessage, {
+              [styles.gameClickMessageBoostMega]:
+                currentBoostType === BoostType.Mega,
+            })}
             style={{
               left: `${click.x}px`,
               top: `${click.y}px`,
             }}
           >
             <span>+</span>
-            <span>{isBoosted ? clickCost * 10 : clickCost}</span>
+            <span>{currentBoostType ? getBoostedClickCost() : clickCost}</span>
           </div>
         ))}
       </div>

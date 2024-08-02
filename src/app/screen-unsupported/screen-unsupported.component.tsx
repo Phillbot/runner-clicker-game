@@ -1,9 +1,9 @@
 import React, { Component, ReactNode } from 'react';
 import { t } from 'i18next';
 import { observer } from 'mobx-react';
+import Fit from 'react-fit';
 
 import styles from './screen-unsupported.md.scss';
-import { Fit } from '@common/utils/fit.component';
 
 type Props = {
   telegram: WebApp;
@@ -23,10 +23,12 @@ export class ScreenUnsupported extends Component<Props> {
         <div className={styles.unsupportedTextContainer}>
           <div className={styles.unsupportedTitle}>
             <Fit>
-              {t('translation:greetings', {
-                name: initDataUnsafe?.user?.first_name,
-                lng,
-              })}
+              <span>
+                {t('translation:greetings', {
+                  name: initDataUnsafe?.user?.first_name,
+                  lng,
+                })}
+              </span>
             </Fit>
           </div>
           <div className={styles.unsupportedRedirect}>

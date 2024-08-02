@@ -11,7 +11,7 @@
   &__balance {
     position: relative;
     top: 3em;
-    width: 100%;
+    width: 15.625em;
   }
 
   &__game {
@@ -28,18 +28,5 @@
     height: 1.875em;
     margin-top: auto;
     z-index: 2;
-  }
-
-  &__boost-button {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    background: transparent;
-    box-shadow: 0 0 0.9em 0.2em #0ff;
-    border-radius: 100%;
-    cursor: pointer;
-    color: #0ff;
-    opacity: 0.6;
-    z-index: 1000;
   }
 }

@@ -6,6 +6,11 @@
   background-color: rgba(204, 204, 204, 0.45);
   border-radius: 0.5em;
   box-shadow: 0 0em 1em 0.3em rgba(0, 255, 255, var(--box-shadow-brightness));
+  position: relative;
+
+  &_boost-mega {
+    box-shadow: 0 0em 1em 0.3em #ff0000;
+  }
 
   &__scale-fill {
     height: 100%;
@@ -18,18 +23,15 @@
   }
 
   &__scale-text {
-    width: 100%;
-    top: 50%;
-    left: 0;
+    width: 15.625em;
+    top: 0;
+    left: 50%;
     position: absolute;
     text-align: center;
-    transform: translate(0, -50%);
     padding-top: 0.3em;
+    transform: translateX(-50%);
     will-change: content;
     z-index: 1;
-  }
-
-  &__scale-text-label {
     color: #ffffff;
     font-size: 1.3em;
     -webkit-text-stroke: 1.25px #000000;
