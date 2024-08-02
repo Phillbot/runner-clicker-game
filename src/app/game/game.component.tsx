@@ -7,8 +7,8 @@ import { map, throttleTime } from 'rxjs/operators';
 
 import { GameStore } from './game.store';
 import { GameBalance } from './game-balance.component';
-import { ScaleBar } from './game-scale-bar.component';
 import { ReactSVG } from './react-svg.component';
+import ScaleBar from './game-scale-bar.component';
 
 import styles from './game.md.scss';
 
@@ -101,7 +101,9 @@ export class Game extends Component<Props> {
             })}
           />
         </div>
-        <ScaleBar scaleValue={scaleValue} initScaleValue={initScaleValue} />
+        <div className={styles.gameScaleBar}>
+          <ScaleBar scaleValue={scaleValue} initScaleValue={initScaleValue} />
+        </div>
         {activeClickMessages.map(click => (
           <div
             key={click.id}

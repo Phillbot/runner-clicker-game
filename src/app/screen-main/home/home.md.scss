@@ -1,9 +1,13 @@
+$width: 21.875em;
+
 .home {
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  height: 100%;
 
   &__game {
-    width: 250px;
-    height: 500px;
+    width: 100%;
+    height: 100%;
+    max-width: $width;
+    margin: 0 auto;
   }
 }

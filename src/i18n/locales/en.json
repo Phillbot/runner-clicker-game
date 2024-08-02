@@ -1,4 +1,5 @@
 {
   "greetings": "Hello, {{name}}!",
-  "test": "This is a test"
+  "test": "This is a test",
+  "unsupported": "Please use your mobile device to continue"
 }

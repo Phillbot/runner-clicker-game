@@ -1,10 +1,6 @@
 .entry {
-  display: flex;
   position: relative;
-  height: 100vh;
-  align-items: center;
-  flex-direction: column;
-  justify-content: space-around;
+  height: calc(100svh - 3.5em);
 
   &::before {
     content: '';
@@ -13,5 +9,9 @@
     height: 100%;
     background: url('./images/unsupported.jpg') no-repeat center / cover;
     z-index: -1;
+  }
+
+  &__unsuppoerted {
+    height: 100svh;
   }
 }
