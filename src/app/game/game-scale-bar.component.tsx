@@ -1,62 +1,60 @@
 import React from 'react';
-
+import { observer } from 'mobx-react';
+import { resolve } from 'inversify-react';
+import { GameStore } from './game.store';
 import styles from './game-scale-bar.md.scss';
 
-type Props = {
-  scaleValue: number;
-  initScaleValue: number;
-};
+@observer
+export class ScaleBar extends React.Component {
+  @resolve
+  private readonly _gameStore: GameStore;
 
-const ScaleBar: React.FC<Props> = ({ scaleValue, initScaleValue }) => {
-  const scalePercentage = (scaleValue / initScaleValue) * 100;
-  const scaleColor = getScaleColor(scalePercentage);
+  override render(): React.ReactNode {
+    const { initScaleValue, scaleValue } = this._gameStore;
+    const scalePercentage = (scaleValue / initScaleValue) * 100;
+    const scaleColor = this.getScaleColor(scalePercentage);
 
-  return (
-    <div className={styles.scaleContainer}>
-      <div
-        className={styles.scaleContainerScaleFill}
-        style={{
-          width: `${scalePercentage}%`,
-          backgroundColor: scaleColor,
-        }}
-      />
-      <div className={styles.scaleContainerScaleText}>
-        <span className={styles.scaleContainerScaleTextLabel}>
-          {scaleValue}/{initScaleValue}
-        </span>
+    return (
+      <div className={styles.scaleContainer}>
+        <div
+          className={styles.scaleContainerScaleFill}
+          style={{
+            width: `${scalePercentage}%`,
+            backgroundColor: scaleColor,
+            transition: 'width 0.3s, background-color 0.3s',
+          }}
+        />
+        <div className={styles.scaleContainerScaleText}>
+          <span className={styles.scaleContainerScaleTextLabel}>
+            {scaleValue}/{initScaleValue}
+          </span>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
 
-const getScaleColor = (percentage: number): string => {
-  // Define colors for the gradient starting from green to red
-  const colors = [
-    { r: 255, g: 0, b: 0 }, // Red
-    { r: 255, g: 165, b: 0 }, // Orange
-    { r: 173, g: 216, b: 230 }, // Light Blue
-  ];
+  private getScaleColor = (percentage: number): string => {
+    const colors = [
+      { r: 255, g: 0, b: 0 }, // Red
+      { r: 255, g: 165, b: 0 }, // Orange
+      { r: 144, g: 238, b: 144 }, // Light green
+    ];
 
-  // Calculate the index in the colors array
-  const index = Math.floor((percentage / 100) * (colors.length - 1));
-  const nextIndex = Math.min(index + 1, colors.length - 1);
+    const index = Math.floor((percentage / 100) * (colors.length - 1));
+    const nextIndex = Math.min(index + 1, colors.length - 1);
+    const factor =
+      (percentage % (100 / (colors.length - 1))) / (100 / (colors.length - 1));
 
-  // Calculate the interpolation factor
-  const factor =
-    (percentage % (100 / (colors.length - 1))) / (100 / (colors.length - 1));
+    const r = Math.floor(
+      colors[index].r + factor * (colors[nextIndex].r - colors[index].r),
+    );
+    const g = Math.floor(
+      colors[index].g + factor * (colors[nextIndex].g - colors[index].g),
+    );
+    const b = Math.floor(
+      colors[index].b + factor * (colors[nextIndex].b - colors[index].b),
+    );
 
-  // Interpolate between the two colors
-  const r = Math.floor(
-    colors[index].r + factor * (colors[nextIndex].r - colors[index].r),
-  );
-  const g = Math.floor(
-    colors[index].g + factor * (colors[nextIndex].g - colors[index].g),
-  );
-  const b = Math.floor(
-    colors[index].b + factor * (colors[nextIndex].b - colors[index].b),
-  );
-
-  return `rgb(${r}, ${g}, ${b})`;
-};
-
-export default React.memo(ScaleBar);
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+}

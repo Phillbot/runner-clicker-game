@@ -6,9 +6,7 @@ import { fromEvent, race, Subscription } from 'rxjs';
 import { map, throttleTime } from 'rxjs/operators';
 
 import { GameStore } from './game.store';
-import { GameBalance } from './game-balance.component';
 import { ReactSVG } from './react-svg.component';
-import ScaleBar from './game-scale-bar.component';
 
 import styles from './game.md.scss';
 
@@ -67,20 +65,10 @@ export class Game extends Component<Props> {
   }
 
   override render(): ReactNode {
-    const {
-      isScaled,
-      scaleValue,
-      activeClickMessages,
-      isClickable,
-      initScaleValue,
-    } = this._gameStore;
+    const { isScaled, activeClickMessages, isClickable } = this._gameStore;
 
     return (
       <div className={styles.game} ref={this.gameContainerRef}>
-        <div className={styles.gameBalance}>
-          <GameBalance />
-        </div>
-
         <div
           className={classNames(styles.gameIcon, {
             [styles.gameIconUnclickable]: !isClickable,
@@ -100,9 +88,6 @@ export class Game extends Component<Props> {
               [styles.gameIconSvgDotsBoosted]: this.isBoosted,
             })}
           />
-        </div>
-        <div className={styles.gameScaleBar}>
-          <ScaleBar scaleValue={scaleValue} initScaleValue={initScaleValue} />
         </div>
         {activeClickMessages.map(click => (
           <div

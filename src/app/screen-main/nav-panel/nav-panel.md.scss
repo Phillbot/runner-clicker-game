@@ -7,16 +7,17 @@
   right: 0;
 
   &__bottom-navigation {
-    background-color: #8c6188 !important;
+    background-color: #000000 !important;
   }
 
   &__bottom-navigation-element {
+    color: #fff !important;
     span {
       @include font-overdoze;
     }
 
     &_active {
-      color: #fff !important;
+      color: gold !important;
 
       span {
         font-size: 1.25em;

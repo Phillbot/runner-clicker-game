@@ -1,4 +1,3 @@
-// game.store.ts
 import { injectable } from 'inversify';
 import {
   observable,
@@ -22,6 +21,7 @@ export class GameStore {
   private readonly _initScaleValue: number = 1000;
   private readonly _clickCost: number = 10;
   private readonly regenirationSpeed: number = 500;
+  private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   constructor() {
     makeObservable(this);
@@ -62,6 +62,7 @@ export class GameStore {
     }, 500);
 
     this.restartScaleAnimation();
+    this._telegram.HapticFeedback.impactOccurred('heavy');
   };
 
   @action

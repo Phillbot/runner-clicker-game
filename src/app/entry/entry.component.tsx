@@ -1,12 +1,12 @@
 import React, { Component, ReactNode } from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
+import classNames from 'classnames';
 
 import ScreenMain from '@app/screen-main/screen-main.component';
 import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
 
 import styles from './entry.md.scss';
-import classNames from 'classnames';
 
 type Props = WithTranslation;
 
@@ -14,11 +14,18 @@ class Entry extends Component<Props> {
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   override componentDidMount(): void {
-    this._telegram.ready();
+    if (window.Telegram && window.Telegram.WebApp) {
+      this._telegram.setHeaderColor('#1d2256');
+      this._telegram.ready();
+      this._telegram.disableVerticalSwipes();
+      this._telegram.expand();
+      this._telegram.isClosingConfirmationEnabled = true;
+    }
   }
 
   override render(): ReactNode {
-    const isUnsupportedScreen = !this.isDesktop;
+    // const isUnsupportedScreen = this.isDesktop;
+    const isUnsupportedScreen = false;
 
     return (
       <div

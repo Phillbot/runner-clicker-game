@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import styles from './game-balance.md.scss';
 import { resolve } from 'inversify-react';
-import { GameStore } from './game.store';
+
 import { formatNumber } from '@common/utils/numbers';
+
+import { GameStore } from './game.store';
+
+import styles from './game-balance.md.scss';
 
 @observer
 export class GameBalance extends Component {

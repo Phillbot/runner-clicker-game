@@ -3,23 +3,15 @@
 $size: 15.625em;
 
 .game {
-  width: 100%;
-  height: 100%;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-
-  &__balance {
-    width: $size;
-  }
 
   &__icon {
     width: $size;
     position: relative;
     outline: none;
-    transition: box-shadow 300ms linear;
+    transition:
+      transform,
+      box-shadow 300ms linear;
     animation: rotate-turn linear 10s infinite;
     pointer-events: auto;
 
@@ -32,7 +24,7 @@ $size: 15.625em;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      box-shadow: 0 0 3.125em 0.7em rgba(255, 217, 0, 0.572);
+      box-shadow: 0 0 3.125em 0.7em rgba(255, 217, 0, 0.6);
       border-radius: 100%;
       z-index: -1;
     }
@@ -46,8 +38,6 @@ $size: 15.625em;
 
     &_boosted {
       pointer-events: none;
-      animation: rotate-turn linear 2000ms infinite;
-
       &::before {
         box-shadow: 0 0 3.125em 0.7em red;
       }
@@ -60,10 +50,12 @@ $size: 15.625em;
     display: block;
     outline: none;
     pointer-events: none;
-    transition: opacity 300ms ease-in;
+    transition:
+      transform,
+      opacity 300ms ease-in;
 
     &_scale {
-      animation: scale-up 100ms ease-in-out forwards;
+      transform: scale(1.1);
     }
 
     &_disabled {
@@ -72,10 +64,10 @@ $size: 15.625em;
   }
 
   &_icon-svg-elements {
-    fill: #050d42;
+    fill: rgba(255, 217, 0, 0.719);
 
     &_boosted {
-      fill: orange;
+      fill: rgb(255, 89, 0);
       box-shadow: 120px 80px 40px 20px #0ff;
     }
   }
@@ -88,29 +80,18 @@ $size: 15.625em;
     }
   }
 
-  &__scale-bar {
-    width: $size;
-  }
-
   &__click-message {
     pointer-events: none;
     position: absolute;
-    color: #fff;
-    font-size: 2.5em;
+    color: black;
+    font-size: 3em;
+    -webkit-text-stroke: 1.25px #ffffff;
+    text-shadow: 2px 2px 2px #ffffff;
     transform: translate(-50%, -50%);
     animation: fly-up 500ms forwards;
+    z-index: 4;
 
     @include font-overdoze;
-  }
-}
-
-@keyframes scale-up {
-  0% {
-    transform: scale(1);
-  }
-
-  100% {
-    transform: scale(1.1);
   }
 }
 
