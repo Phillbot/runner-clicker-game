@@ -1,15 +1,21 @@
-import React, { PureComponent, ReactNode } from 'react';
-
-import { Fit } from '@common/utils/fit.component';
+import React, { Component } from 'react';
+import { observer } from 'mobx-react';
 import styles from './game-balance.md.scss';
+import { resolve } from 'inversify-react';
+import { GameStore } from './game.store';
+import { formatNumber } from '@common/utils/numbers';
 
-export class GameBalance extends PureComponent {
-  override render(): ReactNode {
+@observer
+export class GameBalance extends Component {
+  @resolve
+  private readonly _gameStore: GameStore;
+
+  override render(): React.ReactNode {
     return (
       <div className={styles.gameBalance}>
-        <Fit>
-          <span className={styles.gameBalanceLabel}>6000</span>
-        </Fit>
+        <span className={styles.gameBalanceLabel}>
+          {formatNumber(this._gameStore.balance)}
+        </span>
       </div>
     );
   }

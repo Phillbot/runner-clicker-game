@@ -1,3 +1,4 @@
+// game.store.ts
 import { injectable } from 'inversify';
 import {
   observable,
@@ -15,6 +16,7 @@ export class GameStore {
   @observable scaleValue: number = 1000;
   @observable isScaled: boolean = false;
   @observable isClickable: boolean = true;
+  @observable balance: number = 1000;
   private clickId: number = 0;
   private intervalId: NodeJS.Timeout | null = null;
   private readonly _initScaleValue: number = 1000;
@@ -48,6 +50,8 @@ export class GameStore {
     this.scaleValue = Math.max(this.scaleValue - this._clickCost, 0);
     this.isScaled = true;
     this.setClickable(this.scaleValue >= this._clickCost);
+
+    this.incrementBalance(this._clickCost);
 
     setTimeout(() => {
       runInAction(() => {
@@ -113,6 +117,11 @@ export class GameStore {
   @action
   setClickable = (value: boolean) => {
     this.isClickable = value;
+  };
+
+  @action
+  incrementBalance = (amount: number) => {
+    this.balance += amount;
   };
 
   @computed
