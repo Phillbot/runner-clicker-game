@@ -37,7 +37,7 @@ export class ScaleBar extends React.Component {
     const colors = [
       { r: 255, g: 0, b: 0 }, // Red
       { r: 255, g: 165, b: 0 }, // Orange
-      { r: 144, g: 238, b: 144 }, // Light green
+      { r: 27, g: 33, b: 116 }, // Light blue
     ];
 
     const index = Math.floor((percentage / 100) * (colors.length - 1));

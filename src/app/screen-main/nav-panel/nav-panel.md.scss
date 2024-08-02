@@ -7,17 +7,17 @@
   right: 0;
 
   &__bottom-navigation {
-    background-color: #000000 !important;
+    background: linear-gradient(to bottom, #1e3c72, #2a5298);
   }
 
   &__bottom-navigation-element {
     color: #fff !important;
     span {
-      @include font-overdoze;
+      @include font-press-start;
     }
 
     &_active {
-      color: gold !important;
+      color: #0ff !important;
 
       span {
         font-size: 1.25em;

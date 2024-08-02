@@ -59,7 +59,7 @@ export class GameStore {
           click => click.id !== newClickId,
         );
       });
-    }, 500);
+    }, 800);
 
     this.restartScaleAnimation();
     this._telegram.HapticFeedback.impactOccurred('heavy');

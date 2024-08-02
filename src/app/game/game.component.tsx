@@ -98,7 +98,8 @@ export class Game extends Component<Props> {
               top: `${click.y}px`,
             }}
           >
-            {this._gameStore.clickCost}
+            <span>+</span>
+            <span>{this._gameStore.clickCost}</span>
           </div>
         ))}
       </div>

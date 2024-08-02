@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FC } from 'react';
 import { Dashboard, Home, Man } from '@mui/icons-material';
-import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
+import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import styles from './nav-panel.md.scss';
@@ -64,7 +64,7 @@ export const NavPanel: FC = () => {
   }, [navigate, historyCount]);
 
   return (
-    <Paper className={styles.navPanel} elevation={3}>
+    <div className={styles.navPanel}>
       <BottomNavigation
         showLabels={true}
         className={styles.navPanelBottomNavigation}
@@ -89,6 +89,6 @@ export const NavPanel: FC = () => {
           />
         ))}
       </BottomNavigation>
-    </Paper>
+    </div>
   );
 };
