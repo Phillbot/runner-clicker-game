@@ -63,14 +63,15 @@ export class Game extends Component<Props> {
   }
 
   override render(): ReactNode {
-    const { isScaled, activeClickMessages, isClickable } = this._gameStore;
+    const { isScaled, activeClickMessages, isClickable, isBoosted, clickCost } =
+      this._gameStore;
 
     return (
       <div className={styles.game} ref={this.gameContainerRef}>
         <div
           className={classNames(styles.gameIcon, {
             [styles.gameIconUnclickable]: !isClickable,
-            [styles.gameIconBoosted]: this._gameStore.isBoosted,
+            [styles.gameIconBoosted]: isBoosted,
           })}
           ref={this.gameIconRef}
         >
@@ -80,10 +81,10 @@ export class Game extends Component<Props> {
               [styles.gameIconSvgDisabled]: !isClickable,
             })}
             reactElementsClasses={classNames(styles.gameIconSvgElements, {
-              [styles.gameIconSvgElementsBoosted]: this._gameStore.isBoosted,
+              [styles.gameIconSvgElementsBoosted]: isBoosted,
             })}
             reactDotsClasses={classNames(styles.gameIconSvgDots, {
-              [styles.gameIconSvgDotsBoosted]: this._gameStore.isBoosted,
+              [styles.gameIconSvgDotsBoosted]: isBoosted,
             })}
           />
         </div>
@@ -97,7 +98,7 @@ export class Game extends Component<Props> {
             }}
           >
             <span>+</span>
-            <span>{this._gameStore.clickCost}</span>
+            <span>{isBoosted ? clickCost * 10 : clickCost}</span>
           </div>
         ))}
       </div>

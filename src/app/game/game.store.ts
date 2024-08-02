@@ -16,10 +16,13 @@ export class GameStore {
   @observable isScaled: boolean = false;
   @observable isClickable: boolean = true;
   @observable balance: number = 1000;
-  @observable isBoosted = false;
+  @observable isBoosted: boolean = false;
+  @observable showBoostButton: boolean = false;
 
   private clickId: number = 0;
   private intervalId: NodeJS.Timeout | null = null;
+  private boostIntervalId: NodeJS.Timeout | null = null;
+  private boostTimeoutId: NodeJS.Timeout | null = null;
   private readonly _initScaleValue: number = 1000;
   private readonly _clickCost: number = 10;
   private readonly regenirationSpeed: number = 500;
@@ -28,6 +31,7 @@ export class GameStore {
   constructor() {
     makeObservable(this);
     this.startRegeneration();
+    this.scheduleNextBoostButton();
   }
 
   get clickCost(): number {
@@ -128,9 +132,72 @@ export class GameStore {
   };
 
   @action
-  toggleBusted(): void {
-    this.isBoosted = !this.isBoosted;
-  }
+  toggleBoosted = () => {
+    if (!this.isBoosted) {
+      this.isBoosted = true;
+      this.showBoostButton = false;
+      this.startBoost();
+
+      const randomBoostDuration = Math.random() * (50000 - 5000) + 5000; // random duration between 5 and 50 seconds
+      this.boostTimeoutId = setTimeout(() => {
+        runInAction(() => {
+          this.stopBoost();
+          this.isBoosted = false;
+        });
+      }, randomBoostDuration);
+    }
+  };
+
+  startBoost = () => {
+    if (!this.boostIntervalId) {
+      this.boostIntervalId = setInterval(() => {
+        runInAction(() => {
+          this.balance += this._clickCost * 10;
+          const newClickId = this.clickId++;
+          const removeAt = Date.now() + 500;
+          this.clickMessages.push({ id: newClickId, x: 0, y: 0, removeAt });
+
+          setTimeout(() => {
+            runInAction(() => {
+              this.clickMessages = this.clickMessages.filter(
+                click => click.id !== newClickId,
+              );
+            });
+          }, 500);
+        });
+      }, 1000);
+    }
+  };
+
+  stopBoost = () => {
+    if (this.boostIntervalId) {
+      clearInterval(this.boostIntervalId);
+      this.boostIntervalId = null;
+    }
+    if (this.boostTimeoutId) {
+      clearTimeout(this.boostTimeoutId);
+      this.boostTimeoutId = null;
+    }
+  };
+
+  scheduleNextBoostButton = () => {
+    const randomInterval = Math.random() * (50000 - 5000) + 5000; // random time between 5 and 50 seconds
+
+    setTimeout(() => {
+      if (!this.isBoosted) {
+        runInAction(() => {
+          this.showBoostButton = true;
+        });
+
+        setTimeout(() => {
+          runInAction(() => {
+            this.showBoostButton = false;
+            this.scheduleNextBoostButton(); // Schedule the next boost button after the current one disappears
+          });
+        }, 3000); // show button for 3 seconds
+      }
+    }, randomInterval);
+  };
 
   @computed
   get activeClickMessages() {

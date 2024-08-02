@@ -7,15 +7,23 @@ import styles from './game-scale-bar.md.scss';
 @observer
 export class ScaleBar extends React.Component {
   @resolve
-  private readonly _gameStore: GameStore;
+  private readonly _gameStore!: GameStore;
 
   override render(): React.ReactNode {
     const { initScaleValue, scaleValue } = this._gameStore;
     const scalePercentage = (scaleValue / initScaleValue) * 100;
     const scaleColor = this.getScaleColor(scalePercentage);
+    const boxShadowBrightness = scalePercentage / 100;
 
     return (
-      <div className={styles.scaleContainer}>
+      <div
+        className={styles.scaleContainer}
+        style={
+          {
+            '--box-shadow-brightness': boxShadowBrightness,
+          } as React.CSSProperties
+        }
+      >
         <div
           className={styles.scaleContainerScaleFill}
           style={{

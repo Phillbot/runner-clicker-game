@@ -1,4 +1,4 @@
-$size: 15.625em;
+@import '~@fonts/fonts.scss';
 
 .game-container {
   width: 100%;
@@ -22,11 +22,24 @@ $size: 15.625em;
   }
 
   &__scale-bar {
-    width: $size;
+    width: 15.625em;
     position: relative;
     bottom: 2em;
     height: 1.875em;
     margin-top: auto;
     z-index: 2;
+  }
+
+  &__boost-button {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    background: transparent;
+    box-shadow: 0 0 0.9em 0.2em #0ff;
+    border-radius: 100%;
+    cursor: pointer;
+    color: #0ff;
+    opacity: 0.6;
+    z-index: 1000;
   }
 }
