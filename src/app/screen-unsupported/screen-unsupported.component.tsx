@@ -1,7 +1,8 @@
 import React, { Component, ReactNode } from 'react';
 import { t } from 'i18next';
 import { observer } from 'mobx-react';
-import Fit from 'react-fit';
+
+import { Fit } from '@common/utils/fit.comonent';
 
 import styles from './screen-unsupported.md.scss';
 

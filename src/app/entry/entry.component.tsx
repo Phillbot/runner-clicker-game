@@ -1,5 +1,4 @@
 import React, { Component, ReactNode } from 'react';
-import { withTranslation, WithTranslation } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 import classNames from 'classnames';
 
@@ -8,9 +7,7 @@ import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.co
 
 import styles from './entry.md.scss';
 
-type Props = WithTranslation;
-
-class Entry extends Component<Props> {
+export class Entry extends Component {
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   override componentDidMount(): void {
@@ -49,5 +46,3 @@ class Entry extends Component<Props> {
     return /windows|macintosh|linux/.test(userAgent);
   }
 }
-
-export default withTranslation()(Entry);

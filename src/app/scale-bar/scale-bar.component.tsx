@@ -2,14 +2,15 @@ import React from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
-import Fit from 'react-fit';
 
 import { assertNever } from '@common/utils/assert-never';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
+import { Fit } from '@common/utils/fit.comonent';
+import { formatNumber } from '@common/utils/numbers';
 
-import { GameStore } from './game.store';
+import { GameStore } from '../game/game.store';
 
-import styles from './game-scale-bar.md.scss';
+import styles from './scale-bar.md.scss';
 
 @observer
 export class ScaleBar extends React.Component {
@@ -23,11 +24,12 @@ export class ScaleBar extends React.Component {
     const scalePercentage = (scaleValue / initScaleValue) * 100;
     const scaleColor = this.getScaleColor(scalePercentage);
     const boxShadowBrightness = scalePercentage / 100;
-    const { currentBoostType } = this._boostStore;
+    const { currentBoostType, isBoosted } = this._boostStore;
 
     return (
       <div
         className={classNames(styles.scaleContainer, {
+          [styles.scaleContainerBoost]: isBoosted,
           [styles.scaleContainerBoostMega]: currentBoostType === BoostType.Mega,
         })}
         style={
@@ -38,17 +40,21 @@ export class ScaleBar extends React.Component {
       >
         <div
           className={styles.scaleContainerScaleFill}
-          style={{
-            width: `${scalePercentage}%`,
-            backgroundColor: scaleColor,
-            transition: 'width 0.3s, background-color 0.3s',
-          }}
+          style={
+            isBoosted
+              ? {}
+              : {
+                  width: `${scalePercentage}%`,
+                  backgroundColor: scaleColor,
+                  transition: 'width 0.3s, background-color 0.3s',
+                }
+          }
         />
         <Fit>
           <div className={styles.scaleContainerScaleText}>
             {currentBoostType !== null
               ? mapBoostTypeToText(currentBoostType)
-              : `${scaleValue}/${initScaleValue}`}
+              : `${formatNumber(scaleValue)}/${formatNumber(initScaleValue)}`}
           </div>
         </Fit>
       </div>

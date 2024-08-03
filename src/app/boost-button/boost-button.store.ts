@@ -7,6 +7,7 @@ import {
   computed,
 } from 'mobx';
 import { GameStore } from '@app/game/game.store';
+import { BalanceStore } from '@app/balance/balance.store';
 
 export enum BoostType {
   Mega = 'MEGA',
@@ -25,9 +26,11 @@ export class BoostStore {
   private boostTimeoutId: NodeJS.Timeout | null = null;
   private dailyBoostTimeoutId: NodeJS.Timeout | null = null;
   private lastDailyBoostTimestamp: number | null = null; // Mocked storage
-  private updateTimerIntervalId: NodeJS.Timeout | null = null;
 
-  constructor(@inject(GameStore) private readonly _gameStore: GameStore) {
+  constructor(
+    @inject(GameStore) private readonly _gameStore: GameStore,
+    @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
+  ) {
     makeObservable(this);
     this.checkDailyBoostAvailability();
     this.startUpdateTimer();
@@ -68,7 +71,7 @@ export class BoostStore {
       this.boostIntervalId = setInterval(() => {
         runInAction(() => {
           const boostMultiplier = this.getBoostMultiplier(boostType);
-          this._gameStore.incrementBalance(
+          this._balanceStore.incrementBalance(
             this._gameStore.clickCost * boostMultiplier,
           );
           const newClickId = this._gameStore.generateClickMessageId();
@@ -167,7 +170,6 @@ export class BoostStore {
         this.canUseDailyBoost = true;
       } else {
         this.canUseDailyBoost = false;
-        this.startDailyBoostCooldown();
       }
     } else {
       this.canUseDailyBoost = true;
@@ -190,7 +192,7 @@ export class BoostStore {
   }
 
   private startUpdateTimer() {
-    this.updateTimerIntervalId = setInterval(() => {
+    setInterval(() => {
       if (!this.canUseDailyBoost && this.lastDailyBoostTimestamp) {
         const now = Date.now();
         const timeSinceLastBoost = now - this.lastDailyBoostTimestamp;
@@ -201,7 +203,7 @@ export class BoostStore {
           const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
           const seconds = Math.floor((remainingTime / 1000) % 60);
 
-          this.timeUntilNextBoost = `${hours}h ${minutes}m ${seconds}s`;
+          this.timeUntilNextBoost = `${hours}:${minutes}:${seconds}`;
         } else {
           this.timeUntilNextBoost = '';
           this.canUseDailyBoost = true;

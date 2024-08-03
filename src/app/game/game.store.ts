@@ -1,4 +1,5 @@
-import { injectable } from 'inversify';
+import { BalanceStore } from '@app/balance/balance.store';
+import { injectable, inject } from 'inversify';
 import {
   observable,
   action,
@@ -6,40 +7,64 @@ import {
   runInAction,
   computed,
 } from 'mobx';
+import {
+  ClickCostLevel,
+  InitScaleValueLevel,
+  RegenValueLevel,
+  ClickCostLevelMax,
+  InitScaleValueLevelMax,
+  RegenValueLevelMax,
+  getClickCost,
+  getInitScaleValue,
+  getRegenValue,
+} from './game-levels';
 
 type ClickMessage = { id: number; x: number; y: number; removeAt: number };
 
 @injectable()
 export class GameStore {
   @observable clickMessages: ClickMessage[] = [];
-  @observable scaleValue: number = 1000;
+  @observable scaleValue: number = getInitScaleValue(
+    InitScaleValueLevel.LEVEL_3,
+  );
   @observable isScaled: boolean = false;
   @observable isClickable: boolean = true;
-  @observable balance: number = 1000;
+
+  @observable clickCostLevel: ClickCostLevel = ClickCostLevel.LEVEL_1;
+  @observable initScaleValueLevel: InitScaleValueLevel =
+    InitScaleValueLevel.LEVEL_3;
+  @observable regenValueLevel: RegenValueLevel = RegenValueLevel.LEVEL_1;
 
   private clickId: number = 0;
   private intervalId: NodeJS.Timeout | null = null;
-  private readonly _initScaleValue: number = 1000;
   private readonly regenirationSpeed: number = 500;
   private readonly _telegram: WebApp = window.Telegram.WebApp;
-  private readonly _clickCost: number = 10;
 
-  constructor() {
+  constructor(
+    @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
+  ) {
     makeObservable(this);
     this.startRegeneration();
   }
 
+  @computed
   get clickCost(): number {
-    return this._clickCost;
+    return getClickCost(this.clickCostLevel);
   }
 
+  @computed
   get initScaleValue(): number {
-    return this._initScaleValue;
+    return getInitScaleValue(this.initScaleValueLevel);
+  }
+
+  @computed
+  get regenValue(): number {
+    return getRegenValue(this.regenValueLevel);
   }
 
   @action
   handleEvent = (x: number, y: number) => {
-    if (this.scaleValue < this._clickCost) {
+    if (this.scaleValue < this.clickCost) {
       this.setClickable(false);
       return;
     }
@@ -48,11 +73,11 @@ export class GameStore {
     const removeAt = Date.now() + 500;
 
     this.clickMessages.push({ id: newClickId, x, y, removeAt });
-    this.scaleValue = Math.max(this.scaleValue - this._clickCost, 0);
+    this.scaleValue = Math.max(this.scaleValue - this.clickCost, 0);
     this.isScaled = true;
-    this.setClickable(this.scaleValue >= this._clickCost);
+    this.setClickable(this.scaleValue >= this.clickCost);
 
-    this.incrementBalance(this._clickCost);
+    this._balanceStore.incrementBalance(this.clickCost);
 
     setTimeout(() => {
       runInAction(() => {
@@ -68,8 +93,11 @@ export class GameStore {
 
   @action
   regeneratePoints = () => {
-    this.scaleValue = Math.min(this.scaleValue + 1, this._initScaleValue);
-    this.setClickable(this.scaleValue >= this._clickCost);
+    this.scaleValue = Math.min(
+      this.scaleValue + this.regenValue,
+      this.initScaleValue,
+    );
+    this.setClickable(this.scaleValue >= this.clickCost);
     this.removeOldMessages();
   };
 
@@ -122,11 +150,6 @@ export class GameStore {
   };
 
   @action
-  incrementBalance = (amount: number) => {
-    this.balance += amount;
-  };
-
-  @action
   generateClickMessageId = (): number => {
     return this.clickId++;
   };
@@ -146,4 +169,25 @@ export class GameStore {
     const now = Date.now();
     return this.clickMessages.filter(click => click.removeAt > now);
   }
+
+  @action
+  upgradeClickCostLevel = () => {
+    if (this.clickCostLevel < ClickCostLevelMax) {
+      this.clickCostLevel += 1;
+    }
+  };
+
+  @action
+  upgradeInitScaleValueLevel = () => {
+    if (this.initScaleValueLevel < InitScaleValueLevelMax) {
+      this.initScaleValueLevel += 1;
+    }
+  };
+
+  @action
+  upgradeRegenValueLevel = () => {
+    if (this.regenValueLevel < RegenValueLevelMax) {
+      this.regenValueLevel += 1;
+    }
+  };
 }

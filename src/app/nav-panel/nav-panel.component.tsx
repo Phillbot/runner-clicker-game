@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FC } from 'react';
-import { Dashboard, Home, Man } from '@mui/icons-material';
+import { Dashboard, Home, ListAlt, Person } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -17,7 +17,13 @@ const links = [
     to: '/profile',
     label: 'Profile',
     value: '/profile',
-    icon: <Man />,
+    icon: <Person />,
+  },
+  {
+    to: '/tasks',
+    label: 'Tasks',
+    value: '/tasks',
+    icon: <ListAlt />,
   },
   {
     to: '/stats',
@@ -40,9 +46,10 @@ export const NavPanel: FC = () => {
   useEffect(() => {
     if (window.Telegram.WebApp) {
       const canGoBack = historyCount > 0;
-      canGoBack
-        ? window.Telegram.WebApp.BackButton.show()
-        : window.Telegram.WebApp.BackButton.hide();
+      canGoBack;
+      // temp OFF
+      // ? window.Telegram.WebApp.BackButton.show()
+      // : window.Telegram.WebApp.BackButton.hide();
     }
   }, [historyCount]);
 
@@ -80,6 +87,7 @@ export const NavPanel: FC = () => {
               [styles.navPanelBottomNavigationElementActive]:
                 item.value === value,
             })}
+            disabled={item.value === value}
             key={item.value}
             component={Link}
             to={item.to}

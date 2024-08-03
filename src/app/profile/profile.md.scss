@@ -1,0 +1,63 @@
+@import '~@styles/mixins.scss';
+
+$width: 21.875em;
+
+.profile {
+  height: 100%;
+  width: $width;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 1em;
+
+  &__title {
+    text-align: center;
+    font-size: 3em;
+
+    @include main-text;
+  }
+
+  &__bonuses-container {
+    margin: 2em auto;
+  }
+
+  &__bonuses-container-boost {
+    margin: 3em auto;
+    width: 95%;
+  }
+
+  &__bonuses-container-item {
+    display: flex;
+    align-items: center;
+  }
+
+  &__bonuses-container-item-block {
+    width: 50%;
+    text-align: left;
+    font-size: 0.7em;
+
+    @include main-text;
+
+    &_full {
+      width: 100%;
+      text-align: center;
+      margin-top: 5em;
+    }
+  }
+
+  &__bonuses-container-item-block-with-value {
+    width: 35%;
+    text-align: center;
+    font-size: 0.7em;
+
+    @include main-text;
+  }
+
+  &__bonuses-container-item-block-value {
+    color: #ff0000;
+  }
+
+  &__bonuses-container-item-icon-button {
+    width: 15%;
+    cursor: pointer;
+  }
+}

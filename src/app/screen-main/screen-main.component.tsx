@@ -1,8 +1,8 @@
 import React, { Component, ReactNode } from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 
-import { NavPanel } from './nav-panel/nav-panel.component';
-import AppRoutes from './router';
+import { NavPanel } from '@app/nav-panel/nav-panel.component';
+import AppRoutes from '@app/router/router';
 
 import styles from './screen-main.md.scss';
 

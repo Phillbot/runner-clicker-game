@@ -6,15 +6,14 @@ import { fromEvent, race, Subscription } from 'rxjs';
 import { map, throttleTime } from 'rxjs/operators';
 
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
+import { ReactSVG } from '@app/react-svg/react-svg.component';
+
 import { GameStore } from './game.store';
-import { ReactSVG } from './react-svg.component';
 
 import styles from './game.md.scss';
 
-type Props = NonNullable<unknown>;
-
 @observer
-export class Game extends Component<Props> {
+export class Game extends Component {
   private gameContainerRef = createRef<HTMLDivElement>();
   private gameIconRef = createRef<HTMLDivElement>();
   @resolve
@@ -70,19 +69,6 @@ export class Game extends Component<Props> {
       this._gameStore;
     const { currentBoostType } = this._boostStore;
 
-    const getBoostedClickCost = () => {
-      switch (currentBoostType) {
-        case BoostType.Mega:
-          return clickCost * 20;
-        case BoostType.Normal:
-          return clickCost * 10;
-        case BoostType.Tiny:
-          return clickCost * 5;
-        default:
-          return clickCost;
-      }
-    };
-
     return (
       <div className={styles.game} ref={this.gameContainerRef}>
         <div
@@ -123,10 +109,26 @@ export class Game extends Component<Props> {
             }}
           >
             <span>+</span>
-            <span>{currentBoostType ? getBoostedClickCost() : clickCost}</span>
+            <span>{currentBoostType ? this.boostedClickCost : clickCost}</span>
           </div>
         ))}
       </div>
     );
+  }
+
+  private get boostedClickCost() {
+    const { currentBoostType } = this._boostStore;
+    const { clickCost } = this._gameStore;
+
+    switch (currentBoostType) {
+      case BoostType.Mega:
+        return clickCost * 20;
+      case BoostType.Normal:
+        return clickCost * 10;
+      case BoostType.Tiny:
+        return clickCost * 5;
+      default:
+        return clickCost;
+    }
   }
 }

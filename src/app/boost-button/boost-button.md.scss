@@ -1,19 +1,49 @@
+@import '~@styles/mixins.scss';
+
 .boost-button-container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   position: relative;
   align-items: center;
 }
 
 .boost-button {
+  display: flex;
+  position: relative;
   background: transparent;
   color: #ff0000;
   cursor: pointer;
+  animation: scale-up 3s infinite ease-in-out;
   z-index: 1000;
 
   &_disabled {
     color: #ccc;
     pointer-events: none;
     opacity: 0.3;
+    animation: none;
+  }
+
+  &__timer {
+    text-align: left;
+    font-size: 0.875em;
+
+    @include main-text;
+  }
+}
+
+@keyframes scale-up {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
   }
 }
