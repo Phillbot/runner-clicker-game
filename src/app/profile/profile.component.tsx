@@ -4,18 +4,23 @@ import { resolve } from 'inversify-react';
 import classNames from 'classnames';
 import Tooltip from 'rc-tooltip';
 
-import { AddCircle, Wallet } from '@mui/icons-material';
+import {
+  AddCircleOutline,
+  DoneAllOutlined,
+  WalletOutlined,
+} from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 
+import { formatNumber } from '@common/utils/utils';
 import { GameStore } from '@app/game/game.store';
 import BoostButtonWithNavigate from '@app/boost-button/boost-button.component';
-
-import styles from './profile.md.scss';
 import {
   ClickCostLevelMax,
-  InitScaleValueLevelMax,
-  RegenValueLevelMax,
+  EnergyValueLevelMax,
+  EnergyRegenLevelMax,
 } from '@app/game/game-levels';
+
+import styles from './profile.md.scss';
 
 @observer
 export class Profile extends PureComponent {
@@ -28,17 +33,23 @@ export class Profile extends PureComponent {
         id: 'click_coast',
         title: 'Click level',
         value: `${this._gameStore.clickCostLevel}/${ClickCostLevelMax}`,
+        tooltip: `Points per click - ${formatNumber(this._gameStore.clickCost)} `,
+        isMaxLevel: this._gameStore.clickCostLevel === ClickCostLevelMax,
       },
 
       {
         id: 'energy_limit',
         title: 'Energy level',
-        value: `${this._gameStore.initScaleValueLevel}/${InitScaleValueLevelMax}`,
+        value: `${this._gameStore.energyTotalLevel}/${EnergyValueLevelMax}`,
+        tooltip: `Energy limit - ${formatNumber(this._gameStore.energyTotalValue)}`,
+        isMaxLevel: this._gameStore.energyTotalLevel === EnergyValueLevelMax,
       },
       {
         id: 'regen_value',
         title: 'Regen level',
-        value: `${this._gameStore.regenValueLevel}/${RegenValueLevelMax}`,
+        value: `${this._gameStore.energyRegenLevel}/${EnergyRegenLevelMax}`,
+        tooltip: `Point regen per tic - ${formatNumber(this._gameStore.energyRegenValue)}`,
+        isMaxLevel: this._gameStore.energyRegenLevel === EnergyRegenLevelMax,
       },
     ];
 
@@ -50,22 +61,37 @@ export class Profile extends PureComponent {
             <BoostButtonWithNavigate />
           </div>
 
-          {abilities.map(({ id, title, value }) => (
+          {abilities.map(({ id, title, value, tooltip, isMaxLevel }) => (
             <div key={id} className={styles.profileBonusesContainerItem}>
               <div className={styles.profileBonusesContainerItemBlock}>
                 {title}{' '}
               </div>
 
               <div className={styles.profileBonusesContainerItemBlockWithValue}>
-                <span className={styles.profileBonusesContainerItemBlockValue}>
-                  {value}
-                </span>
+                <Tooltip
+                  placement="top"
+                  trigger={['hover']}
+                  overlay={<span>{tooltip}</span>}
+                  showArrow={false}
+                >
+                  <span
+                    className={styles.profileBonusesContainerItemBlockValue}
+                  >
+                    {value}
+                  </span>
+                </Tooltip>
               </div>
 
               <div className={styles.profileBonusesContainerItemIconButton}>
-                <IconButton size="large" color="success">
-                  <AddCircle />
-                </IconButton>
+                {isMaxLevel ? (
+                  <IconButton size="large" color="success" disableRipple>
+                    <DoneAllOutlined />
+                  </IconButton>
+                ) : (
+                  <IconButton size="large" color="primary">
+                    <AddCircleOutline />
+                  </IconButton>
+                )}
               </div>
             </div>
           ))}
@@ -83,7 +109,7 @@ export class Profile extends PureComponent {
                 overlay={<span>Soon</span>}
                 showArrow={false}
               >
-                <Wallet fontSize="large" color="error" />
+                <WalletOutlined fontSize="large" color="error" />
               </Tooltip>
             </div>
           </div>

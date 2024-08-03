@@ -22,7 +22,6 @@ $width: 21.875em;
 
   &__bonuses-container-boost {
     margin: 3em auto;
-    width: 95%;
   }
 
   &__bonuses-container-item {
@@ -54,6 +53,8 @@ $width: 21.875em;
 
   &__bonuses-container-item-block-value {
     color: #ff0000;
+    text-align: right;
+    text-shadow: 0.0125em 0em 0.185em #ff0000;
   }
 
   &__bonuses-container-item-icon-button {

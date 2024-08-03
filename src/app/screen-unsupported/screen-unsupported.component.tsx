@@ -2,7 +2,7 @@ import React, { Component, ReactNode } from 'react';
 import { t } from 'i18next';
 import { observer } from 'mobx-react';
 
-import { Fit } from '@common/utils/fit.comonent';
+import { Fit } from '@common/utils/fit.component';
 
 import styles from './screen-unsupported.md.scss';
 

@@ -1,5 +1,10 @@
 import React, { useState, useEffect, FC } from 'react';
-import { Dashboard, Home, ListAlt, Person } from '@mui/icons-material';
+import {
+  BarChartOutlined,
+  HomeOutlined,
+  ListAltOutlined,
+  PersonOutline,
+} from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -11,25 +16,25 @@ const links = [
     to: '/',
     label: 'Home',
     value: '/',
-    icon: <Home />,
+    icon: <HomeOutlined />,
   },
   {
     to: '/profile',
     label: 'Profile',
     value: '/profile',
-    icon: <Person />,
+    icon: <PersonOutline />,
   },
   {
     to: '/tasks',
     label: 'Tasks',
     value: '/tasks',
-    icon: <ListAlt />,
+    icon: <ListAltOutlined />,
   },
   {
     to: '/stats',
     label: 'Stats',
     value: '/stats',
-    icon: <Dashboard />,
+    icon: <BarChartOutlined />,
   },
 ];
 
@@ -46,10 +51,9 @@ export const NavPanel: FC = () => {
   useEffect(() => {
     if (window.Telegram.WebApp) {
       const canGoBack = historyCount > 0;
-      canGoBack;
-      // temp OFF
-      // ? window.Telegram.WebApp.BackButton.show()
-      // : window.Telegram.WebApp.BackButton.hide();
+      canGoBack
+        ? window.Telegram.WebApp.BackButton.show()
+        : window.Telegram.WebApp.BackButton.hide();
     }
   }, [historyCount]);
 
@@ -78,7 +82,7 @@ export const NavPanel: FC = () => {
         value={value}
         onChange={(_, newValue) => {
           setValue(newValue);
-          setHistoryCount(count => count + 1); // Увеличиваем счетчик при навигации
+          setHistoryCount(count => count + 1);
         }}
       >
         {links.map(item => (

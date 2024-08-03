@@ -8,36 +8,35 @@ import {
   computed,
 } from 'mobx';
 import {
+  EnergyValueLevel,
   ClickCostLevel,
-  InitScaleValueLevel,
-  RegenValueLevel,
-  ClickCostLevelMax,
-  InitScaleValueLevelMax,
-  RegenValueLevelMax,
-  getClickCost,
-  getInitScaleValue,
-  getRegenValue,
+  EnergyRegenLevel,
+  getEnergyValueByLevel,
+  getClickCostByLevel,
+  getEnergyRegenValueByLevel,
 } from './game-levels';
 
 type ClickMessage = { id: number; x: number; y: number; removeAt: number };
 
 @injectable()
 export class GameStore {
-  @observable clickMessages: ClickMessage[] = [];
-  @observable scaleValue: number = getInitScaleValue(
-    InitScaleValueLevel.LEVEL_3,
+  @observable private _clickMessages: ClickMessage[] = [];
+  @observable private _isScaled: boolean = false;
+  @observable private _isEnergyAvailable: boolean = true;
+
+  @observable private _availableEnergyValue: number = getEnergyValueByLevel(
+    EnergyValueLevel.LEVEL_2, // we will get this points from server?
   );
-  @observable isScaled: boolean = false;
-  @observable isClickable: boolean = true;
 
-  @observable clickCostLevel: ClickCostLevel = ClickCostLevel.LEVEL_1;
-  @observable initScaleValueLevel: InitScaleValueLevel =
-    InitScaleValueLevel.LEVEL_3;
-  @observable regenValueLevel: RegenValueLevel = RegenValueLevel.LEVEL_1;
+  @observable private _clickCostLevel: ClickCostLevel = ClickCostLevel.LEVEL_20;
+  @observable private _energyTotalLevel: EnergyValueLevel =
+    EnergyValueLevel.LEVEL_2;
+  @observable private _energyRegenLevel: EnergyRegenLevel =
+    EnergyRegenLevel.LEVEL_1;
 
-  private clickId: number = 0;
-  private intervalId: NodeJS.Timeout | null = null;
-  private readonly regenirationSpeed: number = 500;
+  private _clickId: number = 0;
+  private _intervalId: NodeJS.Timeout | null = null;
+  private readonly _regenerationSpeed: number = 500;
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   constructor(
@@ -49,77 +48,123 @@ export class GameStore {
 
   @computed
   get clickCost(): number {
-    return getClickCost(this.clickCostLevel);
+    return getClickCostByLevel(this._clickCostLevel);
   }
 
   @computed
-  get initScaleValue(): number {
-    return getInitScaleValue(this.initScaleValueLevel);
+  get energyTotalValue(): number {
+    return getEnergyValueByLevel(this._energyTotalLevel);
   }
 
   @computed
-  get regenValue(): number {
-    return getRegenValue(this.regenValueLevel);
+  get energyRegenValue(): number {
+    return getEnergyRegenValueByLevel(this._energyRegenLevel);
+  }
+
+  @computed
+  get clickMessages(): ClickMessage[] {
+    return this._clickMessages;
+  }
+
+  @computed
+  get availableEnergyValue(): number {
+    return this._availableEnergyValue;
+  }
+
+  @computed
+  get isScaled(): boolean {
+    return this._isScaled;
+  }
+
+  @computed
+  get isEnergyAvailable(): boolean {
+    return this._isEnergyAvailable;
+  }
+
+  @computed
+  get clickCostLevel(): ClickCostLevel {
+    return this._clickCostLevel;
+  }
+
+  @computed
+  get energyTotalLevel(): EnergyValueLevel {
+    return this._energyTotalLevel;
+  }
+
+  @computed
+  get energyRegenLevel(): EnergyRegenLevel {
+    return this._energyRegenLevel;
+  }
+
+  @computed
+  get activeClickMessages(): ClickMessage[] {
+    const now = Date.now();
+    return this._clickMessages.filter(click => click.removeAt > now);
   }
 
   @action
-  handleEvent = (x: number, y: number) => {
-    if (this.scaleValue < this.clickCost) {
-      this.setClickable(false);
+  readonly handleEvent = (x: number, y: number) => {
+    if (this._availableEnergyValue < this.clickCost) {
+      this.setEnergyAvailable(false);
       return;
     }
 
-    const newClickId = this.clickId++;
+    const newClickId = this._clickId++;
     const removeAt = Date.now() + 500;
 
-    this.clickMessages.push({ id: newClickId, x, y, removeAt });
-    this.scaleValue = Math.max(this.scaleValue - this.clickCost, 0);
-    this.isScaled = true;
-    this.setClickable(this.scaleValue >= this.clickCost);
+    this._clickMessages.push({ id: newClickId, x, y, removeAt });
+    this._availableEnergyValue = Math.max(
+      this._availableEnergyValue - this.clickCost,
+      0,
+    );
+    this._isScaled = true;
+    this.setEnergyAvailable(this._availableEnergyValue >= this.clickCost);
 
     this._balanceStore.incrementBalance(this.clickCost);
 
     setTimeout(() => {
       runInAction(() => {
-        this.clickMessages = this.clickMessages.filter(
+        this._clickMessages = this._clickMessages.filter(
           click => click.id !== newClickId,
         );
       });
     }, 800);
 
     this.restartScaleAnimation();
-    this._telegram.HapticFeedback.impactOccurred('heavy');
+    if (this._telegram) {
+      this._telegram.HapticFeedback.impactOccurred('heavy');
+    }
   };
 
   @action
-  regeneratePoints = () => {
-    this.scaleValue = Math.min(
-      this.scaleValue + this.regenValue,
-      this.initScaleValue,
+  readonly regeneratePoints = () => {
+    this._availableEnergyValue = Math.min(
+      this._availableEnergyValue + this.energyRegenValue,
+      this.energyTotalValue,
     );
-    this.setClickable(this.scaleValue >= this.clickCost);
+    this.setEnergyAvailable(this._availableEnergyValue >= this.clickCost);
     this.removeOldMessages();
   };
 
-  startRegeneration = () => {
-    if (!this.intervalId) {
-      this.intervalId = setInterval(() => {
+  readonly startRegeneration = () => {
+    if (!this._intervalId) {
+      this._intervalId = setInterval(() => {
         runInAction(() => {
           this.regeneratePoints();
         });
-      }, this.regenirationSpeed);
+      }, this._regenerationSpeed);
     }
   };
 
-  stopRegeneration = () => {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+  readonly stopRegeneration = () => {
+    if (this._intervalId) {
+      clearInterval(this._intervalId);
+      this._intervalId = null;
     }
   };
 
   @action
-  restartScaleAnimation = () => {
+  readonly restartScaleAnimation = () => {
     this.setScaled(false);
     setTimeout(() => {
       runInAction(() => {
@@ -132,62 +177,35 @@ export class GameStore {
   };
 
   @action
-  removeOldMessages = () => {
+  readonly removeOldMessages = () => {
     const now = Date.now();
-    this.clickMessages = this.clickMessages.filter(
+    this._clickMessages = this._clickMessages.filter(
       click => click.removeAt > now,
     );
   };
 
   @action
-  setScaled = (value: boolean) => {
-    this.isScaled = value;
+  readonly setScaled = (value: boolean) => {
+    this._isScaled = value;
   };
 
   @action
-  setClickable = (value: boolean) => {
-    this.isClickable = value;
+  readonly setEnergyAvailable = (value: boolean) => {
+    this._isEnergyAvailable = value;
   };
 
   @action
-  generateClickMessageId = (): number => {
-    return this.clickId++;
+  readonly generateClickMessageId = (): number => {
+    return this._clickId++;
   };
 
   @action
-  addClickMessage = (message: ClickMessage) => {
-    this.clickMessages.push(message);
+  readonly addClickMessage = (message: ClickMessage) => {
+    this._clickMessages.push(message);
   };
 
   @action
-  removeClickMessage = (id: number) => {
-    this.clickMessages = this.clickMessages.filter(click => click.id !== id);
-  };
-
-  @computed
-  get activeClickMessages() {
-    const now = Date.now();
-    return this.clickMessages.filter(click => click.removeAt > now);
-  }
-
-  @action
-  upgradeClickCostLevel = () => {
-    if (this.clickCostLevel < ClickCostLevelMax) {
-      this.clickCostLevel += 1;
-    }
-  };
-
-  @action
-  upgradeInitScaleValueLevel = () => {
-    if (this.initScaleValueLevel < InitScaleValueLevelMax) {
-      this.initScaleValueLevel += 1;
-    }
-  };
-
-  @action
-  upgradeRegenValueLevel = () => {
-    if (this.regenValueLevel < RegenValueLevelMax) {
-      this.regenValueLevel += 1;
-    }
+  readonly removeClickMessage = (id: number) => {
+    this._clickMessages = this._clickMessages.filter(click => click.id !== id);
   };
 }

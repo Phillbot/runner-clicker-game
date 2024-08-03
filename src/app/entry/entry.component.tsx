@@ -40,9 +40,4 @@ export class Entry extends Component {
       </div>
     );
   }
-
-  private get isDesktop() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    return /windows|macintosh|linux/.test(userAgent);
-  }
 }

@@ -27,6 +27,29 @@ export class BoostStore {
   private dailyBoostTimeoutId: NodeJS.Timeout | null = null;
   private lastDailyBoostTimestamp: number | null = null; // Mocked storage
 
+  private readonly config = {
+    boostDurations: {
+      MEGA: 60000, // 1 minute
+      NORMAL: 30000, // 30 seconds
+      TINY: 15000, // 15 seconds
+      DEFAULT: 30000, // Default duration
+    },
+    boostIntervals: {
+      MEGA: 500, // 500 ms
+      NORMAL: 1000, // 1 second
+      TINY: 1000, // 1 second
+      DEFAULT: 1000, // Default interval
+    },
+    boostMultipliers: {
+      MEGA: 20,
+      NORMAL: 10,
+      TINY: 5,
+      DEFAULT: 1, // Default multiplier
+    },
+    dailyBoostCooldown: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+    updateInterval: 1000, // 1 second
+  };
+
   constructor(
     @inject(GameStore) private readonly _gameStore: GameStore,
     @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
@@ -111,42 +134,24 @@ export class BoostStore {
   };
 
   getBoostDuration = (boostType: BoostType): number => {
-    switch (boostType) {
-      case BoostType.Mega:
-        return 60000; // 1 minute
-      case BoostType.Normal:
-        return 30000; // 30 seconds
-      case BoostType.Tiny:
-        return 15000; // 15 seconds
-      default:
-        return 30000;
-    }
+    return (
+      this.config.boostDurations[boostType] ||
+      this.config.boostDurations.DEFAULT
+    );
   };
 
   getBoostInterval = (boostType: BoostType): number => {
-    switch (boostType) {
-      case BoostType.Mega:
-        return 500; // 500 ms
-      case BoostType.Normal:
-        return 1000; // 1 second
-      case BoostType.Tiny:
-        return 1000; // 1 second
-      default:
-        return 1000;
-    }
+    return (
+      this.config.boostIntervals[boostType] ||
+      this.config.boostIntervals.DEFAULT
+    );
   };
 
   getBoostMultiplier = (boostType: BoostType): number => {
-    switch (boostType) {
-      case BoostType.Mega:
-        return 20;
-      case BoostType.Normal:
-        return 10;
-      case BoostType.Tiny:
-        return 5;
-      default:
-        return 1;
-    }
+    return (
+      this.config.boostMultipliers[boostType] ||
+      this.config.boostMultipliers.DEFAULT
+    );
   };
 
   @computed
@@ -164,9 +169,10 @@ export class BoostStore {
     if (lastBoostTimestamp) {
       const now = Date.now();
       const timeSinceLastBoost = now - lastBoostTimestamp;
-      const hoursSinceLastBoost = timeSinceLastBoost / (1000 * 60 * 60);
+      const hoursSinceLastBoost =
+        timeSinceLastBoost / this.config.dailyBoostCooldown;
 
-      if (hoursSinceLastBoost >= 24) {
+      if (hoursSinceLastBoost >= 1) {
         this.canUseDailyBoost = true;
       } else {
         this.canUseDailyBoost = false;
@@ -181,14 +187,11 @@ export class BoostStore {
       clearTimeout(this.dailyBoostTimeoutId);
     }
 
-    this.dailyBoostTimeoutId = setTimeout(
-      () => {
-        runInAction(() => {
-          this.canUseDailyBoost = true;
-        });
-      },
-      24 * 60 * 60 * 1000,
-    ); // 24 hours
+    this.dailyBoostTimeoutId = setTimeout(() => {
+      runInAction(() => {
+        this.canUseDailyBoost = true;
+      });
+    }, this.config.dailyBoostCooldown);
   }
 
   private startUpdateTimer() {
@@ -196,7 +199,8 @@ export class BoostStore {
       if (!this.canUseDailyBoost && this.lastDailyBoostTimestamp) {
         const now = Date.now();
         const timeSinceLastBoost = now - this.lastDailyBoostTimestamp;
-        const remainingTime = 24 * 60 * 60 * 1000 - timeSinceLastBoost;
+        const remainingTime =
+          this.config.dailyBoostCooldown - timeSinceLastBoost;
 
         if (remainingTime > 0) {
           const hours = Math.floor((remainingTime / (1000 * 60 * 60)) % 24);
@@ -209,6 +213,6 @@ export class BoostStore {
           this.canUseDailyBoost = true;
         }
       }
-    }, 1000);
+    }, this.config.updateInterval);
   }
 }

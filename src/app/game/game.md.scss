@@ -38,6 +38,7 @@ $size: 18.3em;
     }
 
     &_boosted-tiny {
+      pointer-events: none;
       animation: rotate-turn linear 5s infinite;
     }
 

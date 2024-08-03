@@ -2,7 +2,7 @@ import React, { Component, ReactNode } from 'react';
 import { resolve } from 'inversify-react';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
-import { LocalFireDepartment } from '@mui/icons-material';
+import { RocketLaunchOutlined } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 import { BoostStore } from './boost-button.store';
@@ -37,7 +37,7 @@ class BoostButton extends Component<Props> {
           })}
           onClick={this.handleBoostClick}
         >
-          <LocalFireDepartment fontSize="large" />
+          <RocketLaunchOutlined fontSize="large" />
         </div>
       </div>
     );

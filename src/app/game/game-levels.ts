@@ -1,3 +1,5 @@
+// game-levels.ts
+
 export enum ClickCostLevel {
   LEVEL_1 = 1,
   LEVEL_2 = 2,
@@ -21,7 +23,7 @@ export enum ClickCostLevel {
   LEVEL_20 = 20,
 }
 
-export enum InitScaleValueLevel {
+export enum EnergyValueLevel {
   LEVEL_1 = 1,
   LEVEL_2 = 2,
   LEVEL_3 = 3,
@@ -34,7 +36,7 @@ export enum InitScaleValueLevel {
   LEVEL_10 = 10,
 }
 
-export enum RegenValueLevel {
+export enum EnergyRegenLevel {
   LEVEL_1 = 1,
   LEVEL_2 = 2,
   LEVEL_3 = 3,
@@ -48,17 +50,17 @@ export enum RegenValueLevel {
 }
 
 export const ClickCostLevelMax = 20;
-export const InitScaleValueLevelMax = 10;
-export const RegenValueLevelMax = 10;
+export const EnergyValueLevelMax = 10;
+export const EnergyRegenLevelMax = 10;
 
-export function getClickCost(level: ClickCostLevel): number {
+export function getClickCostByLevel(level: ClickCostLevel): number {
   return 5 * (level - 1) + 1;
 }
 
-export function getInitScaleValue(level: InitScaleValueLevel): number {
+export function getEnergyValueByLevel(level: EnergyValueLevel): number {
   return 2500 * (level - 1) + 1000;
 }
 
-export function getRegenValue(level: RegenValueLevel): number {
+export function getEnergyRegenValueByLevel(level: EnergyRegenLevel): number {
   return 5 * (level - 1) + 1;
 }

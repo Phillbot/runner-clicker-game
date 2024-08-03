@@ -65,7 +65,7 @@ export class Game extends Component {
   }
 
   override render(): ReactNode {
-    const { isScaled, activeClickMessages, isClickable, clickCost } =
+    const { isScaled, activeClickMessages, isEnergyAvailable } =
       this._gameStore;
     const { currentBoostType } = this._boostStore;
 
@@ -73,7 +73,7 @@ export class Game extends Component {
       <div className={styles.game} ref={this.gameContainerRef}>
         <div
           className={classNames(styles.gameIcon, {
-            [styles.gameIconUnclickable]: !isClickable,
+            [styles.gameIconUnclickable]: !isEnergyAvailable,
             [styles.gameIconBoostedMega]: currentBoostType === BoostType.Mega,
             [styles.gameIconBoostedNormal]:
               currentBoostType === BoostType.Normal,
@@ -84,7 +84,7 @@ export class Game extends Component {
           <ReactSVG
             svgClasses={classNames(styles.gameIconSvg, {
               [styles.gameIconSvgScale]: isScaled,
-              [styles.gameIconSvgDisabled]: !isClickable,
+              [styles.gameIconSvgDisabled]: !isEnergyAvailable,
             })}
             reactElementsClasses={classNames(styles.gameIconSvgElements, {
               [styles.gameIconSvgElementsBoostedMega]:
@@ -108,8 +108,7 @@ export class Game extends Component {
               top: `${click.y}px`,
             }}
           >
-            <span>+</span>
-            <span>{currentBoostType ? this.boostedClickCost : clickCost}</span>
+            <span>+{this.boostedClickCost}</span>
           </div>
         ))}
       </div>

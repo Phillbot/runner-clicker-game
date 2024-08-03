@@ -3,10 +3,9 @@ import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 import classNames from 'classnames';
 
-import { formatNumber } from '@common/utils/numbers';
-
+import { formatNumber } from '@common/utils/utils';
+import { Fit } from '@common/utils/fit.component';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
-import { Fit } from '@common/utils/fit.comonent';
 
 import { BalanceStore } from './balance.store';
 
