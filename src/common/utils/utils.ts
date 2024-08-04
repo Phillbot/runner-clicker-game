@@ -32,10 +32,12 @@ export function assertNever(value: never): never {
 }
 
 export function isProd(): boolean {
-  return process.env.REACT_APP_ENV === ENV_MODE.PROD;
+  return process.env.REACT_CLICKER_APP_ENV === ENV_MODE.PROD;
 }
 
+export const REACT_CLICKER_APP_BASE_URL =
+  process.env.REACT_CLICKER_APP_BASE_TELEGRAM_GAME_ENDPOINT_URL;
+
 export function avoidTelegramAuth(): boolean {
-  console.log('HERE', process.env.REACT_APP_AVOID_TELEGRAM_AUTH);
-  return process.env.REACT_APP_AVOID_TELEGRAM_AUTH === 'true';
+  return process.env.REACT_CLICKER_APP_AVOID_TELEGRAM_AUTH === 'true';
 }

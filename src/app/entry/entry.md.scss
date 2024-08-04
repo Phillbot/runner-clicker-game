@@ -14,7 +14,31 @@
     z-index: -1;
   }
 
-  &_unsupported {
+  &__loading-loader {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  &__loading-loader-label {
+    font-size: 1.5em;
+
+    color: #050d42;
+    -webkit-text-stroke: 0.025em #0ff;
+    text-shadow: 0.0125em 0em 0.185em #0ff;
+  }
+
+  &_unsupported,
+  &_loading {
     height: 100svh;
+    width: 100%;
+  }
+
+  &_loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

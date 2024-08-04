@@ -1,21 +1,20 @@
 import React, { Component, ReactNode } from 'react';
 import { t } from 'i18next';
 import { observer } from 'mobx-react';
+import { resolve } from 'inversify-react';
 
 import { Fit } from '@common/utils/fit.component';
+import { EntryStore } from '@app/entry/entry.store';
 
 import styles from './screen-unsupported.md.scss';
 
-type Props = {
-  telegram: WebApp;
-};
-
 @observer
-export class ScreenUnsupported extends Component<Props> {
+export class ScreenUnsupported extends Component {
+  @resolve
+  private declare readonly _entryStore: EntryStore;
+
   override render(): ReactNode {
-    const {
-      telegram: { initDataUnsafe },
-    } = this.props;
+    const { initDataUnsafe } = this._entryStore.telegram;
 
     const lng = initDataUnsafe?.user?.language_code;
 

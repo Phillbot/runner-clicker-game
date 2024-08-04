@@ -6,8 +6,10 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.REACT_CLICKER_APP_ENV === 'production';
 
 module.exports = {
   entry: './src/index.tsx',
@@ -20,7 +22,7 @@ module.exports = {
       : '[name].chunk.bundle.js',
     publicPath: '/',
   },
-  devtool: isProduction ? false : 'source-map',
+  devtool: isProduction ? 'source-map' : 'eval-source-map', // Updated for better source maps
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.scss', '.json'],
     plugins: [
@@ -136,7 +138,7 @@ module.exports = {
           },
         },
         generator: {
-          filename: 'assets/[name][hash:8][ext][query]',
+          filename: 'assets/images/[name][hash:8][ext][query]',
         },
       },
       {
@@ -165,7 +167,11 @@ module.exports = {
       chunkFilename: isProduction ? '[id].[contenthash].css' : '[id].css',
     }),
     new Dotenv(),
-  ],
+    new CopyWebpackPlugin({
+      patterns: [{ from: 'src/@fonts', to: 'assets/fonts' }],
+    }),
+    !isProduction && new ReactRefreshWebpackPlugin(),
+  ].filter(Boolean),
   devServer: {
     static: {
       directory: path.join(__dirname, 'dist'),
@@ -174,14 +180,12 @@ module.exports = {
     port: 9000,
     historyApiFallback: true,
     client: {
-      overlay: {
-        errors: true,
-        warnings: false,
-      },
+      overlay: false,
     },
     devMiddleware: {
       publicPath: '/',
     },
     allowedHosts: 'all',
+    hot: true,
   },
 };

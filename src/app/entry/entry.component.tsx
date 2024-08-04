@@ -1,99 +1,69 @@
 import React, { Component, ReactNode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import classNames from 'classnames';
-import axios from 'axios';
+import { observer } from 'mobx-react';
+import { resolve } from 'inversify-react';
+import { Box, LinearProgress } from '@mui/material';
 
-import { avoidTelegramAuth, isDesktop, isProd } from '@common/utils/utils';
 import { ScreenMain } from '@app/screen-main/screen-main.component';
 import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
 
+import { EntryStore } from './entry.store';
+
 import styles from './entry.md.scss';
 
-type State = {
-  isLoading: boolean;
-  isAuthorized: boolean;
-};
+@observer
+export class Entry extends Component {
+  @resolve
+  private declare readonly _entryStore: EntryStore;
 
-type Props = NonNullable<unknown>;
-
-const isUnsupportedScreen = isProd() && isDesktop();
-
-console.log(isUnsupportedScreen);
-
-export class Entry extends Component<Props, State> {
-  private readonly _telegram: WebApp = window.Telegram.WebApp;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      isLoading: true,
-      isAuthorized: false,
-    };
-  }
-
-  override componentDidMount(): void {
-    if (isUnsupportedScreen) {
-      this.setState({ isLoading: false, isAuthorized: false });
+  override async componentDidMount(): Promise<void> {
+    if (this._entryStore.isUnsupportedScreen) {
+      this._entryStore.isLoading = false;
+      this._entryStore.isAuthorized = false;
     } else {
-      if (window.Telegram && window.Telegram.WebApp) {
-        this._telegram.setHeaderColor('#1d2256');
-        this._telegram.ready();
-        this._telegram.disableVerticalSwipes();
-        this._telegram.expand();
-        this._telegram.isClosingConfirmationEnabled = true;
-      }
-      this.checkAuth();
+      await this._entryStore.initialize();
     }
   }
-
-  checkAuth = async () => {
-    if (avoidTelegramAuth() && !isProd()) {
-      this.setState({ isLoading: false, isAuthorized: true });
-      return;
-    }
-
-    const initData = window.Telegram.WebApp.initData;
-
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_TELEGRAM_GAME_ENDPOINT_URL!}/react-clicker-bot/auth`,
-        {
-          initData,
-        },
-      );
-
-      if (response.data.success) {
-        this.setState({ isLoading: false, isAuthorized: true });
-      } else {
-        this.setState({ isLoading: false, isAuthorized: false });
-      }
-    } catch (error) {
-      console.error('Authorization check failed', error);
-      this.setState({ isLoading: false, isAuthorized: false });
-    }
-  };
 
   override render(): ReactNode {
-    const { isLoading, isAuthorized } = this.state;
+    const {
+      isLoading,
+      isAuthorized,
+      resourcesLoaded,
+      loadProgress,
+      isUnsupportedScreen,
+    } = this._entryStore;
 
     if (isUnsupportedScreen) {
       return (
         <div className={classNames(styles.entry, styles.entryUnsupported)}>
-          <ScreenUnsupported telegram={this._telegram} />
+          <ScreenUnsupported />
         </div>
       );
     }
 
-    if (isLoading) {
-      return <div>Loading...</div>;
+    if (isLoading || !resourcesLoaded) {
+      return (
+        <div className={classNames(styles.entry, styles.entryLoading)}>
+          <div className={styles.entryLoadingLoader}>
+            <div className={styles.entryLoadingLoaderLabel}>
+              {Math.round(loadProgress)}%
+            </div>
+            <Box sx={{ width: '50%' }}>
+              <LinearProgress
+                variant="determinate"
+                color="primary"
+                value={loadProgress}
+              />
+            </Box>
+          </div>
+        </div>
+      );
     }
 
     if (!isAuthorized) {
-      return (
-        <div className={classNames(styles.entry, styles.entryUnsupported)}>
-          <ScreenUnsupported telegram={this._telegram} />
-        </div>
-      );
+      return null;
     }
 
     return (
