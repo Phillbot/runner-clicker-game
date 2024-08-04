@@ -1,20 +1,11 @@
-import React, { Component, ReactNode } from 'react';
-import { withTranslation, WithTranslation } from 'react-i18next';
+import React, { PureComponent, ReactNode } from 'react';
 
 import { NavPanel } from '@app/nav-panel/nav-panel.component';
 import AppRoutes from '@app/router/router';
 
 import styles from './screen-main.md.scss';
 
-type Props = WithTranslation;
-
-class ScreenMain extends Component<Props> {
-  private readonly _telegram: WebApp = window.Telegram.WebApp;
-
-  override componentDidMount(): void {
-    this._telegram.ready();
-  }
-
+export class ScreenMain extends PureComponent {
   override render(): ReactNode {
     return (
       <div className={styles.screenMain}>
@@ -24,5 +15,3 @@ class ScreenMain extends Component<Props> {
     );
   }
 }
-
-export default withTranslation()(ScreenMain);

@@ -1,3 +1,8 @@
+export enum ENV_MODE {
+  PROD = 'production',
+  DEV = 'development',
+}
+
 export function formatNumber(num: number): string {
   const thresholds = [
     { value: 1e9, suffix: 'B' },
@@ -17,11 +22,20 @@ export function formatNumber(num: number): string {
   return num.toString();
 }
 
-export function isDesktop() {
+export function isDesktop(): boolean {
   const userAgent = navigator.userAgent.toLowerCase();
   return /windows|macintosh|linux/.test(userAgent);
 }
 
 export function assertNever(value: never): never {
   throw new Error(`Unexpected value: ${value}`);
+}
+
+export function isProd(): boolean {
+  return process.env.REACT_APP_ENV === ENV_MODE.PROD;
+}
+
+export function avoidTelegramAuth(): boolean {
+  console.log('HERE', process.env.REACT_APP_AVOID_TELEGRAM_AUTH);
+  return process.env.REACT_APP_AVOID_TELEGRAM_AUTH === 'true';
 }
