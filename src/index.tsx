@@ -4,8 +4,8 @@ import ReactDOM from 'react-dom/client';
 import { Provider as DependencyInjectionProvider } from 'inversify-react';
 
 import { Entry } from '@app/entry/entry.component';
-import { isProd } from '@common/utils/utils';
 import { container } from '@common/IoC/container';
+import { EnvUtils } from '@common/utils/env.utils';
 
 import './i18n/config';
 
@@ -16,7 +16,7 @@ import 'rc-tooltip/assets/bootstrap.css';
 const rootElement = document.getElementById('root')!;
 const root = ReactDOM.createRoot(rootElement);
 
-const isProduction = isProd();
+const isProduction = EnvUtils.isProd;
 
 const App = (
   <DependencyInjectionProvider container={container}>

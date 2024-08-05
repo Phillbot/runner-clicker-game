@@ -22,7 +22,7 @@ module.exports = {
       : '[name].chunk.bundle.js',
     publicPath: '/',
   },
-  devtool: isProduction ? 'source-map' : 'eval-source-map', // Updated for better source maps
+  devtool: isProduction ? 'source-map' : 'eval-source-map',
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.scss', '.json'],
     plugins: [
@@ -130,13 +130,8 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|svg|jpg|gif)$/,
-        type: 'asset',
-        parser: {
-          dataUrlCondition: {
-            maxSize: 8 * 1024,
-          },
-        },
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
         generator: {
           filename: 'assets/images/[name][hash:8][ext][query]',
         },

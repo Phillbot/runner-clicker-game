@@ -19,8 +19,8 @@ export class Entry extends Component {
 
   override async componentDidMount(): Promise<void> {
     if (this._entryStore.isUnsupportedScreen) {
-      this._entryStore.isLoading = false;
-      this._entryStore.isAuthorized = false;
+      this._entryStore.setLoading(false);
+      this._entryStore.setAuthorized(false);
     } else {
       await this._entryStore.initialize();
     }
@@ -42,6 +42,8 @@ export class Entry extends Component {
         </div>
       );
     }
+
+    console.log(isLoading, resourcesLoaded);
 
     if (isLoading || !resourcesLoaded) {
       return (

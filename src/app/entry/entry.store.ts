@@ -1,29 +1,24 @@
-import { makeObservable, observable, action } from 'mobx';
 import { injectable } from 'inversify';
-import axios from 'axios';
-
+import { makeObservable, observable, action } from 'mobx';
+import axios, { AxiosProgressEvent } from 'axios';
 import { preloadResourcesWithProgress } from '@common/utils/preload-resources';
-import {
-  isDesktop,
-  isProd,
-  REACT_CLICKER_APP_BASE_URL,
-} from '@common/utils/utils';
-import FontFaceObserver from 'fontfaceobserver';
+import { EnvUtils } from '@common/utils/env.utils';
+import { isDesktop } from '@common/utils/common.utils';
 
 @injectable()
 export class EntryStore {
   @observable
-  isLoading: boolean = true;
+  private _isLoading: boolean = true;
   @observable
-  isAuthorized: boolean = false;
+  private _isAuthorized: boolean = false;
   @observable
-  resourcesLoaded: boolean = false;
+  private _resourcesLoaded: boolean = false;
   @observable
-  loadProgress: number = 0;
+  private _loadProgress: number = 0;
   @observable
-  serverLoadProgress: number = 0;
+  private _serverLoadProgress: number = 0;
   @observable
-  resourcesLoadProgress: number = 0;
+  private _resourcesLoadProgress: number = 0;
 
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
@@ -31,7 +26,15 @@ export class EntryStore {
     makeObservable(this);
   }
 
-  @action async initialize() {
+  @action
+  async initialize() {
+    if (EnvUtils.avoidTelegramAuth) {
+      this.setAuthorized(true);
+      this.setLoading(false);
+      await this.loadResources();
+      return;
+    }
+
     if (this._telegram) {
       this._telegram.setHeaderColor('#1d2256');
       this._telegram.ready();
@@ -39,40 +42,40 @@ export class EntryStore {
       this._telegram.expand();
       this._telegram.isClosingConfirmationEnabled = true;
     }
+
     await this.checkAuth();
   }
 
-  @action private async checkAuth() {
+  @action
+  private async checkAuth() {
     const initData = window.Telegram.WebApp.initData;
 
     try {
       await this.loadServerData(initData);
       await this.loadResources();
-      await this.loadFonts();
-      this.isLoading = false;
-      this.isAuthorized = true;
+      this.setLoading(false);
+      this.setAuthorized(true);
     } catch (error) {
       this.handleUnauthorized();
     }
   }
 
-  @action private async loadServerData(initData: string) {
+  @action
+  private async loadServerData(initData: string) {
     const updateProgress = (progress: number) => {
-      this.serverLoadProgress = progress;
+      this.setServerLoadProgress(progress);
       this.updateCombinedProgress();
     };
 
     const response = await axios.post(
-      `${REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/getMe`,
+      `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/getMe`,
       { initData },
       {
-        onDownloadProgress: progressEvent => {
-          if (progressEvent.total) {
-            const progress = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total,
-            );
-            updateProgress(progress);
-          }
+        onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / (progressEvent.total || 1),
+          );
+          updateProgress(progress);
         },
       },
     );
@@ -82,50 +85,50 @@ export class EntryStore {
     }
   }
 
-  @action private async loadResources(): Promise<void> {
+  @action
+  private async loadResources(): Promise<void> {
+    const imageUrls = this.imageUrls;
+    const fontNames = this.fontNames;
+
+    const updateProgress = (progress: number) => {
+      this.setResourcesLoadProgress(progress);
+      this.updateCombinedProgress();
+    };
+
     try {
-      await preloadResourcesWithProgress(this.resources, (progress: number) => {
-        this.resourcesLoadProgress = progress;
-        this.updateCombinedProgress();
+      await preloadResourcesWithProgress(imageUrls, fontNames, updateProgress);
+      this.setResourcesLoaded(true);
+      document.fonts.ready.then(() => {
+        document.body.classList.add('fonts-loaded');
       });
-      this.resourcesLoaded = true;
     } catch (error) {
       console.error('Resource preloading failed', error);
-      this.resourcesLoaded = true;
+      this.setResourcesLoaded(true);
     }
   }
 
-  @action private updateCombinedProgress() {
+  @action
+  private updateCombinedProgress() {
     const totalProgress =
-      (this.serverLoadProgress + this.resourcesLoadProgress) / 2;
-    this.loadProgress = totalProgress;
+      (this._serverLoadProgress + this._resourcesLoadProgress) / 2;
+    this.setLoadProgress(totalProgress);
   }
 
-  @action private handleUnauthorized() {
+  @action
+  private handleUnauthorized() {
     if (this._telegram) {
       this._telegram.close();
     }
-    this.isLoading = false;
-    this.isAuthorized = false;
+    this.setLoading(false);
+    this.setAuthorized(false);
   }
 
-  private async loadFonts() {
-    const fonts = [
-      new FontFaceObserver('OverdoseSans'),
-      new FontFaceObserver('Rubik'),
-      new FontFaceObserver('PressStart'),
-    ];
-    await Promise.all(fonts.map(font => font.load()));
-    document.body.classList.add('fonts-loaded');
+  private get imageUrls(): string[] {
+    return [require('../../images/test.jpg')];
   }
 
-  // TODO: we need it?
-  private get resources(): string[] {
-    return [
-      '/assets/fonts/overdozesans.woff2',
-      '/assets/fonts/rubik.woff2',
-      '/assets/fonts/press-start.woff2',
-    ];
+  private get fontNames(): string[] {
+    return ['OverdoseSans', 'Rubik', 'PressStart'];
   }
 
   get telegram(): WebApp {
@@ -133,7 +136,60 @@ export class EntryStore {
   }
 
   get isUnsupportedScreen(): boolean {
-    const isUnsupportedScreen = isProd() && isDesktop();
-    return isUnsupportedScreen;
+    return EnvUtils.avoidUnsupportedScreen ? false : isDesktop();
+  }
+
+  @action
+  setLoading(value: boolean) {
+    this._isLoading = value;
+  }
+
+  @action
+  setAuthorized(value: boolean) {
+    this._isAuthorized = value;
+  }
+
+  @action
+  private setResourcesLoaded(value: boolean) {
+    this._resourcesLoaded = value;
+  }
+
+  @action
+  private setLoadProgress(value: number) {
+    this._loadProgress = value;
+  }
+
+  @action
+  private setServerLoadProgress(value: number) {
+    this._serverLoadProgress = value;
+  }
+
+  @action
+  private setResourcesLoadProgress(value: number) {
+    this._resourcesLoadProgress = value;
+  }
+
+  get isLoading(): boolean {
+    return this._isLoading;
+  }
+
+  get isAuthorized(): boolean {
+    return this._isAuthorized;
+  }
+
+  get resourcesLoaded(): boolean {
+    return this._resourcesLoaded;
+  }
+
+  get loadProgress(): number {
+    return this._loadProgress;
+  }
+
+  get serverLoadProgress(): number {
+    return this._serverLoadProgress;
+  }
+
+  get resourcesLoadProgress(): number {
+    return this._resourcesLoadProgress;
   }
 }

@@ -11,7 +11,7 @@ import {
 } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 
-import { formatNumber } from '@common/utils/utils';
+import { formatNumber } from '@common/utils/common.utils';
 import { GameStore } from '@app/game/game.store';
 import BoostButtonWithNavigate from '@app/boost-button/boost-button.component';
 import {

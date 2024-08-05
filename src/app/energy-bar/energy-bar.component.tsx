@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 
 import { Fit } from '@common/utils/fit.component';
-import { assertNever, formatNumber } from '@common/utils/utils';
+import { assertNever, formatNumber } from '@common/utils/common.utils';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
 
 import { GameStore } from '../game/game.store';

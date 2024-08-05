@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 import classNames from 'classnames';
 
-import { formatNumber } from '@common/utils/utils';
+import { formatNumber } from '@common/utils/common.utils';
 import { Fit } from '@common/utils/fit.component';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
 
