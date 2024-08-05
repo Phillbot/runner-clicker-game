@@ -43,8 +43,6 @@ export class Entry extends Component {
       );
     }
 
-    console.log(isLoading, resourcesLoaded);
-
     if (isLoading || !resourcesLoaded) {
       return (
         <div className={classNames(styles.entry, styles.entryLoading)}>
@@ -65,7 +63,13 @@ export class Entry extends Component {
     }
 
     if (!isAuthorized) {
-      return null;
+      return (
+        <div className={classNames(styles.entry, styles.entryNotAuth)}>
+          <div className={styles.entryNotAuthLabel}>
+            What do you expect to see in this place, mortal?
+          </div>
+        </div>
+      );
     }
 
     return (

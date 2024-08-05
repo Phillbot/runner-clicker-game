@@ -1,6 +1,7 @@
 import { injectable } from 'inversify';
 import { makeObservable, observable, action } from 'mobx';
 import axios, { AxiosProgressEvent } from 'axios';
+
 import { preloadResourcesWithProgress } from '@common/utils/preload-resources';
 import { EnvUtils } from '@common/utils/env.utils';
 import { isDesktop } from '@common/utils/common.utils';
@@ -52,11 +53,17 @@ export class EntryStore {
 
     try {
       await this.loadServerData(initData);
-      await this.loadResources();
-      this.setLoading(false);
       this.setAuthorized(true);
     } catch (error) {
-      this.handleUnauthorized();
+      console.error('Authorization failed', error);
+      this.setAuthorized(false);
+
+      if (this._telegram) {
+        this._telegram.close();
+      }
+    } finally {
+      await this.loadResources();
+      this.setLoading(false);
     }
   }
 
@@ -67,21 +74,26 @@ export class EntryStore {
       this.updateCombinedProgress();
     };
 
-    const response = await axios.post(
-      `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/getMe`,
-      { initData },
-      {
-        onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
-          const progress = Math.round(
-            (progressEvent.loaded * 100) / (progressEvent.total || 1),
-          );
-          updateProgress(progress);
+    try {
+      const response = await axios.post(
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/getMe`,
+        { initData },
+        {
+          onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
+            const progress = Math.round(
+              (progressEvent.loaded * 100) / (progressEvent.total || 1),
+            );
+            updateProgress(progress);
+          },
         },
-      },
-    );
+      );
 
-    if (!response.data.ok) {
-      throw new Error('Unauthorized');
+      if (!response.data.ok) {
+        throw new Error('Unauthorized');
+      }
+    } catch (error) {
+      console.error('Failed to load server data', error);
+      throw error;
     }
   }
 
@@ -114,17 +126,10 @@ export class EntryStore {
     this.setLoadProgress(totalProgress);
   }
 
-  @action
-  private handleUnauthorized() {
-    if (this._telegram) {
-      this._telegram.close();
-    }
-    this.setLoading(false);
-    this.setAuthorized(false);
-  }
-
   private get imageUrls(): string[] {
-    return [require('../../images/test.jpg')];
+    return [
+      // require('../../images/test.jpg') // example
+    ];
   }
 
   private get fontNames(): string[] {
