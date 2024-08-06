@@ -4,8 +4,8 @@ import ReactDOM from 'react-dom/client';
 import { Provider as DependencyInjectionProvider } from 'inversify-react';
 
 import { Entry } from '@app/entry/entry.component';
-import { container } from '@common/IoC/container';
-import { EnvUtils } from '@common/utils/env.utils';
+import { EnvUtils } from '@utils/index';
+import { container } from '@config/inversify.config';
 
 import './i18n/config';
 

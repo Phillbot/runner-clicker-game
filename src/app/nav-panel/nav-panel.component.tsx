@@ -17,24 +17,28 @@ const links = [
     label: 'Home',
     value: '/',
     icon: <HomeOutlined />,
+    disabled: false,
   },
   {
     to: '/profile',
     label: 'Profile',
     value: '/profile',
     icon: <PersonOutline />,
+    disabled: false,
   },
   {
     to: '/tasks',
     label: 'Tasks',
     value: '/tasks',
     icon: <ListAltOutlined />,
+    disabled: true,
   },
   {
     to: '/stats',
     label: 'Stats',
     value: '/stats',
     icon: <BarChartOutlined />,
+    disabled: true,
   },
 ];
 
@@ -90,8 +94,9 @@ export const NavPanel: FC = () => {
             className={classNames(styles.navPanelBottomNavigationElement, {
               [styles.navPanelBottomNavigationElementActive]:
                 item.value === value,
+              [styles.navPanelBottomNavigationElementDisabled]: item.disabled,
             })}
-            disabled={item.value === value}
+            disabled={item.value === value || item.disabled}
             key={item.value}
             component={Link}
             to={item.to}

@@ -7,6 +7,7 @@
   border-radius: 0.5em;
   box-shadow: 0 0em 1em 0.3em rgba(0, 255, 255, var(--box-shadow-brightness));
   position: relative;
+  overflow: hidden;
 
   &_boost-mega {
     box-shadow: 0 0em 1em 0.3em #ff0000;

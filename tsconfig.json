@@ -24,12 +24,12 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./src",
     "paths": {
+      "@config/*": ["config/*"],
       "@fonts/*": ["@fonts/*"],
-      "@styles/*": ["@styles/*"],
+      "@styles/*": ["styles/*"],
       "@types/*": ["@types/*"],
-      "@common/*": ["common/*"],
       "@app/*": ["app/*"],
-      "@locales/*": ["locales/*"]
+      "@utils/*": ["utils/*"]
     }
   },
   "include": ["./src/**/*", "src/@types", "global.d.ts"],

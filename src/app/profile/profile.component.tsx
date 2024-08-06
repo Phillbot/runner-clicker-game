@@ -11,7 +11,7 @@ import {
 } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 
-import { formatNumber } from '@common/utils/common.utils';
+import { formatNumber } from '@utils/index';
 import { GameStore } from '@app/game/game.store';
 import BoostButtonWithNavigate from '@app/boost-button/boost-button.component';
 import {
@@ -36,7 +36,6 @@ export class Profile extends PureComponent {
         tooltip: `Points per click - ${formatNumber(this._gameStore.clickCost)} `,
         isMaxLevel: this._gameStore.clickCostLevel === ClickCostLevelMax,
       },
-
       {
         id: 'energy_limit',
         title: 'Energy level',

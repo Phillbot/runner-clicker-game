@@ -2,9 +2,11 @@ import { injectable } from 'inversify';
 import { makeObservable, observable, action } from 'mobx';
 import axios, { AxiosProgressEvent } from 'axios';
 
-import { preloadResourcesWithProgress } from '@common/utils/preload-resources';
-import { EnvUtils } from '@common/utils/env.utils';
-import { isDesktop } from '@common/utils/common.utils';
+import {
+  EnvUtils,
+  preloadResourcesWithProgress,
+  isDesktop,
+} from '@utils/index';
 
 @injectable()
 export class EntryStore {

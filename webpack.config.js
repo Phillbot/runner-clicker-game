@@ -32,11 +32,11 @@ module.exports = {
     ],
     alias: {
       '@fonts': path.resolve(__dirname, 'src/@fonts'),
-      '@styles': path.resolve(__dirname, 'src/@styles'),
-      '@common': path.resolve(__dirname, 'src/common'),
+      '@styles': path.resolve(__dirname, 'src/styles'),
       '@app': path.resolve(__dirname, 'src/app'),
-      '@locales': path.resolve(__dirname, 'src/locales'),
-      '@types': path.resolve(__dirname, 'src/types'),
+      '@types': path.resolve(__dirname, 'src/@types'),
+      '@config': path.resolve(__dirname, 'src/config'),
+      '@utils/*': path.resolve(__dirname, 'src/utils'),
     },
   },
   optimization: {

@@ -25,5 +25,9 @@
         color: #fff !important;
       }
     }
+
+    &_disabled {
+      opacity: 0.2;
+    }
   }
 }

@@ -3,7 +3,7 @@ import { t } from 'i18next';
 import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 
-import { Fit } from '@common/utils/fit.component';
+import { Fit } from 'utils/fit.component';
 import { EntryStore } from '@app/entry/entry.store';
 
 import styles from './screen-unsupported.md.scss';

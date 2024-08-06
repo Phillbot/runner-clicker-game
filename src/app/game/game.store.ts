@@ -25,18 +25,18 @@ export class GameStore {
   @observable private _isEnergyAvailable: boolean = true;
 
   @observable private _availableEnergyValue: number = getEnergyValueByLevel(
-    EnergyValueLevel.LEVEL_2, // we will get this points from server?
+    EnergyValueLevel.LEVEL_1, // its same as this._energyTotalLevel
   );
 
   @observable private _clickCostLevel: ClickCostLevel = ClickCostLevel.LEVEL_20;
   @observable private _energyTotalLevel: EnergyValueLevel =
-    EnergyValueLevel.LEVEL_2;
+    EnergyValueLevel.LEVEL_1;
   @observable private _energyRegenLevel: EnergyRegenLevel =
-    EnergyRegenLevel.LEVEL_1;
+    EnergyRegenLevel.LEVEL_5;
 
   private _clickId: number = 0;
   private _intervalId: NodeJS.Timeout | null = null;
-  private readonly _regenerationSpeed: number = 500;
+  private readonly _regenerationSpeed: number = 100;
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   constructor(

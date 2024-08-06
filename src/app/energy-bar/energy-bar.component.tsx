@@ -3,8 +3,7 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 
-import { Fit } from '@common/utils/fit.component';
-import { assertNever, formatNumber } from '@common/utils/common.utils';
+import { assertNever, formatNumber, Fit } from '@utils/index';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
 
 import { GameStore } from '../game/game.store';
@@ -25,6 +24,14 @@ export class EnergyBar extends React.Component {
     const boxShadowBrightness = scalePercentage / 100;
     const { currentBoostType, isBoosted } = this._boostStore;
 
+    const scaleFillStyle = isBoosted
+      ? {}
+      : {
+          width: `${scalePercentage}%`,
+          backgroundColor: scaleColor,
+          transition: 'width 0.3s, background-color 0.3s',
+        };
+
     return (
       <div
         className={classNames(styles.scaleContainer, {
@@ -39,21 +46,13 @@ export class EnergyBar extends React.Component {
       >
         <div
           className={styles.scaleContainerScaleFill}
-          style={
-            isBoosted
-              ? {}
-              : {
-                  width: `${scalePercentage}%`,
-                  backgroundColor: scaleColor,
-                  transition: 'width 0.3s, background-color 0.3s',
-                }
-          }
+          style={scaleFillStyle}
         />
         <Fit>
           <div className={styles.scaleContainerScaleText}>
             {currentBoostType !== null
               ? mapBoostTypeToText(currentBoostType)
-              : `${formatNumber(availableEnergyValue)}/${formatNumber(energyTotalValue)}`}
+              : `${formatNumber(Math.round(availableEnergyValue))}/${formatNumber(Math.round(energyTotalValue))}`}
           </div>
         </Fit>
       </div>

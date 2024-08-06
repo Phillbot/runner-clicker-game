@@ -1,4 +1,4 @@
-import { ENV_MODE } from './common.utils';
+import { ENV_MODE } from './common';
 
 export class EnvUtils {
   static get isProd(): boolean {
