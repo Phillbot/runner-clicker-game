@@ -1,3 +1,9 @@
+export enum AbilityType {
+  ClickCost,
+  EnergyLimit,
+  EnergyRegen,
+}
+
 export enum ClickCostLevel {
   LEVEL_1 = 1,
   LEVEL_2 = 2,

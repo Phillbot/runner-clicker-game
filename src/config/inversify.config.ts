@@ -4,6 +4,9 @@ import { EntryStore } from '@app/entry/entry.store';
 import { GameStore } from '@app/game/game.store';
 import { BoostStore } from '@app/boost-button/boost-button.store';
 import { BalanceStore } from '@app/balance/balance.store';
+import { ModalsStore } from '@app/modals/modals.store';
+import { ModalFactory } from '@app/modals/modal-factory';
+import { IModalFactory } from '@app/modals/types';
 
 export const container = new Container({ defaultScope: 'Singleton' });
 
@@ -11,3 +14,5 @@ container.bind<EntryStore>(EntryStore).toSelf();
 container.bind<GameStore>(GameStore).toSelf();
 container.bind<BoostStore>(BoostStore).toSelf();
 container.bind<BalanceStore>(BalanceStore).toSelf();
+container.bind<ModalsStore>(ModalsStore).toSelf();
+container.bind<IModalFactory>('IModalFactory').to(ModalFactory);

@@ -1,4 +1,4 @@
-import React, { PureComponent, ReactNode } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 import classNames from 'classnames';
@@ -13,38 +13,42 @@ import { IconButton } from '@mui/material';
 
 import { formatNumber } from '@utils/index';
 import { GameStore } from '@app/game/game.store';
+import { ModalsStore } from '@app/modals/modals.store';
 import BoostButtonWithNavigate from '@app/boost-button/boost-button.component';
 import {
   ClickCostLevelMax,
   EnergyValueLevelMax,
   EnergyRegenLevelMax,
+  AbilityType,
 } from '@app/game/game-levels';
 
 import styles from './profile.md.scss';
 
 @observer
-export class Profile extends PureComponent {
+export class Profile extends Component {
   @resolve
   private declare readonly _gameStore: GameStore;
+  @resolve
+  private declare readonly _modalStore: ModalsStore;
 
   override render(): ReactNode {
     const abilities = [
       {
-        id: 'click_coast',
+        id: AbilityType.ClickCost,
         title: 'Click level',
         value: `${this._gameStore.clickCostLevel}/${ClickCostLevelMax}`,
         tooltip: `Points per click - ${formatNumber(this._gameStore.clickCost)} `,
         isMaxLevel: this._gameStore.clickCostLevel === ClickCostLevelMax,
       },
       {
-        id: 'energy_limit',
+        id: AbilityType.EnergyLimit,
         title: 'Energy level',
         value: `${this._gameStore.energyTotalLevel}/${EnergyValueLevelMax}`,
         tooltip: `Energy limit - ${formatNumber(this._gameStore.energyTotalValue)}`,
         isMaxLevel: this._gameStore.energyTotalLevel === EnergyValueLevelMax,
       },
       {
-        id: 'regen_value',
+        id: AbilityType.EnergyRegen,
         title: 'Regen level',
         value: `${this._gameStore.energyRegenLevel}/${EnergyRegenLevelMax}`,
         tooltip: `Point regen per tic - ${formatNumber(this._gameStore.energyRegenValue)}`,
@@ -87,7 +91,11 @@ export class Profile extends PureComponent {
                     <DoneAllOutlined />
                   </IconButton>
                 ) : (
-                  <IconButton size="large" color="primary">
+                  <IconButton
+                    size="large"
+                    color="primary"
+                    onClick={() => this._modalStore.openLevelUpModal(id)}
+                  >
                     <AddCircleOutline />
                   </IconButton>
                 )}
