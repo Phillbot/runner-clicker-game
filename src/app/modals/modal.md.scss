@@ -9,8 +9,10 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  opacity: 1;
-  transition: opacity 0.3s;
+
+  &_open {
+    animation: fade-in 300ms forwards;
+  }
 }
 
 .modal-content {
@@ -22,6 +24,10 @@
   max-width: 80vw;
   max-height: 80vh;
   overflow-y: auto;
+
+  &_open {
+    animation: fade-in 300ms forwards;
+  }
 }
 
 .close-button {
@@ -33,4 +39,14 @@
   font-size: 1.5em;
   cursor: pointer;
   z-index: 1001;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }

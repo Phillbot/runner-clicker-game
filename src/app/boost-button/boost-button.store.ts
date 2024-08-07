@@ -17,15 +17,19 @@ export enum BoostType {
 
 @injectable()
 export class BoostStore {
-  @observable isBoosted: boolean = false;
-  @observable boostType: BoostType | null = null;
-  @observable canUseDailyBoost: boolean = true;
-  @observable timeUntilNextBoost: string = '';
+  @observable
+  private _isBoosted: boolean = false;
+  @observable
+  private _boostType: BoostType | null = null;
+  @observable
+  private _canUseDailyBoost: boolean = true;
+  @observable
+  private _timeUntilNextBoost: string = '';
 
-  private boostIntervalId: NodeJS.Timeout | null = null;
-  private boostTimeoutId: NodeJS.Timeout | null = null;
-  private dailyBoostTimeoutId: NodeJS.Timeout | null = null;
-  private lastDailyBoostTimestamp: number | null = null; // Mocked storage
+  private _boostIntervalId: NodeJS.Timeout | null = null;
+  private _boostTimeoutId: NodeJS.Timeout | null = null;
+  private _dailyBoostTimeoutId: NodeJS.Timeout | null = null;
+  private _lastDailyBoostTimestamp: number | null = null; // Mocked storage
 
   private readonly config = {
     boostDurations: {
@@ -61,18 +65,14 @@ export class BoostStore {
 
   @action
   toggleBoosted = () => {
-    if (!this.isBoosted) {
+    if (!this._isBoosted) {
       const randomBoostType = this.getRandomBoostType();
-      this.isBoosted = true;
-      this.boostType = randomBoostType;
       this.startBoost(randomBoostType);
 
       const randomBoostDuration = this.getBoostDuration(randomBoostType);
-      this.boostTimeoutId = setTimeout(() => {
+      this._boostTimeoutId = setTimeout(() => {
         runInAction(() => {
           this.stopBoost();
-          this.isBoosted = false;
-          this.boostType = null;
         });
       }, randomBoostDuration);
     }
@@ -80,18 +80,22 @@ export class BoostStore {
 
   @action
   useDailyBoost = () => {
-    if (this.canUseDailyBoost) {
+    if (this._canUseDailyBoost) {
       this.toggleBoosted();
       this.saveDailyBoostTimestamp();
-      this.canUseDailyBoost = false;
+      this._canUseDailyBoost = false;
       this.startDailyBoostCooldown();
     }
   };
 
-  startBoost = (boostType: BoostType) => {
+  @action
+  private startBoost = (boostType: BoostType) => {
+    this._isBoosted = true;
+    this._boostType = boostType;
+
     const interval = this.getBoostInterval(boostType);
-    if (!this.boostIntervalId) {
-      this.boostIntervalId = setInterval(() => {
+    if (!this._boostIntervalId) {
+      this._boostIntervalId = setInterval(() => {
         runInAction(() => {
           const boostMultiplier = this.getBoostMultiplier(boostType);
           this._balanceStore.incrementBalance(
@@ -116,38 +120,41 @@ export class BoostStore {
     }
   };
 
-  stopBoost = () => {
-    if (this.boostIntervalId) {
-      clearInterval(this.boostIntervalId);
-      this.boostIntervalId = null;
+  @action
+  private stopBoost = () => {
+    if (this._boostIntervalId) {
+      clearInterval(this._boostIntervalId);
+      this._boostIntervalId = null;
     }
-    if (this.boostTimeoutId) {
-      clearTimeout(this.boostTimeoutId);
-      this.boostTimeoutId = null;
+    if (this._boostTimeoutId) {
+      clearTimeout(this._boostTimeoutId);
+      this._boostTimeoutId = null;
     }
+    this._isBoosted = false;
+    this._boostType = null;
   };
 
-  getRandomBoostType = (): BoostType => {
+  private getRandomBoostType = (): BoostType => {
     const types = Object.values(BoostType);
     const randomIndex = Math.floor(Math.random() * types.length);
     return types[randomIndex];
   };
 
-  getBoostDuration = (boostType: BoostType): number => {
+  private getBoostDuration = (boostType: BoostType): number => {
     return (
       this.config.boostDurations[boostType] ||
       this.config.boostDurations.DEFAULT
     );
   };
 
-  getBoostInterval = (boostType: BoostType): number => {
+  private getBoostInterval = (boostType: BoostType): number => {
     return (
       this.config.boostIntervals[boostType] ||
       this.config.boostIntervals.DEFAULT
     );
   };
 
-  getBoostMultiplier = (boostType: BoostType): number => {
+  private getBoostMultiplier = (boostType: BoostType): number => {
     return (
       this.config.boostMultipliers[boostType] ||
       this.config.boostMultipliers.DEFAULT
@@ -155,50 +162,73 @@ export class BoostStore {
   };
 
   @computed
-  get currentBoostType(): BoostType | null {
-    return this.isBoosted ? this.boostType : null;
+  get isBoosted(): boolean {
+    return this._isBoosted;
   }
 
+  @computed
+  get boostType(): BoostType | null {
+    return this._boostType;
+  }
+
+  @computed
+  get canUseDailyBoost(): boolean {
+    return this._canUseDailyBoost;
+  }
+
+  @computed
+  get timeUntilNextBoost(): string {
+    return this._timeUntilNextBoost;
+  }
+
+  @computed
+  get currentBoostType(): BoostType | null {
+    return this._isBoosted ? this._boostType : null;
+  }
+
+  @action
   private saveDailyBoostTimestamp() {
     const now = Date.now();
-    this.lastDailyBoostTimestamp = now;
+    this._lastDailyBoostTimestamp = now;
   }
 
+  @action
   private checkDailyBoostAvailability() {
-    const lastBoostTimestamp = this.lastDailyBoostTimestamp;
+    const lastBoostTimestamp = this._lastDailyBoostTimestamp;
     if (lastBoostTimestamp) {
       const now = Date.now();
       const timeSinceLastBoost = now - lastBoostTimestamp;
       const hoursSinceLastBoost =
         timeSinceLastBoost / this.config.dailyBoostCooldown;
 
-      if (hoursSinceLastBoost >= 1) {
-        this.canUseDailyBoost = true;
-      } else {
-        this.canUseDailyBoost = false;
-      }
+      runInAction(() => {
+        this._canUseDailyBoost = hoursSinceLastBoost >= 1;
+      });
     } else {
-      this.canUseDailyBoost = true;
+      runInAction(() => {
+        this._canUseDailyBoost = true;
+      });
     }
   }
 
+  @action
   private startDailyBoostCooldown() {
-    if (this.dailyBoostTimeoutId) {
-      clearTimeout(this.dailyBoostTimeoutId);
+    if (this._dailyBoostTimeoutId) {
+      clearTimeout(this._dailyBoostTimeoutId);
     }
 
-    this.dailyBoostTimeoutId = setTimeout(() => {
+    this._dailyBoostTimeoutId = setTimeout(() => {
       runInAction(() => {
-        this.canUseDailyBoost = true;
+        this._canUseDailyBoost = true;
       });
     }, this.config.dailyBoostCooldown);
   }
 
   private startUpdateTimer() {
     setInterval(() => {
-      if (!this.canUseDailyBoost && this.lastDailyBoostTimestamp) {
+      if (!this._canUseDailyBoost && this._lastDailyBoostTimestamp) {
         const now = Date.now();
-        const timeSinceLastBoost = now - this.lastDailyBoostTimestamp;
+        const timeSinceLastBoost = now - this._lastDailyBoostTimestamp;
         const remainingTime =
           this.config.dailyBoostCooldown - timeSinceLastBoost;
 
@@ -207,10 +237,14 @@ export class BoostStore {
           const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
           const seconds = Math.floor((remainingTime / 1000) % 60);
 
-          this.timeUntilNextBoost = `${hours}:${minutes}:${seconds}`;
+          runInAction(() => {
+            this._timeUntilNextBoost = `${hours}:${minutes}:${seconds}`;
+          });
         } else {
-          this.timeUntilNextBoost = '';
-          this.canUseDailyBoost = true;
+          runInAction(() => {
+            this._timeUntilNextBoost = '';
+            this._canUseDailyBoost = true;
+          });
         }
       }
     }, this.config.updateInterval);

@@ -6,7 +6,6 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const isProduction = process.env.REACT_CLICKER_APP_ENV === 'production';
@@ -36,7 +35,7 @@ module.exports = {
       '@app': path.resolve(__dirname, 'src/app'),
       '@types': path.resolve(__dirname, 'src/@types'),
       '@config': path.resolve(__dirname, 'src/config'),
-      '@utils/*': path.resolve(__dirname, 'src/utils'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
     },
   },
   optimization: {
@@ -165,17 +164,17 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [{ from: 'src/@fonts', to: 'assets/fonts' }],
     }),
-    !isProduction && new ReactRefreshWebpackPlugin(),
   ].filter(Boolean),
   devServer: {
     static: {
       directory: path.join(__dirname, 'dist'),
     },
+    
     compress: true,
     port: 9000,
     historyApiFallback: true,
     client: {
-      overlay: false,
+      overlay: true,
     },
     devMiddleware: {
       publicPath: '/',

@@ -1,7 +1,9 @@
 import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom';
+import classNames from 'classnames';
 import { fromEvent, Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
+
 import styles from './modal.md.scss';
 
 type ModalProps = {
@@ -12,9 +14,16 @@ type ModalProps = {
 
 export class Modal extends React.Component<ModalProps> {
   private destroy$ = new Subject<void>();
+  private modalContainer: HTMLElement | null = null;
 
   override componentDidMount() {
     this.addKeydownListener();
+    this.modalContainer = document.getElementById('modal-container');
+    if (!this.modalContainer) {
+      this.modalContainer = document.createElement('div');
+      this.modalContainer.id = 'modal-container';
+      document.body.appendChild(this.modalContainer);
+    }
   }
 
   override componentDidUpdate(prevProps: ModalProps) {
@@ -54,19 +63,24 @@ export class Modal extends React.Component<ModalProps> {
     }
 
     return ReactDOM.createPortal(
-      isOpen && (
-        <div className={styles.modalOverlay} onClick={onClose}>
-          <div
-            className={styles.modalContent}
-            onClick={e => e.stopPropagation()}
-          >
-            <button className={styles.closeButton} onClick={onClose}>
-              &times;
-            </button>
-            {children}
-          </div>
+      <div
+        className={classNames(styles.modalOverlay, {
+          [styles.modalOverlayOpen]: isOpen,
+        })}
+        onClick={onClose}
+      >
+        <div
+          className={classNames(styles.modalContent, {
+            [styles.modalContentOpen]: isOpen,
+          })}
+          onClick={e => e.stopPropagation()}
+        >
+          <button className={styles.closeButton} onClick={onClose}>
+            &times;
+          </button>
+          {children}
         </div>
-      ),
+      </div>,
       modalContainer,
     );
   }
