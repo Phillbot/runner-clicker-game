@@ -1,8 +1,11 @@
 import React, { useRef, useEffect } from 'react';
-import { NavPanel } from '@app/nav-panel/nav-panel.component';
-import AppRoutes from '@app/router/router';
+
 import { container } from '@config/inversify.config';
+
+import AppRoutes from '@app/router/router';
+import { NavPanel } from '@app/nav-panel/nav-panel.component';
 import { ModalRenderer } from '@app/modals/modal-render.component';
+import { LoadingOverlay } from '@app/loading-overlay/loading-overlay.component';
 
 import styles from './screen-main.md.scss';
 
@@ -21,8 +24,9 @@ export const ScreenMain: React.FC = () => {
     <div className={styles.screenMain}>
       <AppRoutes />
       <NavPanel />
-      <div ref={modalContainerRef}></div>
+      <div ref={modalContainerRef} />
       <ModalRenderer />
+      <LoadingOverlay />
     </div>
   );
 };

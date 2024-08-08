@@ -10,67 +10,20 @@ import {
   WalletOutlined,
 } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-
-import { formatNumber } from '@utils/index';
-import { GameStore } from '@app/game/game.store';
 import { ModalsStore } from '@app/modals/modals.store';
 import BoostButtonWithNavigate from '@app/boost-button/boost-button.component';
-import {
-  ClickCostLevelMax,
-  EnergyValueLevelMax,
-  EnergyRegenLevelMax,
-  AbilityType,
-  clickCostUpdateLevelCost,
-  energyValueUpdateLevelCost,
-  energyRegenValueUpdateLevelCost,
-} from '@app/game/game-levels';
 
 import styles from './profile.md.scss';
-import { EnergyStore } from '@app/energy-bar/energy.store';
+import { ProfileStore } from './profile.store';
 
 @observer
 export class Profile extends Component {
   @resolve
-  private declare readonly _gameStore: GameStore;
-  @resolve
-  private declare readonly _energyStore: EnergyStore;
-  @resolve
   private declare readonly _modalStore: ModalsStore;
+  @resolve
+  private declare readonly _profileStore: ProfileStore;
 
   override render(): ReactNode {
-    const abilities = [
-      {
-        id: AbilityType.ClickCost,
-        title: 'Click level',
-        value: `${this._gameStore.clickCostLevel}/${ClickCostLevelMax}`,
-        tooltip: `Points per click - ${formatNumber(this._gameStore.clickCost)} `,
-        isMaxLevel: this._gameStore.clickCostLevel === ClickCostLevelMax,
-        nextLevelCoast: clickCostUpdateLevelCost.get(
-          this._gameStore.clickCostLevel + 1,
-        ),
-      },
-      {
-        id: AbilityType.EnergyLimit,
-        title: 'Energy level',
-        value: `${this._energyStore.energyTotalLevel}/${EnergyValueLevelMax}`,
-        tooltip: `Energy limit - ${formatNumber(this._gameStore.energyTotalValue)}`,
-        isMaxLevel: this._energyStore.energyTotalLevel === EnergyValueLevelMax,
-        nextLevelCoast: energyValueUpdateLevelCost.get(
-          this._energyStore.energyTotalLevel + 1,
-        ),
-      },
-      {
-        id: AbilityType.EnergyRegen,
-        title: 'Regen level',
-        value: `${this._energyStore.energyRegenLevel}/${EnergyRegenLevelMax}`,
-        tooltip: `Point regen per tic - ${formatNumber(this._gameStore.energyRegenValue)}`,
-        isMaxLevel: this._energyStore.energyRegenLevel === EnergyRegenLevelMax,
-        nextLevelCoast: energyRegenValueUpdateLevelCost.get(
-          this._energyStore.energyRegenLevel + 1,
-        ),
-      },
-    ];
-
     return (
       <div className={styles.profile}>
         <div className={styles.profileTitle}>Profile</div>
@@ -78,8 +31,7 @@ export class Profile extends Component {
           <div className={styles.profileBonusesContainerBoost}>
             <BoostButtonWithNavigate />
           </div>
-
-          {abilities.map(
+          {this._profileStore.abilities.map(
             ({ id, title, value, tooltip, isMaxLevel, nextLevelCoast }) => (
               <div key={id} className={styles.profileBonusesContainerItem}>
                 <div className={styles.profileBonusesContainerItemBlock}>

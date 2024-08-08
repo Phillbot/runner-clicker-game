@@ -48,7 +48,7 @@ export class BoostStore {
       TINY: 5,
       DEFAULT: 1, // По умолчанию
     },
-    dailyBoostCooldown: 24 * 60 * 60 * 1000, // 24 часа в мс
+    dailyBoostCooldown: 6 * 60 * 60 * 1000, // 6 часов
     updateInterval: 1000, // 1 секунда
   };
 
@@ -231,6 +231,10 @@ export class BoostStore {
       );
 
       if (!response.data.ok) {
+        if (this._telegram) {
+          this._telegram.close();
+        }
+
         throw new Error('Failed to sync boost data');
       }
     } catch (error) {

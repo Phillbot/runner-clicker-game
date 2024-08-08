@@ -59,18 +59,18 @@ export const EnergyRegenLevelMax = 5;
 
 const clickCoefficient = 1;
 const evergyCoefficient = 1000;
-const evergyRegenCoefficient = 0.1;
+const evergyRegenCoefficient = 0.11;
 
 export function getClickCostByLevel(level: ClickCostLevel): number {
-  return level * clickCoefficient;
+  return Math.round(level * clickCoefficient);
 }
 
 export function getEnergyValueByLevel(level: EnergyValueLevel): number {
-  return level * evergyCoefficient;
+  return Math.round(level * evergyCoefficient);
 }
 
 export function getEnergyRegenValueByLevel(level: EnergyRegenLevel): number {
-  return level * evergyRegenCoefficient;
+  return Math.round(level * evergyRegenCoefficient);
 }
 
 export const clickCostUpdateLevelCost = new Map<ClickCostLevel, number>([
