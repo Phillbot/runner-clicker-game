@@ -23,11 +23,14 @@ import {
 } from '@app/game/game-levels';
 
 import styles from './profile.md.scss';
+import { EnergyStore } from '@app/energy-bar/energy.store';
 
 @observer
 export class Profile extends Component {
   @resolve
   private declare readonly _gameStore: GameStore;
+  @resolve
+  private declare readonly _energyStore: EnergyStore;
   @resolve
   private declare readonly _modalStore: ModalsStore;
 
@@ -43,16 +46,16 @@ export class Profile extends Component {
       {
         id: AbilityType.EnergyLimit,
         title: 'Energy level',
-        value: `${this._gameStore.energyTotalLevel}/${EnergyValueLevelMax}`,
+        value: `${this._energyStore.energyTotalLevel}/${EnergyValueLevelMax}`,
         tooltip: `Energy limit - ${formatNumber(this._gameStore.energyTotalValue)}`,
-        isMaxLevel: this._gameStore.energyTotalLevel === EnergyValueLevelMax,
+        isMaxLevel: this._energyStore.energyTotalLevel === EnergyValueLevelMax,
       },
       {
         id: AbilityType.EnergyRegen,
         title: 'Regen level',
-        value: `${this._gameStore.energyRegenLevel}/${EnergyRegenLevelMax}`,
+        value: `${this._energyStore.energyRegenLevel}/${EnergyRegenLevelMax}`,
         tooltip: `Point regen per tic - ${formatNumber(this._gameStore.energyRegenValue)}`,
-        isMaxLevel: this._gameStore.energyRegenLevel === EnergyRegenLevelMax,
+        isMaxLevel: this._energyStore.energyRegenLevel === EnergyRegenLevelMax,
       },
     ];
 
@@ -67,7 +70,7 @@ export class Profile extends Component {
           {abilities.map(({ id, title, value, tooltip, isMaxLevel }) => (
             <div key={id} className={styles.profileBonusesContainerItem}>
               <div className={styles.profileBonusesContainerItemBlock}>
-                {title}{' '}
+                {title}
               </div>
 
               <div className={styles.profileBonusesContainerItemBlockWithValue}>

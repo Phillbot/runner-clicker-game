@@ -4,6 +4,11 @@ export enum AbilityType {
   EnergyRegen,
 }
 
+export interface Abilities {
+  click_coast_level: ClickCostLevel;
+  energy_level: EnergyValueLevel;
+  energy_regeniration_level: EnergyRegenLevel;
+}
 export enum ClickCostLevel {
   LEVEL_1 = 1,
   LEVEL_2 = 2,

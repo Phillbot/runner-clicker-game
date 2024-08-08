@@ -7,6 +7,8 @@ const TerserPlugin = require('terser-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 const isProduction = process.env.REACT_CLICKER_APP_ENV === 'production';
 
@@ -164,12 +166,21 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [{ from: 'src/@fonts', to: 'assets/fonts' }],
     }),
+    new ForkTsCheckerWebpackPlugin({
+      async: !isProduction,
+      typescript: {
+        configFile: './tsconfig.json',
+      },
+    }),
+    new ESLintPlugin({
+      extensions: ['ts', 'tsx', 'js', 'jsx'],
+      context: path.resolve(__dirname, 'src'),
+    }),
   ].filter(Boolean),
   devServer: {
     static: {
       directory: path.join(__dirname, 'dist'),
     },
-    
     compress: true,
     port: 9000,
     historyApiFallback: true,

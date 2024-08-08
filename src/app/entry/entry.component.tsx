@@ -9,6 +9,7 @@ import { ScreenMain } from '@app/screen-main/screen-main.component';
 import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
 
 import { EntryStore } from './entry.store';
+import { BalanceStore } from '@app/balance/balance.store';
 
 import styles from './entry.md.scss';
 
@@ -16,6 +17,8 @@ import styles from './entry.md.scss';
 export class Entry extends Component {
   @resolve
   private declare readonly _entryStore: EntryStore;
+  @resolve
+  private declare readonly _balanceStore: BalanceStore;
 
   override async componentDidMount(): Promise<void> {
     if (this._entryStore.isUnsupportedScreen) {

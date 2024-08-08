@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 
 import { AbilityType } from '@app/game/game-levels';
-import { assertNever } from '@utils/common';
+import { assertNever, isSomething } from '@utils/common';
 
 import { ModalsStore } from './modals.store';
 import { Modal } from './modal.component';
@@ -20,7 +20,7 @@ export class LevelUpModal extends React.Component {
     const isOpen = this._modalStore.isOpen(Modals.LevelUpModal);
     const abilityType = this._modalStore.levelUpModalAbilityType; // TODO: common type with server ?
 
-    if (!abilityType) {
+    if (!isSomething(abilityType)) {
       return null;
     }
 

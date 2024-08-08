@@ -30,3 +30,13 @@ export function isDesktop(): boolean {
 export function assertNever(value: never): never {
   throw new Error(`Unexpected value: ${value}`);
 }
+
+export function isSomething<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
+export function isNothing<T>(
+  value: T | null | undefined,
+): value is null | undefined {
+  return value === null || value === undefined;
+}

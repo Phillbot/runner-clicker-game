@@ -6,19 +6,18 @@ import { resolve } from 'inversify-react';
 import { assertNever, formatNumber, Fit } from '@utils/index';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
 
-import { GameStore } from '../game/game.store';
-
 import styles from './energy-bar.md.scss';
+import { EnergyStore } from './energy.store';
 
 @observer
 export class EnergyBar extends React.Component {
   @resolve
-  private readonly _gameStore: GameStore;
+  private readonly _energyStore: EnergyStore;
   @resolve
   private readonly _boostStore: BoostStore;
 
   override render(): React.ReactNode {
-    const { energyTotalValue, availableEnergyValue } = this._gameStore;
+    const { energyTotalValue, availableEnergyValue } = this._energyStore;
     const scalePercentage = (availableEnergyValue / energyTotalValue) * 100;
     const scaleColor = getScaleColor(scalePercentage);
     const boxShadowBrightness = scalePercentage / 100;

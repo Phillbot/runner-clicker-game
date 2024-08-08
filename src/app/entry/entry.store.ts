@@ -1,5 +1,5 @@
-import { injectable } from 'inversify';
-import { makeObservable, observable, action } from 'mobx';
+import { injectable, inject } from 'inversify';
+import { makeObservable, observable, action, runInAction } from 'mobx';
 import axios, { AxiosProgressEvent } from 'axios';
 
 import {
@@ -7,6 +7,9 @@ import {
   preloadResourcesWithProgress,
   isDesktop,
 } from '@utils/index';
+import { GameStore } from '@app/game/game.store';
+import { BalanceStore } from '@app/balance/balance.store';
+import { EnergyStore } from '@app/energy-bar/energy.store';
 
 @injectable()
 export class EntryStore {
@@ -22,11 +25,20 @@ export class EntryStore {
   private _serverLoadProgress: number = 0;
   @observable
   private _resourcesLoadProgress: number = 0;
+  @observable
+  private _lastLogout: number = 0;
+
+  private readonly _loginDate = new Date().getTime();
 
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
-  constructor() {
+  constructor(
+    @inject(GameStore) private readonly _gameStore: GameStore,
+    @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
+    @inject(EnergyStore) private readonly _energyStore: EnergyStore,
+  ) {
     makeObservable(this);
+    window.addEventListener('beforeunload', this.syncOnUnload);
   }
 
   @action
@@ -43,7 +55,6 @@ export class EntryStore {
       this._telegram.ready();
       this._telegram.disableVerticalSwipes();
       this._telegram.expand();
-      this._telegram.isClosingConfirmationEnabled = true;
     }
 
     await this.checkAuth();
@@ -93,6 +104,15 @@ export class EntryStore {
       if (!response.data.ok) {
         throw new Error('Unauthorized');
       }
+
+      const { user } = response.data;
+      runInAction(() => {
+        this._gameStore.setInitialData(user.balance, user.abilities);
+        this._balanceStore.setBalance(user.balance);
+        this._lastLogout = user.lastLogout ?? 0;
+        this._energyStore.setAvailableEnergy(user.activeEnergy.active_energy);
+        this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
+      });
     } catch (error) {
       console.error('Failed to load server data', error);
       throw error;
@@ -199,4 +219,31 @@ export class EntryStore {
   get resourcesLoadProgress(): number {
     return this._resourcesLoadProgress;
   }
+
+  get lastLogout(): number {
+    return this._lastLogout;
+  }
+
+  readonly syncOnUnload = () => {
+    const initData = window.Telegram.WebApp.initData;
+    const lastLogoutTimestamp = new Date().getTime();
+    const lastLoginTimestamp = this._loginDate;
+    const balance = this._balanceStore.balance;
+    const activeEnergy = Math.round(this._energyStore.availableEnergyValue);
+
+    try {
+      axios.post(
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/logout`,
+        {
+          initData,
+          balance,
+          lastLogoutTimestamp,
+          lastLoginTimestamp,
+          activeEnergy,
+        },
+      );
+    } catch (error) {
+      console.log('logout error');
+    }
+  };
 }

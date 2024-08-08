@@ -1,4 +1,3 @@
-import { BalanceStore } from '@app/balance/balance.store';
 import { injectable, inject } from 'inversify';
 import {
   observable,
@@ -7,14 +6,9 @@ import {
   runInAction,
   computed,
 } from 'mobx';
-import {
-  EnergyValueLevel,
-  ClickCostLevel,
-  EnergyRegenLevel,
-  getEnergyValueByLevel,
-  getClickCostByLevel,
-  getEnergyRegenValueByLevel,
-} from './game-levels';
+import { BalanceStore } from '@app/balance/balance.store';
+import { Abilities, getClickCostByLevel, ClickCostLevel } from './game-levels';
+import { EnergyStore } from '@app/energy-bar/energy.store';
 
 type ClickMessage = { id: number; x: number; y: number; removeAt: number };
 
@@ -22,28 +16,17 @@ type ClickMessage = { id: number; x: number; y: number; removeAt: number };
 export class GameStore {
   @observable private _clickMessages: ClickMessage[] = [];
   @observable private _isScaled: boolean = false;
-  @observable private _isEnergyAvailable: boolean = true;
-
-  @observable private _availableEnergyValue: number = getEnergyValueByLevel(
-    EnergyValueLevel.LEVEL_1, // its same as this._energyTotalLevel
-  );
-
-  @observable private _clickCostLevel: ClickCostLevel = ClickCostLevel.LEVEL_20;
-  @observable private _energyTotalLevel: EnergyValueLevel =
-    EnergyValueLevel.LEVEL_1;
-  @observable private _energyRegenLevel: EnergyRegenLevel =
-    EnergyRegenLevel.LEVEL_5;
+  @observable private _clickCostLevel: ClickCostLevel = ClickCostLevel.LEVEL_1;
 
   private _clickId: number = 0;
-  private _intervalId: NodeJS.Timeout | null = null;
-  private readonly _regenerationSpeed: number = 100;
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   constructor(
     @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
+    @inject(EnergyStore) private readonly _energyStore: EnergyStore,
   ) {
     makeObservable(this);
-    this.startRegeneration();
+    this._energyStore.startRegeneration();
   }
 
   @computed
@@ -53,22 +36,22 @@ export class GameStore {
 
   @computed
   get energyTotalValue(): number {
-    return getEnergyValueByLevel(this._energyTotalLevel);
+    return this._energyStore.energyTotalValue;
   }
 
   @computed
   get energyRegenValue(): number {
-    return getEnergyRegenValueByLevel(this._energyRegenLevel);
+    return this._energyStore.energyRegenValue;
+  }
+
+  @computed
+  get availableEnergyValue(): number {
+    return this._energyStore.availableEnergyValue;
   }
 
   @computed
   get clickMessages(): ClickMessage[] {
     return this._clickMessages;
-  }
-
-  @computed
-  get availableEnergyValue(): number {
-    return this._availableEnergyValue;
   }
 
   @computed
@@ -78,22 +61,12 @@ export class GameStore {
 
   @computed
   get isEnergyAvailable(): boolean {
-    return this._isEnergyAvailable;
+    return this._energyStore.isEnergyAvailable;
   }
 
   @computed
   get clickCostLevel(): ClickCostLevel {
     return this._clickCostLevel;
-  }
-
-  @computed
-  get energyTotalLevel(): EnergyValueLevel {
-    return this._energyTotalLevel;
-  }
-
-  @computed
-  get energyRegenLevel(): EnergyRegenLevel {
-    return this._energyRegenLevel;
   }
 
   @computed
@@ -104,62 +77,32 @@ export class GameStore {
 
   @action
   readonly handleEvent = (x: number, y: number) => {
-    if (this._availableEnergyValue < this.clickCost) {
-      this.setEnergyAvailable(false);
+    if (this.availableEnergyValue < this.clickCost) {
+      this._energyStore.setEnergyAvailable(false);
       return;
     }
 
-    const newClickId = this._clickId++;
+    const newClickId = this.generateClickMessageId();
     const removeAt = Date.now() + 500;
 
-    this._clickMessages.push({ id: newClickId, x, y, removeAt });
-    this._availableEnergyValue = Math.max(
-      this._availableEnergyValue - this.clickCost,
-      0,
-    );
+    this.addClickMessage({ id: newClickId, x, y, removeAt });
+    this._energyStore.decrementEnergy(this.clickCost);
     this._isScaled = true;
-    this.setEnergyAvailable(this._availableEnergyValue >= this.clickCost);
+    this._energyStore.setEnergyAvailable(
+      this.availableEnergyValue >= this.clickCost,
+    );
 
     this._balanceStore.incrementBalance(this.clickCost);
 
     setTimeout(() => {
       runInAction(() => {
-        this._clickMessages = this._clickMessages.filter(
-          click => click.id !== newClickId,
-        );
+        this.removeClickMessage(newClickId);
       });
     }, 800);
 
     this.restartScaleAnimation();
     if (this._telegram) {
       this._telegram.HapticFeedback.impactOccurred('heavy');
-    }
-  };
-
-  @action
-  readonly regeneratePoints = () => {
-    this._availableEnergyValue = Math.min(
-      this._availableEnergyValue + this.energyRegenValue,
-      this.energyTotalValue,
-    );
-    this.setEnergyAvailable(this._availableEnergyValue >= this.clickCost);
-    this.removeOldMessages();
-  };
-
-  readonly startRegeneration = () => {
-    if (!this._intervalId) {
-      this._intervalId = setInterval(() => {
-        runInAction(() => {
-          this.regeneratePoints();
-        });
-      }, this._regenerationSpeed);
-    }
-  };
-
-  readonly stopRegeneration = () => {
-    if (this._intervalId) {
-      clearInterval(this._intervalId);
-      this._intervalId = null;
     }
   };
 
@@ -177,6 +120,11 @@ export class GameStore {
   };
 
   @action
+  readonly setScaled = (value: boolean) => {
+    this._isScaled = value;
+  };
+
+  @action
   readonly removeOldMessages = () => {
     const now = Date.now();
     this._clickMessages = this._clickMessages.filter(
@@ -185,27 +133,30 @@ export class GameStore {
   };
 
   @action
-  readonly setScaled = (value: boolean) => {
-    this._isScaled = value;
+  setClickCostLevel = (level: ClickCostLevel) => {
+    this._clickCostLevel = level;
   };
 
   @action
-  readonly setEnergyAvailable = (value: boolean) => {
-    this._isEnergyAvailable = value;
+  readonly setInitialData = (balance: number, abilities: Abilities) => {
+    this._balanceStore.setBalance(balance);
+    this.setClickCostLevel(abilities.click_coast_level);
+    this._energyStore.setEnergyTotalLevel(abilities.energy_level);
+    this._energyStore.setEnergyRegenLevel(abilities.energy_regeniration_level);
   };
 
   @action
-  readonly generateClickMessageId = (): number => {
+  generateClickMessageId(): number {
     return this._clickId++;
-  };
+  }
 
   @action
-  readonly addClickMessage = (message: ClickMessage) => {
+  addClickMessage(message: ClickMessage) {
     this._clickMessages.push(message);
-  };
+  }
 
   @action
-  readonly removeClickMessage = (id: number) => {
+  removeClickMessage(id: number) {
     this._clickMessages = this._clickMessages.filter(click => click.id !== id);
-  };
+  }
 }
