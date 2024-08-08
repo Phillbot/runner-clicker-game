@@ -26,7 +26,7 @@ export class EnergyStore {
   @observable
   private _isEnergyAvailable: boolean = true;
 
-  private readonly _regenerationSpeed: number = 100;
+  private readonly _regenerationSpeed: number = 100; // 1 minute in milliseconds
   private _intervalId: NodeJS.Timeout | null = null;
   private _syncIntervalId: NodeJS.Timeout | null = null;
 
@@ -116,21 +116,15 @@ export class EnergyStore {
     const regenCycles = Math.floor(regenTimeMS / this._regenerationSpeed);
     const regeneratedEnergy = regenCycles * this.energyRegenValue;
 
-    console.log(
-      'here',
-      this._availableEnergyValue,
-      regenCycles,
-      currentTime,
-      lastLogout,
-      regenTimeMS,
-    );
-
     this._availableEnergyValue = Math.min(
       this._availableEnergyValue + regeneratedEnergy,
       this.energyTotalValue,
     );
+
+    this.setEnergyAvailable(this._availableEnergyValue > 0);
   }
 
+  @action
   async syncEnergyWithServer() {
     if (this._availableEnergyValue === this.energyTotalValue) {
       return;

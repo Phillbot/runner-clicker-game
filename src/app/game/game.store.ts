@@ -6,17 +6,28 @@ import {
   runInAction,
   computed,
 } from 'mobx';
+import axios from 'axios';
 import { BalanceStore } from '@app/balance/balance.store';
-import { Abilities, getClickCostByLevel, ClickCostLevel } from './game-levels';
+import {
+  Abilities,
+  getClickCostByLevel,
+  ClickCostLevel,
+  AbilityType,
+} from './game-levels';
 import { EnergyStore } from '@app/energy-bar/energy.store';
+import { EnvUtils } from '@utils/index';
+import { ModalsStore } from '@app/modals/modals.store';
 
 type ClickMessage = { id: number; x: number; y: number; removeAt: number };
 
 @injectable()
 export class GameStore {
-  @observable private _clickMessages: ClickMessage[] = [];
-  @observable private _isScaled: boolean = false;
-  @observable private _clickCostLevel: ClickCostLevel = ClickCostLevel.LEVEL_1;
+  @observable
+  private _clickMessages: ClickMessage[] = [];
+  @observable
+  private _isScaled: boolean = false;
+  @observable
+  private _clickCostLevel: ClickCostLevel = ClickCostLevel.LEVEL_1;
 
   private _clickId: number = 0;
   private readonly _telegram: WebApp = window.Telegram.WebApp;
@@ -24,6 +35,7 @@ export class GameStore {
   constructor(
     @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
     @inject(EnergyStore) private readonly _energyStore: EnergyStore,
+    @inject(ModalsStore) private readonly _modalsStore: ModalsStore,
   ) {
     makeObservable(this);
     this._energyStore.startRegeneration();
@@ -158,5 +170,30 @@ export class GameStore {
   @action
   removeClickMessage(id: number) {
     this._clickMessages = this._clickMessages.filter(click => click.id !== id);
+  }
+
+  @action
+  async incrementAbility(abilityType: AbilityType) {
+    try {
+      const initData = window.Telegram.WebApp.initData;
+      const response = await axios.post(
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/updateAbility`,
+        { initData, abilityType },
+      );
+
+      if (response.data.ok) {
+        runInAction(() => {
+          const { balance, abilities } = response.data;
+          this._balanceStore.setBalance(balance);
+          this.setInitialData(balance, abilities);
+        });
+
+        this._modalsStore.closeLevelUpModal();
+      } else {
+        throw new Error('Failed to update ability');
+      }
+    } catch (error) {
+      console.error('Error incrementing ability:', error);
+    }
   }
 }

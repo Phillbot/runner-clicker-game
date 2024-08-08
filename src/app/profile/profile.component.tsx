@@ -20,6 +20,9 @@ import {
   EnergyValueLevelMax,
   EnergyRegenLevelMax,
   AbilityType,
+  clickCostUpdateLevelCost,
+  energyValueUpdateLevelCost,
+  energyRegenValueUpdateLevelCost,
 } from '@app/game/game-levels';
 
 import styles from './profile.md.scss';
@@ -42,6 +45,9 @@ export class Profile extends Component {
         value: `${this._gameStore.clickCostLevel}/${ClickCostLevelMax}`,
         tooltip: `Points per click - ${formatNumber(this._gameStore.clickCost)} `,
         isMaxLevel: this._gameStore.clickCostLevel === ClickCostLevelMax,
+        nextLevelCoast: clickCostUpdateLevelCost.get(
+          this._gameStore.clickCostLevel + 1,
+        ),
       },
       {
         id: AbilityType.EnergyLimit,
@@ -49,6 +55,9 @@ export class Profile extends Component {
         value: `${this._energyStore.energyTotalLevel}/${EnergyValueLevelMax}`,
         tooltip: `Energy limit - ${formatNumber(this._gameStore.energyTotalValue)}`,
         isMaxLevel: this._energyStore.energyTotalLevel === EnergyValueLevelMax,
+        nextLevelCoast: energyValueUpdateLevelCost.get(
+          this._energyStore.energyTotalLevel + 1,
+        ),
       },
       {
         id: AbilityType.EnergyRegen,
@@ -56,6 +65,9 @@ export class Profile extends Component {
         value: `${this._energyStore.energyRegenLevel}/${EnergyRegenLevelMax}`,
         tooltip: `Point regen per tic - ${formatNumber(this._gameStore.energyRegenValue)}`,
         isMaxLevel: this._energyStore.energyRegenLevel === EnergyRegenLevelMax,
+        nextLevelCoast: energyRegenValueUpdateLevelCost.get(
+          this._energyStore.energyRegenLevel + 1,
+        ),
       },
     ];
 
@@ -67,44 +79,50 @@ export class Profile extends Component {
             <BoostButtonWithNavigate />
           </div>
 
-          {abilities.map(({ id, title, value, tooltip, isMaxLevel }) => (
-            <div key={id} className={styles.profileBonusesContainerItem}>
-              <div className={styles.profileBonusesContainerItemBlock}>
-                {title}
-              </div>
+          {abilities.map(
+            ({ id, title, value, tooltip, isMaxLevel, nextLevelCoast }) => (
+              <div key={id} className={styles.profileBonusesContainerItem}>
+                <div className={styles.profileBonusesContainerItemBlock}>
+                  {title}
+                </div>
 
-              <div className={styles.profileBonusesContainerItemBlockWithValue}>
-                <Tooltip
-                  placement="top"
-                  trigger={['hover']}
-                  overlay={<span>{tooltip}</span>}
-                  showArrow={false}
+                <div
+                  className={styles.profileBonusesContainerItemBlockWithValue}
                 >
-                  <span
-                    className={styles.profileBonusesContainerItemBlockValue}
+                  <Tooltip
+                    placement="top"
+                    trigger={['hover']}
+                    overlay={<span>{tooltip}</span>}
+                    showArrow={false}
                   >
-                    {value}
-                  </span>
-                </Tooltip>
-              </div>
+                    <span
+                      className={styles.profileBonusesContainerItemBlockValue}
+                    >
+                      {value}
+                    </span>
+                  </Tooltip>
+                </div>
 
-              <div className={styles.profileBonusesContainerItemIconButton}>
-                {isMaxLevel ? (
-                  <IconButton size="large" color="success" disableRipple>
-                    <DoneAllOutlined />
-                  </IconButton>
-                ) : (
-                  <IconButton
-                    size="large"
-                    color="primary"
-                    onClick={() => this._modalStore.openLevelUpModal(id)}
-                  >
-                    <AddCircleOutline />
-                  </IconButton>
-                )}
+                <div className={styles.profileBonusesContainerItemIconButton}>
+                  {isMaxLevel ? (
+                    <IconButton size="large" color="success" disableRipple>
+                      <DoneAllOutlined />
+                    </IconButton>
+                  ) : (
+                    <IconButton
+                      size="large"
+                      color="primary"
+                      onClick={() =>
+                        this._modalStore.openLevelUpModal(id, nextLevelCoast)
+                      }
+                    >
+                      <AddCircleOutline />
+                    </IconButton>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
 
           <div className={styles.profileBonusesContainerItem}>
             <div

@@ -16,6 +16,7 @@ export class ModalsStore {
 
   @observable
   private _levelUpModalAbilityType: AbilityType | null = null;
+  private _levelUpModalNextLevelCoast: number | undefined;
 
   constructor() {
     this._modalsState = observable.map<Modals, boolean>([
@@ -42,11 +43,20 @@ export class ModalsStore {
     return this._levelUpModalAbilityType;
   }
 
+  @computed
+  get levelUpModalNextLevelCoast(): AbilityType | undefined {
+    return this._levelUpModalNextLevelCoast;
+  }
+
   @action.bound
-  openLevelUpModal(abilityType: AbilityType): void {
+  openLevelUpModal(
+    abilityType: AbilityType,
+    nextLevelCoast: number | undefined,
+  ): void {
     console.log(`Opening LevelUpModal with ability type: ${abilityType}`);
     this._modalsState.set(Modals.LevelUpModal, true);
     this._levelUpModalAbilityType = abilityType;
+    this._levelUpModalNextLevelCoast = nextLevelCoast;
   }
 
   @action.bound
@@ -54,5 +64,6 @@ export class ModalsStore {
     console.log(`Closing LevelUpModal`);
     this._modalsState.set(Modals.LevelUpModal, false);
     this._levelUpModalAbilityType = null;
+    this._levelUpModalNextLevelCoast = undefined;
   }
 }
