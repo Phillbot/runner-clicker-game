@@ -67,17 +67,16 @@ export class Game extends Component {
   override render(): ReactNode {
     const { isScaled, activeClickMessages, isEnergyAvailable } =
       this._gameStore;
-    const { currentBoostType } = this._boostStore;
+    const { boostType } = this._boostStore;
 
     return (
       <div className={styles.game} ref={this.gameContainerRef}>
         <div
           className={classNames(styles.gameIcon, {
             [styles.gameIconUnclickable]: !isEnergyAvailable,
-            [styles.gameIconBoostedMega]: currentBoostType === BoostType.Mega,
-            [styles.gameIconBoostedNormal]:
-              currentBoostType === BoostType.Normal,
-            [styles.gameIconBoostedTiny]: currentBoostType === BoostType.Tiny,
+            [styles.gameIconBoostedMega]: boostType === BoostType.Mega,
+            [styles.gameIconBoostedNormal]: boostType === BoostType.Normal,
+            [styles.gameIconBoostedTiny]: boostType === BoostType.Tiny,
           })}
           ref={this.gameIconRef}
         >
@@ -88,11 +87,10 @@ export class Game extends Component {
             })}
             reactElementsClasses={classNames(styles.gameIconSvgElements, {
               [styles.gameIconSvgElementsBoostedMega]:
-                currentBoostType === BoostType.Mega,
+                boostType === BoostType.Mega,
             })}
             reactDotsClasses={classNames(styles.gameIconSvgDots, {
-              [styles.gameIconSvgDotsBoostedMega]:
-                currentBoostType === BoostType.Mega,
+              [styles.gameIconSvgDotsBoostedMega]: boostType === BoostType.Mega,
             })}
           />
         </div>
@@ -100,8 +98,7 @@ export class Game extends Component {
           <div
             key={click.id}
             className={classNames(styles.gameClickMessage, {
-              [styles.gameClickMessageBoostMega]:
-                currentBoostType === BoostType.Mega,
+              [styles.gameClickMessageBoostMega]: boostType === BoostType.Mega,
             })}
             style={{
               left: `${click.x}px`,
@@ -116,10 +113,10 @@ export class Game extends Component {
   }
 
   private get boostedClickCost() {
-    const { currentBoostType } = this._boostStore;
+    const { boostType } = this._boostStore;
     const { clickCost } = this._gameStore;
 
-    switch (currentBoostType) {
+    switch (boostType) {
       case BoostType.Mega:
         return clickCost * 20;
       case BoostType.Normal:

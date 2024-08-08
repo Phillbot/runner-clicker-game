@@ -10,6 +10,7 @@ import {
 import { GameStore } from '@app/game/game.store';
 import { BalanceStore } from '@app/balance/balance.store';
 import { EnergyStore } from '@app/energy-bar/energy.store';
+import { BoostStore } from '@app/boost-button/boost-button.store';
 
 @injectable()
 export class EntryStore {
@@ -29,13 +30,13 @@ export class EntryStore {
   private _lastLogout: number = 0;
 
   private readonly _loginDate = new Date().getTime();
-
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   constructor(
     @inject(GameStore) private readonly _gameStore: GameStore,
     @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
     @inject(EnergyStore) private readonly _energyStore: EnergyStore,
+    @inject(BoostStore) private readonly _boostStore: BoostStore,
   ) {
     makeObservable(this);
     window.addEventListener('beforeunload', this.syncOnUnload);
@@ -55,6 +56,7 @@ export class EntryStore {
       this._telegram.ready();
       this._telegram.disableVerticalSwipes();
       this._telegram.expand();
+      this._telegram.disableClosingConfirmation();
     }
 
     await this.checkAuth();
@@ -112,6 +114,7 @@ export class EntryStore {
         this._lastLogout = user.lastLogout ?? 0;
         this._energyStore.setAvailableEnergy(user.activeEnergy.active_energy);
         this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
+        this._boostStore.setInitialBoostData(user?.boost?.last_boost_run ?? 0);
       });
     } catch (error) {
       console.error('Failed to load server data', error);
@@ -229,7 +232,7 @@ export class EntryStore {
     const lastLogoutTimestamp = new Date().getTime();
     const lastLoginTimestamp = this._loginDate;
     const balance = this._balanceStore.balance;
-    const activeEnergy = Math.round(this._energyStore.availableEnergyValue);
+    const activeEnergy = Math.ceil(this._energyStore.availableEnergyValue);
 
     try {
       axios.post(

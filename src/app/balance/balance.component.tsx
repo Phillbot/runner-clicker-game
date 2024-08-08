@@ -24,7 +24,7 @@ export class GameBalance extends Component {
           <div
             className={classNames(styles.gameBalanceLabel, {
               [styles.gameBalanceLabelBoostMega]:
-                this._boostStore.currentBoostType === BoostType.Mega,
+                this._boostStore.boostType === BoostType.Mega,
             })}
           >
             {formatNumber(this._balanceStore.balance)}

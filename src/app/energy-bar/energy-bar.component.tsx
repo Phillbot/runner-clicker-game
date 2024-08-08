@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 
-import { assertNever, formatNumber, Fit } from '@utils/index';
+import { assertNever, Fit } from '@utils/index';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
 
 import styles from './energy-bar.md.scss';
@@ -21,7 +21,7 @@ export class EnergyBar extends React.Component {
     const scalePercentage = (availableEnergyValue / energyTotalValue) * 100;
     const scaleColor = getScaleColor(scalePercentage);
     const boxShadowBrightness = scalePercentage / 100;
-    const { currentBoostType, isBoosted } = this._boostStore;
+    const { boostType, isBoosted } = this._boostStore;
 
     const scaleFillStyle = isBoosted
       ? {}
@@ -35,7 +35,7 @@ export class EnergyBar extends React.Component {
       <div
         className={classNames(styles.scaleContainer, {
           [styles.scaleContainerBoost]: isBoosted,
-          [styles.scaleContainerBoostMega]: currentBoostType === BoostType.Mega,
+          [styles.scaleContainerBoostMega]: boostType === BoostType.Mega,
         })}
         style={
           {
@@ -49,9 +49,9 @@ export class EnergyBar extends React.Component {
         />
         <Fit>
           <div className={styles.scaleContainerScaleText}>
-            {currentBoostType !== null
-              ? mapBoostTypeToText(currentBoostType)
-              : `${formatNumber(Math.round(availableEnergyValue))}/${formatNumber(Math.round(energyTotalValue))}`}
+            {boostType !== null
+              ? mapBoostTypeToText(boostType)
+              : `${Math.ceil(availableEnergyValue)}/${Math.ceil(energyTotalValue)}`}
           </div>
         </Fit>
       </div>

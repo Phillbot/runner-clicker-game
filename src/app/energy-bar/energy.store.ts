@@ -140,7 +140,7 @@ export class EnergyStore {
         `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/updateEnergy`,
         {
           initData: window.Telegram.WebApp.initData,
-          activeEnergy: Math.round(this._availableEnergyValue),
+          activeEnergy: Math.ceil(this._availableEnergyValue),
         },
       );
 

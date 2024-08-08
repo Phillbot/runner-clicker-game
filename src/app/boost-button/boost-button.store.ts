@@ -6,8 +6,10 @@ import {
   runInAction,
   computed,
 } from 'mobx';
+import axios from 'axios';
 import { GameStore } from '@app/game/game.store';
 import { BalanceStore } from '@app/balance/balance.store';
+import { EnvUtils } from '@utils/index';
 
 export enum BoostType {
   Mega = 'MEGA',
@@ -17,41 +19,37 @@ export enum BoostType {
 
 @injectable()
 export class BoostStore {
-  @observable
-  private _isBoosted: boolean = false;
-  @observable
-  private _boostType: BoostType | null = null;
-  @observable
-  private _canUseDailyBoost: boolean = true;
-  @observable
-  private _timeUntilNextBoost: string = '';
+  @observable private _isBoosted: boolean = false;
+  @observable private _boostType: BoostType | null = null;
+  @observable private _canUseDailyBoost: boolean = false;
+  @observable private _timeUntilNextBoost: string = '00:00:00';
+  @observable private _lastBoostRun: number = 0; // Время последнего буста в мс
 
   private _boostIntervalId: NodeJS.Timeout | null = null;
   private _boostTimeoutId: NodeJS.Timeout | null = null;
-  private _dailyBoostTimeoutId: NodeJS.Timeout | null = null;
-  private _lastDailyBoostTimestamp: number | null = null; // Mocked storage
+  private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   private readonly config = {
     boostDurations: {
-      MEGA: 60000, // 1 minute
-      NORMAL: 30000, // 30 seconds
-      TINY: 15000, // 15 seconds
-      DEFAULT: 30000, // Default duration
+      MEGA: 60000, // 1 минута
+      NORMAL: 30000, // 30 секунд
+      TINY: 15000, // 15 секунд
+      DEFAULT: 30000, // По умолчанию 30 секунд
     },
     boostIntervals: {
-      MEGA: 500, // 500 ms
-      NORMAL: 1000, // 1 second
-      TINY: 1000, // 1 second
-      DEFAULT: 1000, // Default interval
+      MEGA: 500, // 500 мс
+      NORMAL: 1000, // 1 секунда
+      TINY: 1000, // 1 секунда
+      DEFAULT: 1000, // По умолчанию 1 секунда
     },
     boostMultipliers: {
       MEGA: 20,
       NORMAL: 10,
       TINY: 5,
-      DEFAULT: 1, // Default multiplier
+      DEFAULT: 1, // По умолчанию
     },
-    dailyBoostCooldown: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-    updateInterval: 1000, // 1 second
+    dailyBoostCooldown: 24 * 60 * 60 * 1000, // 24 часа в мс
+    updateInterval: 1000, // 1 секунда
   };
 
   constructor(
@@ -59,39 +57,92 @@ export class BoostStore {
     @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
   ) {
     makeObservable(this);
-    this.checkDailyBoostAvailability();
     this.startUpdateTimer();
   }
 
+  @computed
+  get lastBoostRun(): number {
+    return this._lastBoostRun;
+  }
+
+  @computed
+  get timeUntilNextBoost(): string {
+    return this._timeUntilNextBoost;
+  }
+
+  @computed
+  get isBoosted(): boolean {
+    return this._isBoosted;
+  }
+
+  @computed
+  get boostType(): BoostType | null {
+    return this._boostType;
+  }
+
+  @computed
+  get canUseDailyBoost(): boolean {
+    return this._canUseDailyBoost;
+  }
+
   @action
-  toggleBoosted = () => {
+  setInitialBoostData(lastBoostRun: number) {
+    this._lastBoostRun = lastBoostRun;
+    this.updateBoostAvailability();
+  }
+
+  @action
+  private updateBoostAvailability() {
+    const now = Date.now();
+    const elapsedTime = now - this._lastBoostRun;
+    const remainingTime = this.config.dailyBoostCooldown - elapsedTime;
+
+    if (remainingTime > 0) {
+      const hours = Math.floor((remainingTime / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
+      const seconds = Math.floor((remainingTime / 1000) % 60);
+
+      runInAction(() => {
+        this._timeUntilNextBoost = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        this._canUseDailyBoost = false;
+      });
+    } else {
+      runInAction(() => {
+        this._timeUntilNextBoost = '00:00:00';
+        this._canUseDailyBoost = true;
+      });
+    }
+  }
+
+  @action
+  async useDailyBoost() {
+    if (!this._canUseDailyBoost) return;
+
+    this.toggleBoosted();
+    this.saveBoostTimestamp();
+    await this.syncBoostData();
+  }
+
+  @action
+  private toggleBoosted() {
     if (!this._isBoosted) {
       const randomBoostType = this.getRandomBoostType();
       this.startBoost(randomBoostType);
 
-      const randomBoostDuration = this.getBoostDuration(randomBoostType);
+      const boostDuration = this.getBoostDuration(randomBoostType);
       this._boostTimeoutId = setTimeout(() => {
         runInAction(() => {
           this.stopBoost();
         });
-      }, randomBoostDuration);
+      }, boostDuration);
     }
-  };
+  }
 
   @action
-  useDailyBoost = () => {
-    if (this._canUseDailyBoost) {
-      this.toggleBoosted();
-      this.saveDailyBoostTimestamp();
-      this._canUseDailyBoost = false;
-      this.startDailyBoostCooldown();
-    }
-  };
-
-  @action
-  private startBoost = (boostType: BoostType) => {
+  private startBoost(boostType: BoostType) {
     this._isBoosted = true;
     this._boostType = boostType;
+    this._telegram.enableClosingConfirmation();
 
     const interval = this.getBoostInterval(boostType);
     if (!this._boostIntervalId) {
@@ -118,10 +169,10 @@ export class BoostStore {
         });
       }, interval);
     }
-  };
+  }
 
   @action
-  private stopBoost = () => {
+  private stopBoost() {
     if (this._boostIntervalId) {
       clearInterval(this._boostIntervalId);
       this._boostIntervalId = null;
@@ -132,121 +183,66 @@ export class BoostStore {
     }
     this._isBoosted = false;
     this._boostType = null;
-  };
+    this._telegram.disableClosingConfirmation();
+  }
 
-  private getRandomBoostType = (): BoostType => {
+  private getRandomBoostType(): BoostType {
     const types = Object.values(BoostType);
     const randomIndex = Math.floor(Math.random() * types.length);
     return types[randomIndex];
-  };
+  }
 
-  private getBoostDuration = (boostType: BoostType): number => {
+  private getBoostDuration(boostType: BoostType): number {
     return (
       this.config.boostDurations[boostType] ||
       this.config.boostDurations.DEFAULT
     );
-  };
+  }
 
-  private getBoostInterval = (boostType: BoostType): number => {
+  private getBoostInterval(boostType: BoostType): number {
     return (
       this.config.boostIntervals[boostType] ||
       this.config.boostIntervals.DEFAULT
     );
-  };
+  }
 
-  private getBoostMultiplier = (boostType: BoostType): number => {
+  private getBoostMultiplier(boostType: BoostType): number {
     return (
       this.config.boostMultipliers[boostType] ||
       this.config.boostMultipliers.DEFAULT
     );
-  };
-
-  @computed
-  get isBoosted(): boolean {
-    return this._isBoosted;
-  }
-
-  @computed
-  get boostType(): BoostType | null {
-    return this._boostType;
-  }
-
-  @computed
-  get canUseDailyBoost(): boolean {
-    return this._canUseDailyBoost;
-  }
-
-  @computed
-  get timeUntilNextBoost(): string {
-    return this._timeUntilNextBoost;
-  }
-
-  @computed
-  get currentBoostType(): BoostType | null {
-    return this._isBoosted ? this._boostType : null;
-  }
-
-  @action
-  private saveDailyBoostTimestamp() {
-    const now = Date.now();
-    this._lastDailyBoostTimestamp = now;
-  }
-
-  @action
-  private checkDailyBoostAvailability() {
-    const lastBoostTimestamp = this._lastDailyBoostTimestamp;
-    if (lastBoostTimestamp) {
-      const now = Date.now();
-      const timeSinceLastBoost = now - lastBoostTimestamp;
-      const hoursSinceLastBoost =
-        timeSinceLastBoost / this.config.dailyBoostCooldown;
-
-      runInAction(() => {
-        this._canUseDailyBoost = hoursSinceLastBoost >= 1;
-      });
-    } else {
-      runInAction(() => {
-        this._canUseDailyBoost = true;
-      });
-    }
-  }
-
-  @action
-  private startDailyBoostCooldown() {
-    if (this._dailyBoostTimeoutId) {
-      clearTimeout(this._dailyBoostTimeoutId);
-    }
-
-    this._dailyBoostTimeoutId = setTimeout(() => {
-      runInAction(() => {
-        this._canUseDailyBoost = true;
-      });
-    }, this.config.dailyBoostCooldown);
   }
 
   private startUpdateTimer() {
     setInterval(() => {
-      if (!this._canUseDailyBoost && this._lastDailyBoostTimestamp) {
-        const now = Date.now();
-        const timeSinceLastBoost = now - this._lastDailyBoostTimestamp;
-        const remainingTime =
-          this.config.dailyBoostCooldown - timeSinceLastBoost;
-
-        if (remainingTime > 0) {
-          const hours = Math.floor((remainingTime / (1000 * 60 * 60)) % 24);
-          const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
-          const seconds = Math.floor((remainingTime / 1000) % 60);
-
-          runInAction(() => {
-            this._timeUntilNextBoost = `${hours}:${minutes}:${seconds}`;
-          });
-        } else {
-          runInAction(() => {
-            this._timeUntilNextBoost = '';
-            this._canUseDailyBoost = true;
-          });
-        }
-      }
+      this.updateBoostAvailability();
     }, this.config.updateInterval);
+  }
+
+  @action
+  private async syncBoostData() {
+    try {
+      const response = await axios.post(
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/updateBoost`,
+        {
+          initData: window.Telegram.WebApp.initData,
+          lastBoostRun: this._lastBoostRun,
+        },
+      );
+
+      if (!response.data.ok) {
+        throw new Error('Failed to sync boost data');
+      }
+    } catch (error) {
+      console.error('Failed to sync boost data', error);
+    }
+  }
+
+  @action
+  private saveBoostTimestamp() {
+    const now = Date.now();
+    this._lastBoostRun = now;
+    this._canUseDailyBoost = false;
+    this.updateBoostAvailability();
   }
 }
