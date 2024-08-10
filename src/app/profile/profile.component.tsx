@@ -10,11 +10,13 @@ import {
   WalletOutlined,
 } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
+
 import { ModalsStore } from '@app/modals/modals.store';
 import BoostButtonWithNavigate from '@app/boost-button/boost-button.component';
 
-import styles from './profile.md.scss';
 import { ProfileStore } from './profile.store';
+
+import styles from './profile.md.scss';
 
 @observer
 export class Profile extends Component {
@@ -42,10 +44,10 @@ export class Profile extends Component {
                   className={styles.profileBonusesContainerItemBlockWithValue}
                 >
                   <Tooltip
+                    destroyTooltipOnHide={true}
                     placement="top"
                     trigger={['hover']}
                     overlay={<span>{tooltip}</span>}
-                    showArrow={false}
                   >
                     <span
                       className={styles.profileBonusesContainerItemBlockValue}
@@ -84,10 +86,10 @@ export class Profile extends Component {
               )}
             >
               <Tooltip
+                destroyTooltipOnHide={true}
                 placement="top"
                 trigger={['click']}
                 overlay={<span>Soon</span>}
-                showArrow={false}
               >
                 <WalletOutlined fontSize="large" color="error" />
               </Tooltip>

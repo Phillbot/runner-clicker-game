@@ -11,6 +11,7 @@ import { GameStore } from '@app/game/game.store';
 import { BalanceStore } from '@app/balance/balance.store';
 import { EnergyStore } from '@app/energy-bar/energy.store';
 import { BoostStore } from '@app/boost-button/boost-button.store';
+import { UserStatus } from './user-statuses';
 
 @injectable()
 export class EntryStore {
@@ -28,6 +29,8 @@ export class EntryStore {
   private _resourcesLoadProgress: number = 0;
   @observable
   private _lastLogout: number = 0;
+  @observable
+  private _userStatus: UserStatus = 1;
 
   private readonly _loginDate = new Date().getTime();
   private readonly _telegram: WebApp = window.Telegram.WebApp;
@@ -108,7 +111,9 @@ export class EntryStore {
       }
 
       const { user } = response.data;
+
       runInAction(() => {
+        this.setUserStatus(user.status);
         this._gameStore.setInitialData(user.balance, user.abilities);
         this._balanceStore.setBalance(user.balance);
         this._lastLogout = user.lastLogout ?? 0;
@@ -199,6 +204,11 @@ export class EntryStore {
     this._resourcesLoadProgress = value;
   }
 
+  @action
+  private setUserStatus(value: UserStatus) {
+    this._userStatus = value;
+  }
+
   get isLoading(): boolean {
     return this._isLoading;
   }
@@ -225,6 +235,10 @@ export class EntryStore {
 
   get lastLogout(): number {
     return this._lastLogout;
+  }
+
+  get userStatus(): UserStatus {
+    return this._userStatus;
   }
 
   readonly syncOnUnload = () => {

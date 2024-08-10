@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
+import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
-import classNames from 'classnames';
 
 import { Fit, formatNumber } from '@utils/index';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';

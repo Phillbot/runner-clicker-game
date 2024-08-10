@@ -26,7 +26,7 @@ export class EnergyStore {
   @observable
   private _isEnergyAvailable: boolean = true;
 
-  private readonly _regenerationSpeed: number = 100; // 1 minute in milliseconds
+  private readonly _regenerationSpeed: number = 100;
   private _intervalId: NodeJS.Timeout | null = null;
   private _syncIntervalId: NodeJS.Timeout | null = null;
 
@@ -88,8 +88,13 @@ export class EnergyStore {
   }
 
   @action
-  setEnergyAvailable(value: boolean) {
+  setEnergyAvailable(value: boolean): void {
     this._isEnergyAvailable = value;
+  }
+
+  @action
+  setAvailableEnergyValue(value: number): void {
+    this._availableEnergyValue = value;
   }
 
   @action

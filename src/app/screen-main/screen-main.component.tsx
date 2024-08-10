@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { ToastContainer } from 'react-toastify';
 
 import { container } from '@config/inversify.config';
 
@@ -27,6 +28,7 @@ export const ScreenMain: React.FC = () => {
       <div ref={modalContainerRef} />
       <ModalRenderer />
       <LoadingOverlay />
+      <ToastContainer />
     </div>
   );
 };

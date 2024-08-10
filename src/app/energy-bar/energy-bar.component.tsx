@@ -6,8 +6,9 @@ import { resolve } from 'inversify-react';
 import { assertNever, Fit } from '@utils/index';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
 
-import styles from './energy-bar.md.scss';
 import { EnergyStore } from './energy.store';
+
+import styles from './energy-bar.md.scss';
 
 @observer
 export class EnergyBar extends React.Component {

@@ -1,11 +1,14 @@
 import React, { Component, ReactNode } from 'react';
+import classNames from 'classnames';
+import Tooltip from 'rc-tooltip';
+import { useNavigate } from 'react-router-dom';
 import { resolve } from 'inversify-react';
 import { observer } from 'mobx-react';
-import classNames from 'classnames';
 import { RocketLaunchOutlined } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { Button } from '@mui/material';
 
 import { BoostStore } from './boost-button.store';
+
 import styles from './boost-button.md.scss';
 
 type Props = {
@@ -17,11 +20,6 @@ class BoostButton extends Component<Props> {
   @resolve
   private declare readonly _boostStore: BoostStore;
 
-  handleBoostClick = () => {
-    this._boostStore.useDailyBoost();
-    this.props.navigate('/');
-  };
-
   override render(): ReactNode {
     return (
       <div className={styles.boostButtonContainer}>
@@ -31,13 +29,81 @@ class BoostButton extends Component<Props> {
             : this._boostStore.timeUntilNextBoost}
         </div>
 
-        <div
-          className={classNames(styles.boostButton, {
-            [styles.boostButtonDisabled]: !this._boostStore.canUseDailyBoost,
-          })}
-          onClick={this.handleBoostClick}
+        <Tooltip
+          destroyTooltipOnHide={true}
+          overlay={this.renderTooltipContent()}
+          visible={this._boostStore.isTooltipVisible}
+          placement="top"
+          trigger="click"
+          onVisibleChange={this.handleTooltipVisibleChange}
         >
-          <RocketLaunchOutlined fontSize="large" />
+          <div
+            className={classNames(styles.boostButton, {
+              [styles.boostButtonDisabled]: !this._boostStore.canUseDailyBoost,
+            })}
+            onClick={this.handleBoostClick}
+          >
+            <RocketLaunchOutlined fontSize="large" />
+          </div>
+        </Tooltip>
+      </div>
+    );
+  }
+
+  private readonly handleBoostClick = () => {
+    if (this._boostStore.canUseDailyBoost) {
+      this._boostStore.setTooltipVisible(true);
+    }
+  };
+
+  private readonly handleConfirmBoost = () => {
+    this._boostStore.useDailyBoost();
+    this.props.navigate('/');
+    this._boostStore.setTooltipVisible(false);
+  };
+
+  private readonly handleCancel = () => {
+    this._boostStore.setTooltipVisible(false);
+  };
+
+  private readonly handleTooltipVisibleChange = (visible: boolean) => {
+    this._boostStore.setTooltipVisible(visible);
+  };
+
+  private renderTooltipContent(): ReactNode {
+    const buttonConfig = {
+      fontFamily: 'PressStart',
+      fontSize: '0.75em',
+      display: 'block',
+    };
+
+    return (
+      <div className={styles.tooltip}>
+        <div className={styles.tooltipLabel}>Start boost?</div>
+        <div className={styles.tooltipButtonGroup}>
+          <Button
+            sx={{
+              ...buttonConfig,
+              color: 'red',
+            }}
+            className={styles.tooltipButtonGroupButton}
+            size="small"
+            variant="contained"
+            color="inherit"
+            onClick={this.handleConfirmBoost}
+          >
+            Yes
+          </Button>
+          <Button
+            sx={{ ...buttonConfig }}
+            className={styles.tooltipButtonGroupButton}
+            size="small"
+            variant="contained"
+            color="error"
+            onClick={this.handleCancel}
+          >
+            No
+          </Button>
         </div>
       </div>
     );

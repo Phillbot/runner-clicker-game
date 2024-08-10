@@ -20,6 +20,16 @@ export class GameStore {
   private _isScaled: boolean = false;
   @observable
   private _clickCostLevel: ClickCostLevel = ClickCostLevel.LEVEL_1;
+  @observable
+  private _lastClickTimestamp: number | null = null;
+  @observable
+  private _lastClickX: number | null = null;
+  @observable
+  private _lastClickY: number | null = null;
+  @observable
+  private _suspiciousClickCount: number = 0;
+  @observable
+  private _isAutoClickerDetected: boolean = false;
 
   private _clickId: number = 0;
   private readonly _telegram: WebApp = window.Telegram.WebApp;
@@ -78,34 +88,70 @@ export class GameStore {
     return this._clickMessages.filter(click => click.removeAt > now);
   }
 
+  @computed
+  get isAutoClickerDetected(): boolean {
+    return this._isAutoClickerDetected;
+  }
+
   @action
   readonly handleEvent = (x: number, y: number) => {
-    if (this.availableEnergyValue < this.clickCost) {
-      this._energyStore.setEnergyAvailable(false);
-      return;
+    const now = Date.now();
+    const precisionThreshold = 5;
+
+    if (this._lastClickTimestamp) {
+      const timeBetweenClicks = now - this._lastClickTimestamp;
+
+      if (timeBetweenClicks < 60) {
+        if (
+          this._lastClickX !== null &&
+          this._lastClickY !== null &&
+          Math.abs(this._lastClickX - x) <= precisionThreshold &&
+          Math.abs(this._lastClickY - y) <= precisionThreshold
+        ) {
+          this._suspiciousClickCount++;
+        } else {
+          this._suspiciousClickCount = 0;
+        }
+      } else {
+        this._suspiciousClickCount = 0;
+      }
+
+      if (this._suspiciousClickCount > 5) {
+        // this._isAutoClickerDetected = true;
+        // this._telegram.showAlert('Auto-clicker detected!');
+      }
     }
 
-    const newClickId = this.generateClickMessageId();
-    const removeAt = Date.now() + 500;
+    this._lastClickTimestamp = now;
+    this._lastClickX = x;
+    this._lastClickY = y;
 
-    this.addClickMessage({ id: newClickId, x, y, removeAt });
-    this._energyStore.decrementEnergy(this.clickCost);
-    this._isScaled = true;
-    this._energyStore.setEnergyAvailable(
-      this.availableEnergyValue >= this.clickCost,
-    );
+    if (
+      !this._isAutoClickerDetected &&
+      this.availableEnergyValue >= this.clickCost
+    ) {
+      const newClickId = this.generateClickMessageId();
+      const removeAt = now + 500;
 
-    this._balanceStore.incrementBalance(this.clickCost);
+      this.addClickMessage({ id: newClickId, x, y, removeAt });
+      this._energyStore.decrementEnergy(this.clickCost);
+      this._isScaled = true;
+      this._energyStore.setEnergyAvailable(
+        this.availableEnergyValue >= this.clickCost,
+      );
 
-    setTimeout(() => {
-      runInAction(() => {
-        this.removeClickMessage(newClickId);
-      });
-    }, 800);
+      this._balanceStore.incrementBalance(this.clickCost);
 
-    this.restartScaleAnimation();
-    if (this._telegram) {
-      this._telegram.HapticFeedback.impactOccurred('heavy');
+      setTimeout(() => {
+        runInAction(() => {
+          this.removeClickMessage(newClickId);
+        });
+      }, 800);
+
+      this.restartScaleAnimation();
+      if (this._telegram) {
+        this._telegram.HapticFeedback.impactOccurred('heavy');
+      }
     }
   };
 

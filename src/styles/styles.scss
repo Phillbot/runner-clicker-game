@@ -25,3 +25,8 @@ body {
     transform: scale(1);
   }
 }
+
+// fix rc-tooltip arrow {
+.rc-tooltip-arrow {
+  bottom: 4px !important;
+}

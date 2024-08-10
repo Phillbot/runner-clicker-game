@@ -23,7 +23,8 @@ export class BoostStore {
   @observable private _boostType: BoostType | null = null;
   @observable private _canUseDailyBoost: boolean = false;
   @observable private _timeUntilNextBoost: string = '00:00:00';
-  @observable private _lastBoostRun: number = 0; // Время последнего буста в мс
+  @observable private _lastBoostRun: number = 0;
+  @observable private _isTooltipVisible: boolean = false;
 
   private _boostIntervalId: NodeJS.Timeout | null = null;
   private _boostTimeoutId: NodeJS.Timeout | null = null;
@@ -83,6 +84,16 @@ export class BoostStore {
   @computed
   get canUseDailyBoost(): boolean {
     return this._canUseDailyBoost;
+  }
+
+  @computed
+  get isTooltipVisible(): boolean {
+    return this._isTooltipVisible;
+  }
+
+  @action
+  setTooltipVisible(visible: boolean) {
+    this._isTooltipVisible = visible;
   }
 
   @action

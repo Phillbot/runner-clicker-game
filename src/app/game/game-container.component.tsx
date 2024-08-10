@@ -1,8 +1,9 @@
 import React, { PureComponent, ReactNode } from 'react';
 
+import { GameBalance } from '@app/balance/balance.component';
+import { EnergyBar } from '@app/energy-bar/energy-bar.component';
+
 import { Game } from './game.component';
-import { GameBalance } from '../balance/balance.component';
-import { EnergyBar } from '../energy-bar/energy-bar.component';
 
 import styles from './game-container.md.scss';
 

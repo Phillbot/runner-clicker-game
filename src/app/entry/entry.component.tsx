@@ -7,9 +7,10 @@ import { Box, LinearProgress } from '@mui/material';
 
 import { ScreenMain } from '@app/screen-main/screen-main.component';
 import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
+import { BalanceStore } from '@app/balance/balance.store';
 
 import { EntryStore } from './entry.store';
-import { BalanceStore } from '@app/balance/balance.store';
+import { UserStatus } from './user-statuses';
 
 import styles from './entry.md.scss';
 
@@ -65,7 +66,7 @@ export class Entry extends Component {
       );
     }
 
-    if (!isAuthorized) {
+    if (!isAuthorized || this._entryStore.userStatus !== UserStatus.ACTIVE) {
       return (
         <div className={classNames(styles.entry, styles.entryNotAuth)}>
           <div className={styles.entryNotAuthLabel}>

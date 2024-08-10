@@ -1,4 +1,6 @@
 import React, { useState, useEffect, FC } from 'react';
+import classNames from 'classnames';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   BarChartOutlined,
   HomeOutlined,
@@ -6,41 +8,8 @@ import {
   PersonOutline,
 } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import styles from './nav-panel.md.scss';
-import classNames from 'classnames';
-
-const links = [
-  {
-    to: '/',
-    label: 'Home',
-    value: '/',
-    icon: <HomeOutlined />,
-    disabled: false,
-  },
-  {
-    to: '/profile',
-    label: 'Profile',
-    value: '/profile',
-    icon: <PersonOutline />,
-    disabled: false,
-  },
-  {
-    to: '/tasks',
-    label: 'Tasks',
-    value: '/tasks',
-    icon: <ListAltOutlined />,
-    disabled: true,
-  },
-  {
-    to: '/stats',
-    label: 'Stats',
-    value: '/stats',
-    icon: <BarChartOutlined />,
-    disabled: true,
-  },
-];
 
 export const NavPanel: FC = () => {
   const location = useLocation();
@@ -109,3 +78,34 @@ export const NavPanel: FC = () => {
     </div>
   );
 };
+
+const links = [
+  {
+    to: '/',
+    label: 'Home',
+    value: '/',
+    icon: <HomeOutlined />,
+    disabled: false,
+  },
+  {
+    to: '/profile',
+    label: 'Profile',
+    value: '/profile',
+    icon: <PersonOutline />,
+    disabled: false,
+  },
+  {
+    to: '/tasks',
+    label: 'Tasks',
+    value: '/tasks',
+    icon: <ListAltOutlined />,
+    disabled: true,
+  },
+  {
+    to: '/stats',
+    label: 'Stats',
+    value: '/stats',
+    icon: <BarChartOutlined />,
+    disabled: true,
+  },
+];

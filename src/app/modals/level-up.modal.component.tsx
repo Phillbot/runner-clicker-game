@@ -1,7 +1,11 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
+import classNames from 'classnames';
+import { Button } from '@mui/material';
+import { RocketLaunchOutlined } from '@mui/icons-material';
 
+import { Fit } from '@utils/fit.component';
 import { assertNever, isNothing, isSomething } from '@utils/common';
 import { AbilityType } from '@app/game/game-levels';
 import { BalanceStore } from '@app/balance/balance.store';
@@ -12,8 +16,6 @@ import { Modal } from './modal.component';
 import { Modals } from './types';
 
 import styles from './level-up.md.scss';
-import classNames from 'classnames';
-import { Button } from '@mui/material';
 
 @observer
 export class LevelUpModal extends React.Component {
@@ -41,8 +43,13 @@ export class LevelUpModal extends React.Component {
         onClose={() => this._modalStore.closeLevelUpModal()}
       >
         <div className={styles.levelUpModal}>
+          <Fit>
+            <div className={styles.levelUpModalTitle}>
+              {mapAbilityTypeToString(abilityType)}
+            </div>
+          </Fit>
           <div className={styles.levelUpModalLabel}>
-            Update level cost:{' '}
+            Update level cost:&nbsp;
             <span
               className={classNames(styles.levelUpModalLabelCost, {
                 [styles.levelUpModalLabelCostDisabled]: insufficientFunds,
@@ -52,15 +59,18 @@ export class LevelUpModal extends React.Component {
             </span>
           </div>
 
-          <Button
-            variant="contained"
-            disabled={insufficientFunds}
-            onClick={() => this._profileStore.incrementAbility(abilityType)}
-          >
-            {insufficientFunds
-              ? 'Insufficient Funds'
-              : mapAbilityTypeToString(abilityType)}
-          </Button>
+          <div className={styles.levelUpModalConfirmButton}>
+            <Button
+              endIcon={<RocketLaunchOutlined />}
+              variant="contained"
+              size="small"
+              color="info"
+              disabled={insufficientFunds}
+              onClick={() => this._profileStore.incrementAbility(abilityType)}
+            >
+              {insufficientFunds ? 'Insufficient Funds' : 'Let`s go'}
+            </Button>
+          </div>
         </div>
       </Modal>
     );
