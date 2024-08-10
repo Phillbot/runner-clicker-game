@@ -32,25 +32,25 @@ export class BoostStore {
 
   private readonly config = {
     boostDurations: {
-      MEGA: 60000, // 1 минута
-      NORMAL: 30000, // 30 секунд
-      TINY: 15000, // 15 секунд
-      DEFAULT: 30000, // По умолчанию 30 секунд
+      MEGA: 60000,
+      NORMAL: 30000,
+      TINY: 15000,
+      DEFAULT: 30000,
     },
     boostIntervals: {
-      MEGA: 500, // 500 мс
-      NORMAL: 1000, // 1 секунда
-      TINY: 1000, // 1 секунда
-      DEFAULT: 1000, // По умолчанию 1 секунда
+      MEGA: 500,
+      NORMAL: 1000,
+      TINY: 1000,
+      DEFAULT: 1000,
     },
     boostMultipliers: {
       MEGA: 20,
       NORMAL: 10,
       TINY: 5,
-      DEFAULT: 1, // По умолчанию
+      DEFAULT: 1,
     },
-    dailyBoostCooldown: 6 * 60 * 60 * 1000, // 6 часов
-    updateInterval: 1000, // 1 секунда
+    dailyBoostCooldown: 6 * 60 * 60 * 1000, // 6 hours
+    updateInterval: 1000,
   };
 
   constructor(
@@ -195,6 +195,7 @@ export class BoostStore {
     this._isBoosted = false;
     this._boostType = null;
     this._telegram.disableClosingConfirmation();
+    this._balanceStore.syncWithServer();
   }
 
   private getRandomBoostType(): BoostType {

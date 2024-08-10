@@ -73,11 +73,60 @@ export class EntryStore {
       await this.loadServerData(initData);
       this.setAuthorized(true);
     } catch (error) {
-      console.error('Authorization failed', error);
-      this.setAuthorized(false);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          // create user if we cant get it 404
+          try {
+            const createUserResponse = await axios.post(
+              `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/createUser`,
+              {
+                initData,
+                referralId:
+                  window.Telegram.WebApp.initDataUnsafe.start_param ??
+                  undefined,
+              },
+            );
 
-      if (this._telegram) {
-        this._telegram.close();
+            if (!createUserResponse.data.ok) {
+              throw new Error('Failed to create user');
+            }
+
+            const { user } = createUserResponse.data;
+
+            runInAction(() => {
+              this.setUserStatus(user.status);
+              this._gameStore.setInitialData(user.balance, user.abilities);
+              this._balanceStore.setBalance(user.balance);
+              this._lastLogout = user.lastLogout ?? 0;
+              this._energyStore.setAvailableEnergy(
+                user.activeEnergy.active_energy,
+              );
+              this._energyStore.calculateEnergyBasedOnLastLogout(
+                this._lastLogout,
+              );
+              this._boostStore.setInitialBoostData(
+                user?.boost?.last_boost_run ?? 0,
+              );
+              this.setAuthorized(true); // Setup auth true
+            });
+          } catch (creationError) {
+            console.error('Failed to create user:', creationError);
+            if (this._telegram) {
+              this._telegram.close();
+            }
+          }
+        } else if (
+          error.response?.status === 401 ||
+          error.response?.status === 403
+        ) {
+          // Закрываем WebApp, если получен 401 или 403
+          if (this._telegram) {
+            this._telegram.close();
+          }
+        } else {
+          console.error('Authorization failed', error);
+          throw error;
+        }
       }
     } finally {
       await this.loadResources();
@@ -120,6 +169,7 @@ export class EntryStore {
         this._energyStore.setAvailableEnergy(user.activeEnergy.active_energy);
         this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
         this._boostStore.setInitialBoostData(user?.boost?.last_boost_run ?? 0);
+        this.setAuthorized(true);
       });
     } catch (error) {
       console.error('Failed to load server data', error);
@@ -158,7 +208,7 @@ export class EntryStore {
 
   private get imageUrls(): string[] {
     return [
-      // require('../../images/test.jpg') // example
+      // require('../../images/test.jpg')
     ];
   }
 

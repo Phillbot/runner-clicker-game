@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider as DependencyInjectionProvider } from 'inversify-react';
@@ -6,7 +7,6 @@ import { Entry } from '@app/entry/entry.component';
 import { EnvUtils } from '@utils/index';
 import { container } from '@config/inversify.config';
 
-import 'reflect-metadata';
 import './i18n/config';
 
 import '@styles/reset.scss';
