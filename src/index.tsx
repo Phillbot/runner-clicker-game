@@ -4,7 +4,6 @@ import { createRoot } from 'react-dom/client';
 import { Provider as DependencyInjectionProvider } from 'inversify-react';
 
 import { Entry } from '@app/entry/entry.component';
-import { EnvUtils } from '@utils/index';
 import { container } from '@config/inversify.config';
 
 import './i18n/config';
@@ -16,8 +15,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const rootElement = document.getElementById('root');
 
-const isProduction = EnvUtils.isProd;
-
 const modalContainer = document.createElement('div');
 modalContainer.id = 'modal-container';
 document.body.appendChild(modalContainer);
@@ -28,11 +25,9 @@ const App = (
   </DependencyInjectionProvider>
 );
 
-const AppWithStrictMode = <React.StrictMode>{App}</React.StrictMode>;
-
 if (rootElement) {
   const root = createRoot(rootElement);
-  root.render(isProduction ? App : AppWithStrictMode);
+  root.render(App);
 }
 
 container
