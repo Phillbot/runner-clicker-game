@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 import { Home } from '@app/home/home.component';
-import { Profile } from '@app/profile/profile.component';
+import { Upgrades } from '@app/upgrades/upgrades.component';
 import { Tasks } from '@app/tasks/tasks.component';
 import { Stats } from '@app/stats/stats.component';
 
@@ -24,7 +24,7 @@ const AppRoutes: FC = () => {
         <div ref={nodeRef} className="fade">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/upgrades" element={<Upgrades />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/stats" element={<Stats />} />
           </Routes>

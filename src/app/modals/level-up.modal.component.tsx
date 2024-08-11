@@ -9,7 +9,7 @@ import { Fit } from '@utils/fit.component';
 import { assertNever, isNothing, isSomething } from '@utils/common';
 import { AbilityType } from '@app/game/game-levels';
 import { BalanceStore } from '@app/balance/balance.store';
-import { ProfileStore } from '@app/profile/profile.store';
+import { UpgradesStore } from '@app/upgrades/upgrades.store';
 
 import { ModalsStore } from './modals.store';
 import { Modal } from './modal.component';
@@ -24,7 +24,7 @@ export class LevelUpModal extends React.Component {
   @resolve
   private declare readonly _balanceStore: BalanceStore;
   @resolve
-  private declare readonly _profileStore: ProfileStore;
+  private declare readonly _upgradesStore: UpgradesStore;
 
   override render() {
     const isOpen = this._modalStore.isOpen(Modals.LevelUpModal);
@@ -66,7 +66,7 @@ export class LevelUpModal extends React.Component {
               size="small"
               color="info"
               disabled={insufficientFunds}
-              onClick={() => this._profileStore.incrementAbility(abilityType)}
+              onClick={() => this._upgradesStore.incrementAbility(abilityType)}
             >
               {insufficientFunds ? 'Insufficient Funds' : 'Let`s go'}
             </Button>

@@ -8,7 +8,7 @@ import { ModalsStore } from '@app/modals/modals.store';
 import { ModalFactory } from '@app/modals/modal-factory';
 import { IModalFactory } from '@app/modals/types';
 import { EnergyStore } from '@app/energy-bar/energy.store';
-import { ProfileStore } from '@app/profile/profile.store';
+import { UpgradesStore } from '@app/upgrades/upgrades.store';
 import { LoadingOverlayStore } from '@app/loading-overlay/loading-overlay.store';
 
 export const container = new Container({ defaultScope: 'Singleton' });
@@ -19,7 +19,7 @@ container.bind<BoostStore>(BoostStore).toSelf();
 container.bind<BalanceStore>(BalanceStore).toSelf();
 container.bind<EnergyStore>(EnergyStore).toSelf();
 container.bind<ModalsStore>(ModalsStore).toSelf();
-container.bind<ProfileStore>(ProfileStore).toSelf();
+container.bind<UpgradesStore>(UpgradesStore).toSelf();
 container.bind<LoadingOverlayStore>(LoadingOverlayStore).toSelf();
 
 container.bind<IModalFactory>('IModalFactory').to(ModalFactory);

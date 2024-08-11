@@ -29,7 +29,7 @@ import { LoadingOverlayStore } from '@app/loading-overlay/loading-overlay.store'
 import { toastConfig } from '@config/toast.config';
 
 @injectable()
-export class ProfileStore {
+export class UpgradesStore {
   @observable
   private _abilities: {
     id: AbilityType;
@@ -110,7 +110,10 @@ export class ProfileStore {
         runInAction(() => {
           const { balance, abilities, activeEnergy } = response.data;
           this._balanceStore.setBalance(balance);
-          activeEnergy &&
+
+          console.log('activeEnergy', activeEnergy);
+
+          activeEnergy > 0 &&
             this._energyStore.setAvailableEnergyValue(activeEnergy);
 
           this._gameStore.setInitialData(balance, abilities);

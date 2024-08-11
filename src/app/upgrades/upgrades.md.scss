@@ -2,7 +2,7 @@
 
 $width: 21.875em;
 
-.profile {
+.upgrades {
   height: 100%;
   width: $width;
   margin: 0 auto;
@@ -11,7 +11,7 @@ $width: 21.875em;
 
   &__title {
     text-align: center;
-    font-size: 3em;
+    font-size: 2.5em;
 
     @include main-text;
   }

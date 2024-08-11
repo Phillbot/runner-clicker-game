@@ -3,9 +3,9 @@ import classNames from 'classnames';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   BarChartOutlined,
-  HomeOutlined,
-  ListAltOutlined,
-  PersonOutline,
+  ChecklistOutlined,
+  ExtensionOutlined,
+  SportsEsportsOutlined,
 } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 
@@ -84,21 +84,21 @@ const links = [
     to: '/',
     label: 'Home',
     value: '/',
-    icon: <HomeOutlined />,
+    icon: <SportsEsportsOutlined />,
     disabled: false,
   },
   {
-    to: '/profile',
-    label: 'Profile',
-    value: '/profile',
-    icon: <PersonOutline />,
+    to: '/upgrades',
+    label: 'Upgrades',
+    value: '/upgrades',
+    icon: <ExtensionOutlined />,
     disabled: false,
   },
   {
     to: '/tasks',
     label: 'Tasks',
     value: '/tasks',
-    icon: <ListAltOutlined />,
+    icon: <ChecklistOutlined />,
     disabled: true,
   },
   {
