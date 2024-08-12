@@ -1,27 +1,41 @@
 import React, { Component, ReactNode } from 'react';
-import { ReactSVG } from 'react-svg';
+import { t } from 'i18next';
+import { observer } from 'mobx-react';
+import { resolve } from 'inversify-react';
 
-import mySvg from './images/react.svg';
+import { Fit } from '@utils/fit.component';
+import { EntryStore } from '@app/entry/entry.store';
 
 import styles from './screen-unsupported.md.scss';
 
-type Props = {
-  telegram: WebApp;
-};
+@observer
+export class ScreenUnsupported extends Component {
+  @resolve
+  private declare readonly _entryStore: EntryStore;
 
-export class ScreenUnsupported extends Component<Props> {
   override render(): ReactNode {
-    const {
-      telegram: { initDataUnsafe },
-    } = this.props;
+    const { initDataUnsafe } = this._entryStore.telegram;
+
+    const lng = initDataUnsafe?.user?.language_code;
 
     return (
       <div className={styles.unsupported}>
-        <div className={styles.unsupportedTitle}>
-          Здравствуй, {initDataUnsafe?.user?.first_name}
-        </div>
-        <div className={styles.unsupportedIcon}>
-          <ReactSVG className={styles.unsupportedIconSvg} src={mySvg} />
+        <div className={styles.unsupportedTextContainer}>
+          <div className={styles.unsupportedTitle}>
+            <Fit>
+              <span>
+                {t('translation:greetings', {
+                  name: initDataUnsafe?.user?.first_name,
+                  lng,
+                })}
+              </span>
+            </Fit>
+          </div>
+          <div className={styles.unsupportedRedirect}>
+            {t('translation:unsupported', {
+              lng,
+            })}
+          </div>
         </div>
       </div>
     );

@@ -5,8 +5,12 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.REACT_CLICKER_APP_ENV === 'production';
 
 module.exports = {
   entry: './src/index.tsx',
@@ -19,9 +23,9 @@ module.exports = {
       : '[name].chunk.bundle.js',
     publicPath: '/',
   },
-  devtool: isProduction ? false : 'source-map',
+  devtool: isProduction ? 'source-map' : 'eval-source-map',
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.scss'],
+    extensions: ['.tsx', '.ts', '.js', '.scss', '.json'],
     plugins: [
       new TsconfigPathsPlugin({
         configFile: './tsconfig.json',
@@ -29,9 +33,11 @@ module.exports = {
     ],
     alias: {
       '@fonts': path.resolve(__dirname, 'src/@fonts'),
-      '@styles': path.resolve(__dirname, 'src/@styles'),
-      '@common': path.resolve(__dirname, 'src/common'),
+      '@styles': path.resolve(__dirname, 'src/styles'),
       '@app': path.resolve(__dirname, 'src/app'),
+      '@types': path.resolve(__dirname, 'src/@types'),
+      '@config': path.resolve(__dirname, 'src/config'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
     },
   },
   optimization: {
@@ -125,16 +131,25 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|svg|jpg|gif|woff|woff2|eot|ttf|otf)$/,
-        type: 'asset',
-        parser: {
-          dataUrlCondition: {
-            maxSize: 8 * 1024,
-          },
-        },
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
         generator: {
-          filename: 'assets/[name][hash:8][ext][query]',
+          filename: 'assets/images/[name][hash:8][ext][query]',
         },
+      },
+      {
+        test: /\.json$/,
+        type: 'javascript/auto',
+        include: [path.resolve(__dirname, 'src/locales')],
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[hash:8].[ext]',
+              outputPath: 'locales',
+            },
+          },
+        ],
       },
     ],
   },
@@ -147,7 +162,21 @@ module.exports = {
       filename: isProduction ? '[name].[contenthash].css' : '[name].css',
       chunkFilename: isProduction ? '[id].[contenthash].css' : '[id].css',
     }),
-  ],
+    new Dotenv(),
+    new CopyWebpackPlugin({
+      patterns: [{ from: 'src/@fonts', to: 'assets/fonts' }],
+    }),
+    new ForkTsCheckerWebpackPlugin({
+      async: !isProduction,
+      typescript: {
+        configFile: './tsconfig.json',
+      },
+    }),
+    new ESLintPlugin({
+      extensions: ['ts', 'tsx', 'js', 'jsx'],
+      context: path.resolve(__dirname, 'src'),
+    }),
+  ].filter(Boolean),
   devServer: {
     static: {
       directory: path.join(__dirname, 'dist'),
@@ -156,14 +185,12 @@ module.exports = {
     port: 9000,
     historyApiFallback: true,
     client: {
-      overlay: {
-        errors: true,
-        warnings: false,
-      },
+      overlay: true,
     },
     devMiddleware: {
       publicPath: '/',
     },
     allowedHosts: 'all',
+    hot: true,
   },
 };

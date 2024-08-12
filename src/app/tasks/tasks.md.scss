@@ -1,0 +1,13 @@
+@import '~@styles/mixins.scss';
+
+.tasks {
+  height: 100%;
+  padding: 1em;
+
+  &__title {
+    text-align: center;
+    font-size: 3em;
+
+    @include main-text;
+  }
+}

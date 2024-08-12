@@ -1,44 +1,37 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
-    "paths": {
-      "@fonts/*": ["@fonts/*"],
-      "@styles/*": ["@styles/*"],
-      "@common/*": ["common/*"],
-      "@app/*": ["app/*"]
-    },
-    "target": "es6",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "noImplicitAny": true,
-    "noImplicitThis": true,
-    "strictNullChecks": true,
     "noImplicitOverride": true,
-    "strictFunctionTypes": true,
-    "useDefineForClassFields": true,
-    "strictPropertyInitialization": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "strictPropertyInitialization": false,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "jsx": "react",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "moduleResolution": "node",
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "./dist",
-    "resolveJsonModule": true,
-    "jsx": "react",
-    "plugins": [
-      {
-        "name": "typescript-plugin-css-modules",
-        "options": {
-          "customMatcher": "\\.module\\.(sa|sc|c)ss$",
-          "declarationDir": "./src/types",
-          "exclude": "**/*.global.scss"
-        }
-      }
-    ]
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@config/*": ["config/*"],
+      "@fonts/*": ["@fonts/*"],
+      "@styles/*": ["styles/*"],
+      "@types/*": ["@types/*"],
+      "@app/*": ["app/*"],
+      "@utils/*": ["utils/*"]
+    }
   },
-  "include": ["./src/**/*", "global.d.ts"]
+  "include": ["./src/**/*", "src/@types", "global.d.ts"],
+  "exclude": ["node_modules"]
 }

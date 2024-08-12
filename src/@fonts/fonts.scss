@@ -8,10 +8,19 @@
   src: url('~@fonts/rubik.woff2') format('woff2');
 }
 
+@font-face {
+  font-family: PressStart;
+  src: url('~@fonts/press-start.woff2') format('woff2');
+}
+
 @mixin font-overdoze {
   font-family: OverdoseSans, sans-serif;
 }
 
 @mixin font-rubik {
   font-family: Rubik, sans-serif;
+}
+
+@mixin font-press-start {
+  font-family: PressStart, sans-serif;
 }
