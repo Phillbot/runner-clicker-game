@@ -6,4 +6,5 @@ export type Referral = {
   userStatus: number;
   balance: number;
   referralId: number | null;
+  rewardClaim: boolean | undefined;
 };

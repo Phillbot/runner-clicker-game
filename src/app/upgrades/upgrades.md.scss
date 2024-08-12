@@ -9,69 +9,48 @@ $width: 21.875em;
   box-sizing: border-box;
   padding: 1em;
 
-  &__title {
-    text-align: center;
-    font-size: 2.5em;
-
-    @include main-text;
+  &__boost {
+    margin: 3em auto;
   }
 
   &__bonuses-container {
-    margin: 2em auto;
-  }
-
-  &__bonuses-container-balance {
-    text-align: center;
-    font-size: 0.75em;
-
-    @include main-text;
-  }
-
-  &__bonuses-container-balance-value {
-    font-size: 0.9em;
-    color: #ff0000;
-    text-shadow: 0.0125em 0em 0.185em #ff0000;
-  }
-
-  &__bonuses-container-boost {
-    margin: 3em auto;
+    height: 50%;
+    overflow: auto;
+    margin-bottom: 2em;
   }
 
   &__bonuses-container-item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
   }
 
   &__bonuses-container-item-block {
-    width: 50%;
     text-align: left;
-    font-size: 0.7em;
+    font-size: 0.75em;
+    flex: 2;
+    padding: 0.3em;
 
-    @include main-text;
-
-    &_full {
-      width: 100%;
-      text-align: center;
-      margin-top: 5em;
+    &_middle {
+      flex: 1;
     }
+
+    @include main-text-light;
   }
 
-  &__bonuses-container-item-block-with-value {
-    width: 35%;
+  &__bonuses-container-item-block-level-label {
+    @include main-text-light;
+
+    font-size: 0.75em;
+  }
+
+  &__bonuses-container-item-block-icon {
+    color: #00ffff;
+  }
+
+  &__wallet {
+    margin-top: auto;
     text-align: center;
-    font-size: 0.7em;
-
-    @include main-text;
-  }
-
-  &__bonuses-container-item-block-value {
-    color: #ff0000;
-    text-align: right;
-    text-shadow: 0.0125em 0em 0.185em #ff0000;
-  }
-
-  &__bonuses-container-item-icon-button {
-    width: 15%;
-    cursor: pointer;
+    color: #ffffff;
   }
 }

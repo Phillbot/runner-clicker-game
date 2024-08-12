@@ -33,7 +33,7 @@ class BoostButton extends Component<Props> {
           destroyTooltipOnHide={true}
           overlay={this.renderTooltipContent()}
           visible={this._boostStore.isTooltipVisible}
-          placement="top"
+          placement="left"
           trigger="click"
           onVisibleChange={this.handleTooltipVisibleChange}
         >
@@ -84,9 +84,12 @@ class BoostButton extends Component<Props> {
           <Button
             sx={{
               ...buttonConfig,
-              color: 'red',
+              color: '#ff0000',
             }}
-            className={styles.tooltipButtonGroupButton}
+            className={classNames(
+              styles.tooltipButtonGroupButton,
+              styles.tooltipButtonGroupButtonYes,
+            )}
             size="small"
             variant="contained"
             color="inherit"

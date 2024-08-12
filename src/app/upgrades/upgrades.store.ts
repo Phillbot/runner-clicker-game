@@ -40,6 +40,9 @@ export class UpgradesStore {
     nextLevelCoast: number | undefined;
   }[] = [];
 
+  @observable
+  private _userId: number | string = 0;
+
   private readonly _telegram = window.Telegram.WebApp;
 
   constructor(
@@ -57,6 +60,11 @@ export class UpgradesStore {
   @computed.struct
   get abilities() {
     return this._abilities;
+  }
+
+  @computed
+  get userId(): number | string {
+    return this._userId;
   }
 
   @action
@@ -100,6 +108,8 @@ export class UpgradesStore {
     try {
       this._loadingOverlayStore.setIsLoading(true);
 
+      await this._balanceStore.syncWithServer();
+
       const initData = this._telegram.initData;
       const response = await axios.post(
         `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-ability`,
@@ -134,5 +144,10 @@ export class UpgradesStore {
     } finally {
       this._loadingOverlayStore.setIsLoading(false);
     }
+  }
+
+  @action
+  setUserId(value: string | number): void {
+    this._userId = value;
   }
 }

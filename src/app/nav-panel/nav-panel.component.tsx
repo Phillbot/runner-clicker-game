@@ -70,7 +70,6 @@ export const NavPanel: FC = () => {
             draggable={false}
             disabled={item.value === value || item.disabled}
             component={Link}
-            label={item.label}
             value={item.value}
             icon={item.icon}
           />
@@ -85,35 +84,35 @@ const links = [
     to: '/',
     label: 'Home',
     value: '/',
-    icon: <SportsEsportsOutlined />,
+    icon: <SportsEsportsOutlined fontSize="large" />,
     disabled: false,
   },
   {
     to: '/upgrades',
     label: 'Upgrades',
     value: '/upgrades',
-    icon: <ExtensionOutlined />,
+    icon: <ExtensionOutlined fontSize="large" />,
     disabled: false,
   },
   {
     to: '/friends',
     label: 'Friends',
     value: '/friends',
-    icon: <BadgeOutlined />,
+    icon: <BadgeOutlined fontSize="large" />,
     disabled: false,
   },
   {
     to: '/tasks',
     label: 'Tasks',
     value: '/tasks',
-    icon: <ChecklistOutlined />,
+    icon: <ChecklistOutlined fontSize="large" />,
     disabled: true,
   },
   {
     to: '/stats',
     label: 'Stats',
     value: '/stats',
-    icon: <BarChartOutlined />,
+    icon: <BarChartOutlined fontSize="large" />,
     disabled: true,
   },
 ];

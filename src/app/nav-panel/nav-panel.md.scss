@@ -12,16 +12,16 @@
   }
 
   &__bottom-navigation-element {
+    margin-bottom: 0.5em !important;
     color: #fff !important;
     span {
       @include font-press-start;
     }
 
     &_active {
-      color: #0ff !important;
+      color: #00ffff !important;
 
       span {
-        font-size: 1.25em;
         color: #fff !important;
       }
     }

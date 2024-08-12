@@ -2,8 +2,24 @@
 
 @mixin main-text {
   color: #050d42;
-  -webkit-text-stroke: 0.025em #0ff;
-  text-shadow: 0.0125em 0em 0.185em #0ff;
+  -webkit-text-stroke: 0.025em #00ffff;
+  text-shadow: 0.0125em 0em 0.185em #00ffff;
+
+  @include font-press-start;
+}
+
+@mixin main-text-light {
+  color: #ffffff;
+  -webkit-text-stroke: 0.025em #000000;
+  text-shadow: 0.0125em 0em 1.385em #f1f1f1;
+
+  @include font-press-start;
+}
+
+@mixin main-text-contrast {
+  color: #ffffff;
+  -webkit-text-stroke: 0.06em #000000;
+  text-shadow: 0.1125em 0 0.345em #000000;
 
   @include font-press-start;
 }

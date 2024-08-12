@@ -11,7 +11,6 @@ import {
 } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 
-import { Fit } from '@utils/fit.component';
 import { ModalsStore } from '@app/modals/modals.store';
 import BoostButtonWithNavigate from '@app/boost-button/boost-button.component';
 
@@ -29,13 +28,10 @@ export class Upgrades extends Component {
   override render(): ReactNode {
     return (
       <div className={styles.upgrades}>
-        <Fit>
-          <div className={styles.upgradesTitle}>Upgrades</div>
-        </Fit>
+        <div className={styles.upgradesBoost}>
+          <BoostButtonWithNavigate />
+        </div>
         <div className={styles.upgradesBonusesContainer}>
-          <div className={styles.upgradesBonusesContainerBoost}>
-            <BoostButtonWithNavigate />
-          </div>
           {this._upgradesStore.abilities.map(
             ({ id, title, value, tooltip, isMaxLevel, nextLevelCoast }) => (
               <div key={id} className={styles.upgradesBonusesContainerItem}>
@@ -44,7 +40,10 @@ export class Upgrades extends Component {
                 </div>
 
                 <div
-                  className={styles.upgradesBonusesContainerItemBlockWithValue}
+                  className={classNames(
+                    styles.upgradesBonusesContainerItem,
+                    styles.upgradesBonusesContainerItemBlockMiddle,
+                  )}
                 >
                   <Tooltip
                     destroyTooltipOnHide={true}
@@ -53,16 +52,17 @@ export class Upgrades extends Component {
                     overlay={<span>{tooltip}</span>}
                   >
                     <span
-                      className={styles.upgradesBonusesContainerItemBlockValue}
+                      className={
+                        styles.upgradesBonusesContainerItemBlockLevelLabel
+                      }
                     >
                       {value}
                     </span>
                   </Tooltip>
                 </div>
-
-                <div className={styles.upgradesBonusesContainerItemIconButton}>
+                <div className={styles.upgradesBonusesContainerItem}>
                   {isMaxLevel ? (
-                    <IconButton size="large" color="success" disableRipple>
+                    <IconButton size="large" disableRipple>
                       <DoneAllOutlined />
                     </IconButton>
                   ) : (
@@ -73,31 +73,25 @@ export class Upgrades extends Component {
                         this._modalStore.openLevelUpModal(id, nextLevelCoast)
                       }
                     >
-                      <AddCircleOutline />
+                      <AddCircleOutline
+                        className={styles.upgradesBonusesContainerItemBlockIcon}
+                      />
                     </IconButton>
                   )}
                 </div>
               </div>
             ),
           )}
-
-          <div className={styles.upgradesBonusesContainerItem}>
-            <div
-              className={classNames(
-                styles.upgradesBonusesContainerItemBlock,
-                styles.upgradesBonusesContainerItemBlockFull,
-              )}
-            >
-              <Tooltip
-                destroyTooltipOnHide={true}
-                placement="top"
-                trigger={['click']}
-                overlay={<span>Soon</span>}
-              >
-                <WalletOutlined fontSize="large" color="error" />
-              </Tooltip>
-            </div>
-          </div>
+        </div>
+        <div className={styles.upgradesWallet}>
+          <Tooltip
+            destroyTooltipOnHide={true}
+            placement="top"
+            trigger={['click']}
+            overlay={<span>Soon</span>}
+          >
+            <WalletOutlined fontSize="large" />
+          </Tooltip>
         </div>
       </div>
     );

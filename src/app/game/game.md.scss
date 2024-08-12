@@ -24,7 +24,7 @@ $size: 18.3em;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      box-shadow: 0 0 5.025em 2em #0ff;
+      box-shadow: 0 0 5.025em 2em #00ffff;
       border-radius: 100%;
       background: transparent;
       z-index: -1;
@@ -77,7 +77,7 @@ $size: 18.3em;
 
     &_boosted-mega {
       fill: #ff5900;
-      box-shadow: 120px 80px 40px 20px #0ff;
+      box-shadow: 120px 80px 40px 20px #00ffff;
     }
   }
 
@@ -94,8 +94,8 @@ $size: 18.3em;
     position: absolute;
     font-size: 2em;
     color: #050d42;
-    -webkit-text-stroke: 1.25px #0ff;
-    text-shadow: 2px 2px 2px #0ff;
+    -webkit-text-stroke: 1.25px #00ffff;
+    text-shadow: 2px 2px 2px #00ffff;
     transform: translate(-50%, -50%);
     animation: fly-up 2000ms forwards;
 

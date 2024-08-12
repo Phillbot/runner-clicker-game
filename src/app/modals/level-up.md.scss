@@ -12,20 +12,21 @@
     text-align: center;
     margin-bottom: 1em;
 
-    @include main-text;
+    @include main-text-contrast;
   }
 
   &__label {
     font-size: 0.7em;
 
-    @include main-text;
+    @include main-text-contrast;
   }
 
   &__label-cost {
     font-size: 1.2em;
 
-    -webkit-text-stroke: 0.025em #ff0000;
-    text-shadow: 0.0125em 0em 0.185em #ff0000;
+    -webkit-text-stroke: 0.05em #000000;
+    text-shadow: 0.0125em 0em 1.145em #0f0;
+    color: #0f0;
 
     &_disabled {
       opacity: 0.3;

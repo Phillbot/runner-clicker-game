@@ -12,6 +12,7 @@ import { BalanceStore } from '@app/balance/balance.store';
 import { EnergyStore } from '@app/energy-bar/energy.store';
 import { BoostStore } from '@app/boost-button/boost-button.store';
 import { FriendsStore } from '@app/friends/friends.store';
+import { UpgradesStore } from '@app/upgrades/upgrades.store';
 
 import { UserStatus } from './types';
 
@@ -43,6 +44,7 @@ export class EntryStore {
     @inject(EnergyStore) private readonly _energyStore: EnergyStore,
     @inject(BoostStore) private readonly _boostStore: BoostStore,
     @inject(FriendsStore) private readonly _friendsStore: FriendsStore,
+    @inject(UpgradesStore) private readonly _upgradesStore: UpgradesStore,
   ) {
     makeObservable(this);
     window.addEventListener('beforeunload', this.syncOnUnload);
@@ -94,23 +96,27 @@ export class EntryStore {
               throw new Error('Failed to create user');
             }
 
-            const { user } = createUserResponse.data;
+            const { user, bot } = createUserResponse.data;
 
             runInAction(() => {
               this.setUserStatus(user.status);
+              this._upgradesStore.setUserId(user.id);
               this._gameStore.setInitialData(user.balance, user.abilities);
               this._balanceStore.setBalance(user.balance);
               this._lastLogout = user.lastLogout ?? 0;
               this._energyStore.setAvailableEnergy(
-                user.activeEnergy.active_energy,
+                user.activeEnergy.availablePoints ?? 0,
               );
               this._energyStore.calculateEnergyBasedOnLastLogout(
                 this._lastLogout,
               );
               this._boostStore.setInitialBoostData(
-                user?.boost?.last_boost_run ?? 0,
+                user?.boost?.lastBoostRun ?? 0,
               );
-              this.setAuthorized(true); // Setup auth true
+              this._friendsStore.setRefLink(bot?.username, user?.id);
+              this._friendsStore.setFriendsList(user.referrals ?? []);
+
+              this.setAuthorized(true);
             });
           } catch (creationError) {
             console.error('Failed to create user:', creationError);
@@ -166,10 +172,13 @@ export class EntryStore {
 
       runInAction(() => {
         this.setUserStatus(user.status);
+        this._upgradesStore.setUserId(user.id);
         this._gameStore.setInitialData(user.balance, user.abilities);
         this._balanceStore.setBalance(user.balance);
         this._lastLogout = user.lastLogout ?? 0;
-        this._energyStore.setAvailableEnergy(user.activeEnergy.availablePoints);
+        this._energyStore.setAvailableEnergy(
+          user.activeEnergy.availablePoints ?? 0,
+        );
         this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
         this._boostStore.setInitialBoostData(user?.boost?.lastBoostRun ?? 0);
         this._friendsStore.setRefLink(bot?.username, user?.id);
