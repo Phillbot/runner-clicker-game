@@ -136,7 +136,7 @@ export class EnergyStore {
     }
     try {
       const response = await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/updateEnergy`,
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-energy`,
         {
           initData: window.Telegram.WebApp.initData,
           activeEnergy: Math.ceil(this._availableEnergyValue),

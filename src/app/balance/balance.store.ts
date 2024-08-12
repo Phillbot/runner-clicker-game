@@ -37,7 +37,7 @@ export class BalanceStore {
 
     try {
       await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/updateBalance`,
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-balance`,
         {
           balance: this._pendingChanges,
           initData: window.Telegram.WebApp.initData,

@@ -235,7 +235,7 @@ export class BoostStore {
   private async syncBoostData() {
     try {
       const response = await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/updateBoost`,
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-boost`,
         {
           initData: window.Telegram.WebApp.initData,
           lastBoostRun: this._lastBoostRun,

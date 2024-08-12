@@ -10,7 +10,7 @@ import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.co
 import { BalanceStore } from '@app/balance/balance.store';
 
 import { EntryStore } from './entry.store';
-import { UserStatus } from './user-statuses';
+import { UserStatus } from './types';
 
 import styles from './entry.md.scss';
 

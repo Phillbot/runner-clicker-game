@@ -102,7 +102,7 @@ export class UpgradesStore {
 
       const initData = this._telegram.initData;
       const response = await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/updateAbility`,
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-ability`,
         { initData, abilityType },
       );
 
@@ -110,8 +110,6 @@ export class UpgradesStore {
         runInAction(() => {
           const { balance, abilities, activeEnergy } = response.data;
           this._balanceStore.setBalance(balance);
-
-          console.log('activeEnergy', activeEnergy);
 
           activeEnergy > 0 &&
             this._energyStore.setAvailableEnergyValue(activeEnergy);

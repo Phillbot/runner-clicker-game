@@ -189,9 +189,9 @@ export class GameStore {
   @action
   readonly setInitialData = (balance: number, abilities: Abilities) => {
     this._balanceStore.setBalance(balance);
-    this.setClickCostLevel(abilities.click_coast_level);
-    this._energyStore.setEnergyTotalLevel(abilities.energy_level);
-    this._energyStore.setEnergyRegenLevel(abilities.energy_regeniration_level);
+    this.setClickCostLevel(abilities.clickCoastLevel);
+    this._energyStore.setEnergyTotalLevel(abilities.energyLevel);
+    this._energyStore.setEnergyRegenLevel(abilities.energyRegenirationLevel);
   };
 
   @action

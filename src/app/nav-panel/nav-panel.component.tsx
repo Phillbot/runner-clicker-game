@@ -2,6 +2,7 @@ import React, { useState, useEffect, FC } from 'react';
 import classNames from 'classnames';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
+  BadgeOutlined,
   BarChartOutlined,
   ChecklistOutlined,
   ExtensionOutlined,
@@ -16,22 +17,21 @@ export const NavPanel: FC = () => {
   const navigate = useNavigate();
   const [value, setValue] = useState(location.pathname);
   const [historyCount, setHistoryCount] = useState<number>(0);
+  const telegram = window.Telegram.WebApp;
 
   useEffect(() => {
     setValue(location.pathname);
   }, [location]);
 
   useEffect(() => {
-    if (window.Telegram.WebApp) {
+    if (telegram) {
       const canGoBack = historyCount > 0;
-      canGoBack
-        ? window.Telegram.WebApp.BackButton.show()
-        : window.Telegram.WebApp.BackButton.hide();
+      canGoBack ? telegram.BackButton.show() : telegram.BackButton.hide();
     }
   }, [historyCount]);
 
   useEffect(() => {
-    if (window.Telegram.WebApp) {
+    if (telegram) {
       const handleBackButtonClick = () => {
         if (historyCount > 0) {
           navigate(-1);
@@ -39,10 +39,10 @@ export const NavPanel: FC = () => {
         }
       };
 
-      window.Telegram.WebApp.BackButton.onClick(handleBackButtonClick);
+      telegram.BackButton.onClick(handleBackButtonClick);
 
       return () => {
-        window.Telegram.WebApp.BackButton.offClick(handleBackButtonClick);
+        telegram.BackButton.offClick(handleBackButtonClick);
       };
     }
   }, [navigate, historyCount]);
@@ -60,15 +60,16 @@ export const NavPanel: FC = () => {
       >
         {links.map(item => (
           <BottomNavigationAction
+            key={item.value}
+            to={item.to}
             className={classNames(styles.navPanelBottomNavigationElement, {
               [styles.navPanelBottomNavigationElementActive]:
                 item.value === value,
               [styles.navPanelBottomNavigationElementDisabled]: item.disabled,
             })}
+            draggable={false}
             disabled={item.value === value || item.disabled}
-            key={item.value}
             component={Link}
-            to={item.to}
             label={item.label}
             value={item.value}
             icon={item.icon}
@@ -92,6 +93,13 @@ const links = [
     label: 'Upgrades',
     value: '/upgrades',
     icon: <ExtensionOutlined />,
+    disabled: false,
+  },
+  {
+    to: '/friends',
+    label: 'Friends',
+    value: '/friends',
+    icon: <BadgeOutlined />,
     disabled: false,
   },
   {

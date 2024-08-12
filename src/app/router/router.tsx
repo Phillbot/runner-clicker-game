@@ -4,6 +4,7 @@ import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 import { Home } from '@app/home/home.component';
 import { Upgrades } from '@app/upgrades/upgrades.component';
+import { Friends } from '@app/friends/friends.component';
 import { Tasks } from '@app/tasks/tasks.component';
 import { Stats } from '@app/stats/stats.component';
 
@@ -25,6 +26,7 @@ const AppRoutes: FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/upgrades" element={<Upgrades />} />
+            <Route path="/friends" element={<Friends />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/stats" element={<Stats />} />
           </Routes>

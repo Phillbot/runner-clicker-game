@@ -11,7 +11,9 @@ import { GameStore } from '@app/game/game.store';
 import { BalanceStore } from '@app/balance/balance.store';
 import { EnergyStore } from '@app/energy-bar/energy.store';
 import { BoostStore } from '@app/boost-button/boost-button.store';
-import { UserStatus } from './user-statuses';
+import { FriendsStore } from '@app/friends/friends.store';
+
+import { UserStatus } from './types';
 
 @injectable()
 export class EntryStore {
@@ -40,6 +42,7 @@ export class EntryStore {
     @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
     @inject(EnergyStore) private readonly _energyStore: EnergyStore,
     @inject(BoostStore) private readonly _boostStore: BoostStore,
+    @inject(FriendsStore) private readonly _friendsStore: FriendsStore,
   ) {
     makeObservable(this);
     window.addEventListener('beforeunload', this.syncOnUnload);
@@ -78,7 +81,7 @@ export class EntryStore {
           // create user if we cant get it 404
           try {
             const createUserResponse = await axios.post(
-              `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/createUser`,
+              `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/create-user`,
               {
                 initData,
                 referralId:
@@ -143,7 +146,7 @@ export class EntryStore {
 
     try {
       const response = await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/getMe`,
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/get-me`,
         { initData },
         {
           onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
@@ -159,16 +162,19 @@ export class EntryStore {
         throw new Error('Unauthorized');
       }
 
-      const { user } = response.data;
+      const { user, bot } = response.data;
 
       runInAction(() => {
         this.setUserStatus(user.status);
         this._gameStore.setInitialData(user.balance, user.abilities);
         this._balanceStore.setBalance(user.balance);
         this._lastLogout = user.lastLogout ?? 0;
-        this._energyStore.setAvailableEnergy(user.activeEnergy.active_energy);
+        this._energyStore.setAvailableEnergy(user.activeEnergy.availablePoints);
         this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
-        this._boostStore.setInitialBoostData(user?.boost?.last_boost_run ?? 0);
+        this._boostStore.setInitialBoostData(user?.boost?.lastBoostRun ?? 0);
+        this._friendsStore.setRefLink(bot?.username, user?.id);
+        this._friendsStore.setFriendsList(user.referrals ?? []);
+
         this.setAuthorized(true);
       });
     } catch (error) {
