@@ -7,10 +7,11 @@ import {
   computed,
 } from 'mobx';
 import axios from 'axios';
+
 import { EnvUtils } from '@utils/env';
-import { Referral } from './types';
 import { BalanceStore } from '@app/balance/balance.store';
 import { UpgradesStore } from '@app/upgrades/upgrades.store';
+import { Referral } from '@app/entry/types';
 
 interface ReferralWithLoading extends Referral {
   loading?: boolean;

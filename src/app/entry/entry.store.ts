@@ -14,7 +14,7 @@ import { BoostStore } from '@app/boost-button/boost-button.store';
 import { FriendsStore } from '@app/friends/friends.store';
 import { UpgradesStore } from '@app/upgrades/upgrades.store';
 
-import { UserStatus } from './types';
+import type { UserStatus, User, Bot } from './types';
 
 @injectable()
 export class EntryStore {
@@ -59,6 +59,13 @@ export class EntryStore {
       return;
     }
 
+    this.setupTelegramWebApp();
+
+    await this.checkAuth();
+  }
+
+  @action
+  private setupTelegramWebApp() {
     if (this._telegram) {
       this._telegram.setHeaderColor('#1d2256');
       this._telegram.ready();
@@ -66,8 +73,6 @@ export class EntryStore {
       this._telegram.expand();
       this._telegram.disableClosingConfirmation();
     }
-
-    await this.checkAuth();
   }
 
   @action
@@ -80,7 +85,6 @@ export class EntryStore {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 404) {
-          // create user if we cant get it 404
           try {
             const createUserResponse = await axios.post(
               `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/create-user`,
@@ -97,27 +101,7 @@ export class EntryStore {
             }
 
             const { user, bot } = createUserResponse.data;
-
-            runInAction(() => {
-              this.setUserStatus(user.status);
-              this._upgradesStore.setUserId(user.id);
-              this._gameStore.setInitialData(user.balance, user.abilities);
-              this._balanceStore.setBalance(user.balance);
-              this._lastLogout = user.lastLogout ?? 0;
-              this._energyStore.setAvailableEnergy(
-                user.activeEnergy.availablePoints ?? 0,
-              );
-              this._energyStore.calculateEnergyBasedOnLastLogout(
-                this._lastLogout,
-              );
-              this._boostStore.setInitialBoostData(
-                user?.boost?.lastBoostRun ?? 0,
-              );
-              this._friendsStore.setRefLink(bot?.username, user?.id);
-              this._friendsStore.setFriendsList(user.referrals ?? []);
-
-              this.setAuthorized(true);
-            });
+            this.initializeUser(user, bot);
           } catch (creationError) {
             console.error('Failed to create user:', creationError);
             if (this._telegram) {
@@ -128,10 +112,7 @@ export class EntryStore {
           error.response?.status === 401 ||
           error.response?.status === 403
         ) {
-          // Закрываем WebApp, если получен 401 или 403
-          if (this._telegram) {
-            this._telegram.close();
-          }
+          this._telegram.close();
         } else {
           console.error('Authorization failed', error);
           throw error;
@@ -141,6 +122,26 @@ export class EntryStore {
       await this.loadResources();
       this.setLoading(false);
     }
+  }
+
+  @action
+  private initializeUser(user: User, bot: Bot) {
+    runInAction(() => {
+      this.setUserStatus(user.status);
+      this._upgradesStore.setUserId(user.id);
+      this._gameStore.setInitialData(user.balance, user.abilities);
+      this._balanceStore.setBalance(user.balance);
+      this._lastLogout = user.lastLogout ?? 0;
+      this._energyStore.setAvailableEnergy(
+        user.activeEnergy?.availablePoints ?? 0,
+      );
+      this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
+      this._boostStore.setInitialBoostData(user.boost?.lastBoostRun ?? 0);
+      this._friendsStore.setRefLink(bot.username, user?.id);
+      this._friendsStore.setFriendsList(user.referrals ?? []);
+
+      this.setAuthorized(true);
+    });
   }
 
   @action
@@ -169,23 +170,7 @@ export class EntryStore {
       }
 
       const { user, bot } = response.data;
-
-      runInAction(() => {
-        this.setUserStatus(user.status);
-        this._upgradesStore.setUserId(user.id);
-        this._gameStore.setInitialData(user.balance, user.abilities);
-        this._balanceStore.setBalance(user.balance);
-        this._lastLogout = user.lastLogout ?? 0;
-        this._energyStore.setAvailableEnergy(
-          user.activeEnergy.availablePoints ?? 0,
-        );
-        this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
-        this._boostStore.setInitialBoostData(user?.boost?.lastBoostRun ?? 0);
-        this._friendsStore.setRefLink(bot?.username, user?.id);
-        this._friendsStore.setFriendsList(user.referrals ?? []);
-
-        this.setAuthorized(true);
-      });
+      this.initializeUser(user, bot);
     } catch (error) {
       console.error('Failed to load server data', error);
       throw error;

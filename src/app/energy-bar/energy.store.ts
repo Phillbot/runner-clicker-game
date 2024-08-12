@@ -7,6 +7,7 @@ import {
   runInAction,
 } from 'mobx';
 import axios from 'axios';
+
 import { EnvUtils } from '@utils/index';
 import {
   EnergyRegenLevel,

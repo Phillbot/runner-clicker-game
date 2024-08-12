@@ -6,6 +6,7 @@ import {
   runInAction,
   computed,
 } from 'mobx';
+
 import { BalanceStore } from '@app/balance/balance.store';
 import { Abilities, getClickCostByLevel, ClickCostLevel } from './game-levels';
 import { EnergyStore } from '@app/energy-bar/energy.store';

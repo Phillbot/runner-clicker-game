@@ -58,7 +58,7 @@ export const ClickCostLevelMax = 20;
 export const EnergyValueLevelMax = 10;
 export const EnergyRegenLevelMax = 5;
 
-const clickCoefficient = 100;
+const clickCoefficient = 1;
 const evergyCoefficient = 1000;
 const evergyRegenCoefficient = 0.11;
 

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, FC } from 'react';
 import { ToastContainer } from 'react-toastify';
 
 import { container } from '@config/inversify.config';
@@ -10,7 +10,7 @@ import { LoadingOverlay } from '@app/loading-overlay/loading-overlay.component';
 
 import styles from './screen-main.md.scss';
 
-export const ScreenMain: React.FC = () => {
+export const ScreenMain: FC = () => {
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
