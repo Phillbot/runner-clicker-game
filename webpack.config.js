@@ -170,7 +170,10 @@ module.exports = {
       filename: isDevelopment ? '[name].css' : '[name].[contenthash].css',
       chunkFilename: isDevelopment ? '[id].css' : '[id].[contenthash].css',
     }),
-    new Dotenv(),
+    new Dotenv({
+      path: './.env',
+      systemvars: true,
+    }),
     new CopyWebpackPlugin({
       patterns: [{ from: 'src/@fonts', to: 'assets/fonts' }],
     }),

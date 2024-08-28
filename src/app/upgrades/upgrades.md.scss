@@ -17,6 +17,8 @@ $width: 21.875em;
     height: 50%;
     overflow: auto;
     margin-bottom: 2em;
+
+    @include main-text-light;
   }
 
   &__bonuses-container-item {
@@ -34,13 +36,9 @@ $width: 21.875em;
     &_middle {
       flex: 1;
     }
-
-    @include main-text-light;
   }
 
   &__bonuses-container-item-block-level-label {
-    @include main-text-light;
-
     font-size: 0.75em;
   }
 

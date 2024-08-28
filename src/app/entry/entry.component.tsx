@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 import { Box, LinearProgress } from '@mui/material';
 
+import { EnvUtils } from '@utils/env';
 import { ScreenMain } from '@app/screen-main/screen-main.component';
 import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
 import { BalanceStore } from '@app/balance/balance.store';
@@ -39,6 +40,13 @@ export class Entry extends Component {
       isUnsupportedScreen,
     } = this._entryStore;
 
+    console.table({
+      env: process.env.REACT_CLICKER_APP_ENV,
+      url: process.env.REACT_CLICKER_APP_BASE_TELEGRAM_GAME_ENDPOINT_URL,
+      tgAvoid: process.env.REACT_CLICKER_APP_AVOID_TELEGRAM_AUTH,
+      screenAvoid: process.env.REACT_CLICKER_APP_AVOID_UNSUPPORTED_SCREEN,
+    });
+
     if (isUnsupportedScreen) {
       return (
         <div className={classNames(styles.entry, styles.entryUnsupported)}>
@@ -66,7 +74,10 @@ export class Entry extends Component {
       );
     }
 
-    if (!isAuthorized || this._entryStore.userStatus !== UserStatus.ACTIVE) {
+    if (
+      EnvUtils.avoidUnsupportedScreen &&
+      (!isAuthorized || this._entryStore.userStatus !== UserStatus.ACTIVE)
+    ) {
       return (
         <div className={classNames(styles.entry, styles.entryNotAuth)}>
           <div className={styles.entryNotAuthLabel}>
