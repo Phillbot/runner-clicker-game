@@ -119,7 +119,7 @@ export class GameStore {
 
       if (this._suspiciousClickCount > 5) {
         // this._isAutoClickerDetected = true;
-        // this._telegram.showAlert('Auto-clicker detected!');
+        this._telegram.showAlert('Auto-clicker detected! (Beta)');
       }
     }
 
@@ -188,8 +188,7 @@ export class GameStore {
   };
 
   @action
-  readonly setInitialData = (balance: number, abilities: Abilities) => {
-    this._balanceStore.setBalance(balance);
+  readonly setInitialData = (abilities: Abilities) => {
     this.setClickCostLevel(abilities.clickCoastLevel);
     this._energyStore.setEnergyTotalLevel(abilities.energyLevel);
     this._energyStore.setEnergyRegenLevel(abilities.energyRegenirationLevel);

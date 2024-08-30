@@ -1,5 +1,5 @@
 import { injectable, inject } from 'inversify';
-import { makeObservable, observable, action, runInAction } from 'mobx';
+import { makeObservable, observable, action, computed } from 'mobx';
 import axios, { AxiosProgressEvent } from 'axios';
 
 import {
@@ -35,7 +35,7 @@ export class EntryStore {
   @observable
   private _userStatus: UserStatus = 1;
 
-  private readonly _loginDate = new Date().getTime();
+  private readonly _loginDate = Date.now();
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   constructor(
@@ -48,6 +48,16 @@ export class EntryStore {
   ) {
     makeObservable(this);
     window.addEventListener('beforeunload', this.syncOnUnload);
+    if (!this.isLoading) {
+      !this.isUnsupportedScreen && this.startSyncInterval();
+      !this.isUnsupportedScreen && this._energyStore.syncEnergyWithServer();
+    }
+  }
+
+  private startSyncInterval() {
+    setInterval(() => {
+      this.syncOnUnload();
+    }, 3000);
   }
 
   @action
@@ -59,7 +69,7 @@ export class EntryStore {
       return;
     }
 
-    this.setupTelegramWebApp();
+    await this.setupTelegramWebApp();
 
     await this.checkAuth();
   }
@@ -126,22 +136,21 @@ export class EntryStore {
 
   @action
   private initializeUser(user: User, bot: Bot) {
-    runInAction(() => {
-      this.setUserStatus(user.status);
-      this._upgradesStore.setUserId(user.id);
-      this._gameStore.setInitialData(user.balance, user.abilities);
-      this._balanceStore.setBalance(user.balance);
-      this._lastLogout = user.lastLogout ?? 0;
-      this._energyStore.setAvailableEnergy(
-        user.activeEnergy?.availablePoints ?? 0,
-      );
-      this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
-      this._boostStore.setInitialBoostData(user.boost?.lastBoostRun ?? 0);
-      this._friendsStore.setRefLink(bot.username, user?.id);
-      this._friendsStore.setFriendsList(user.referrals ?? []);
+    this.setUserStatus(user.status);
+    this._upgradesStore.setUserId(user.id);
+    this._gameStore.setInitialData(user.abilities);
 
-      this.setAuthorized(true);
-    });
+    this._balanceStore.setBalance(user.balance);
+    this._lastLogout = user.lastLogout ?? 0;
+    this._energyStore.setAvailableEnergy(
+      user.activeEnergy?.availablePoints ?? 0,
+    );
+    this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
+    this._boostStore.setInitialBoostData(user.boost?.lastBoostRun ?? 0);
+    this._friendsStore.setRefLink(bot.username, user?.id);
+    this._friendsStore.setFriendsList(user.referrals ?? []);
+
+    this.setAuthorized(true);
   }
 
   @action
@@ -220,8 +229,10 @@ export class EntryStore {
     return this._telegram;
   }
 
+  @computed
   get isUnsupportedScreen(): boolean {
-    return EnvUtils.avoidUnsupportedScreen ? false : isDesktop();
+    const isWebA = this.telegram && this._telegram.platform === 'weba';
+    return EnvUtils.avoidUnsupportedScreen ? false : isDesktop() || isWebA;
   }
 
   @action
@@ -275,25 +286,14 @@ export class EntryStore {
     return this._loadProgress;
   }
 
-  get serverLoadProgress(): number {
-    return this._serverLoadProgress;
-  }
-
-  get resourcesLoadProgress(): number {
-    return this._resourcesLoadProgress;
-  }
-
-  get lastLogout(): number {
-    return this._lastLogout;
-  }
-
   get userStatus(): UserStatus {
     return this._userStatus;
   }
 
-  readonly syncOnUnload = () => {
+  @action
+  private readonly syncOnUnload = () => {
     const initData = window.Telegram.WebApp.initData;
-    const lastLogoutTimestamp = new Date().getTime();
+    const lastLogoutTimestamp = Date.now();
     const lastLoginTimestamp = this._loginDate;
     const balance = this._balanceStore.balance;
     const activeEnergy = Math.ceil(this._energyStore.availableEnergyValue);

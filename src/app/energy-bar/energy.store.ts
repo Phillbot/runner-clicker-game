@@ -34,7 +34,6 @@ export class EnergyStore {
   constructor() {
     makeObservable(this);
     this.startRegeneration();
-    this.startSyncWithServer();
 
     if (this._availableEnergyValue !== this.energyTotalValue) {
       window.Telegram.WebApp.enableClosingConfirmation();
@@ -117,10 +116,18 @@ export class EnergyStore {
 
   @action
   calculateEnergyBasedOnLastLogout(lastLogout: number) {
-    const currentTime = new Date().getTime();
+    const currentTime = Date.now();
+
     const regenTimeMS = currentTime - lastLogout;
     const regenCycles = Math.floor(regenTimeMS / this._regenerationSpeed);
     const regeneratedEnergy = regenCycles * this.energyRegenValue;
+
+    console.table({
+      currentTime,
+      regenTimeMS,
+      lastLogout,
+      regenCycles,
+    });
 
     this._availableEnergyValue = Math.min(
       this._availableEnergyValue + regeneratedEnergy,
@@ -171,20 +178,6 @@ export class EnergyStore {
       this._syncIntervalId = setInterval(() => {
         this.syncEnergyWithServer();
       }, 15000); // Sync with server every 15 seconds
-    }
-  }
-
-  stopRegeneration() {
-    if (this._intervalId) {
-      clearInterval(this._intervalId);
-      this._intervalId = null;
-    }
-  }
-
-  stopSyncWithServer() {
-    if (this._syncIntervalId) {
-      clearInterval(this._syncIntervalId);
-      this._syncIntervalId = null;
     }
   }
 }

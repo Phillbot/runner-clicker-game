@@ -124,7 +124,7 @@ export class UpgradesStore {
           activeEnergy > 0 &&
             this._energyStore.setAvailableEnergyValue(activeEnergy);
 
-          this._gameStore.setInitialData(balance, abilities);
+          this._gameStore.setInitialData(abilities);
           this.updateAbilities();
 
           toast.success('Ability upgraded successfully!', toastConfig);

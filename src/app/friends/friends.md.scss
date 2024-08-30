@@ -12,6 +12,7 @@ $width: 21.875em;
   &__referral-link {
     font-size: 0.65em;
     word-wrap: break-word;
+    user-select: all;
 
     @include main-text-light;
   }
@@ -47,4 +48,16 @@ $width: 21.875em;
 
     @include main-text-light;
   }
+}
+
+.share-link-wrapper {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.share-link {
+  display: inline-block;
+  width: auto;
+  height: 1em;
+  background: red;
 }

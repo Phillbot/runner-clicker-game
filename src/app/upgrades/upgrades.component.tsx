@@ -17,6 +17,18 @@ import BoostButtonWithNavigate from '@app/boost-button/boost-button.component';
 import { UpgradesStore } from './upgrades.store';
 
 import styles from './upgrades.md.scss';
+import {
+  AbilityType,
+  ClickCostLevelMax,
+  EnergyRegenLevelMax,
+  EnergyValueLevelMax,
+  getClickCostUpdateLevelCost,
+  getEnergyRegenUpgradeLevelCost,
+  getEnergyValueUpdateLevelCost,
+} from '@app/game/game-levels';
+import { formatNumber } from '@utils/common';
+import { EnergyStore } from '@app/energy-bar/energy.store';
+import { GameStore } from '@app/game/game.store';
 
 @observer
 export class Upgrades extends Component {
@@ -24,6 +36,10 @@ export class Upgrades extends Component {
   private declare readonly _modalStore: ModalsStore;
   @resolve
   private declare readonly _upgradesStore: UpgradesStore;
+  @resolve
+  private declare readonly _gameStore: GameStore;
+  @resolve
+  private declare readonly _energyStore: EnergyStore;
 
   override render(): ReactNode {
     return (
@@ -32,7 +48,7 @@ export class Upgrades extends Component {
           <BoostButtonWithNavigate />
         </div>
         <div className={styles.upgradesBonusesContainer}>
-          {this._upgradesStore.abilities.map(
+          {this.abilities.map(
             ({ id, title, value, tooltip, isMaxLevel, nextLevelCoast }) => (
               <div key={id} className={styles.upgradesBonusesContainerItem}>
                 <div className={styles.upgradesBonusesContainerItemBlock}>
@@ -95,5 +111,40 @@ export class Upgrades extends Component {
         </div>
       </div>
     );
+  }
+
+  private get abilities() {
+    return [
+      {
+        id: AbilityType.ClickCost,
+        title: 'Click level',
+        value: `${this._gameStore.clickCostLevel}/${ClickCostLevelMax}`,
+        tooltip: `Points per click - ${formatNumber(this._gameStore.clickCost)} `,
+        isMaxLevel: this._gameStore.clickCostLevel === ClickCostLevelMax,
+        nextLevelCoast: getClickCostUpdateLevelCost(
+          this._gameStore.clickCostLevel + 1,
+        ),
+      },
+      {
+        id: AbilityType.EnergyLimit,
+        title: 'Energy level',
+        value: `${this._energyStore.energyTotalLevel}/${EnergyValueLevelMax}`,
+        tooltip: `Energy limit - ${formatNumber(this._gameStore.energyTotalValue)}`,
+        isMaxLevel: this._energyStore.energyTotalLevel === EnergyValueLevelMax,
+        nextLevelCoast: getEnergyValueUpdateLevelCost(
+          this._energyStore.energyTotalLevel + 1,
+        ),
+      },
+      {
+        id: AbilityType.EnergyRegen,
+        title: 'Regen level',
+        value: `${this._energyStore.energyRegenLevel}/${EnergyRegenLevelMax}`,
+        tooltip: `Point regen per tic - ${formatNumber(this._gameStore.energyRegenValue)}`,
+        isMaxLevel: this._energyStore.energyRegenLevel === EnergyRegenLevelMax,
+        nextLevelCoast: getEnergyRegenUpgradeLevelCost(
+          this._energyStore.energyRegenLevel + 1,
+        ),
+      },
+    ];
   }
 }

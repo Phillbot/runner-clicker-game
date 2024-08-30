@@ -11,9 +11,9 @@ import { BoostStore } from './boost-button.store';
 
 import styles from './boost-button.md.scss';
 
-type Props = {
+type Props = Readonly<{
   navigate: ReturnType<typeof useNavigate>;
-};
+}>;
 
 @observer
 class BoostButton extends Component<Props> {

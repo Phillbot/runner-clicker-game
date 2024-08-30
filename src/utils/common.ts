@@ -24,7 +24,21 @@ export function formatNumber(num: number): string {
 
 export function isDesktop(): boolean {
   const userAgent = navigator.userAgent.toLowerCase();
-  return /windows|macintosh|linux/.test(userAgent);
+  const platform = navigator.platform.toLowerCase();
+
+  const isDesktopAgent = /windows|macintosh|linux/.test(userAgent);
+  const isMobileAgent = /mobile|android|touch|tablet/.test(userAgent);
+  const isTouchDevice =
+    'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  // Платформы, которые, скорее всего, являются настольными
+  const desktopPlatforms = ['win32', 'macintel', 'linux'];
+
+  // Проверяем на настольное устройство, если это не мобильное и не сенсорное устройство
+  return (
+    (isDesktopAgent && !isMobileAgent && !isTouchDevice) ||
+    desktopPlatforms.some(platformPart => platform.includes(platformPart))
+  );
 }
 
 export function assertNever(value: never): never {

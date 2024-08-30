@@ -16,15 +16,21 @@ export class Friends extends Component {
   override render(): ReactNode {
     return (
       <div className={styles.friends}>
-        <div className={styles.friendsReferralLink}>
-          {this._friendsStore.refLink}
+        <div className={styles.shareLinkWrapper}>
+          <Button
+            variant="contained"
+            href={`https://t.me/share/url?url=${this._friendsStore.refLink}&text=Привіт! Го грати зі мною в клікера!`}
+          >
+            Invite Friends!
+          </Button>
         </div>
+
         <div className={styles.friendsList}>
           {[...this._friendsStore.friendsList].map(
             ({ firstName, userName, userId, rewardClaim, loading }) => (
               <div key={userId} className={styles.friendsListItem}>
                 <div className={styles.friendsListItemName}>
-                  {userName ?? firstName}
+                  {userName || firstName}
                 </div>
 
                 {rewardClaim ? (
@@ -35,7 +41,7 @@ export class Friends extends Component {
                   <Button
                     className={styles.friendsListItemClaimButton}
                     size="small"
-                    variant="outlined"
+                    variant="contained"
                     disabled={loading}
                     onClick={() =>
                       this._friendsStore.updateFriendStatus(userId)
