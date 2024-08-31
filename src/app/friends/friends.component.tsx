@@ -18,6 +18,8 @@ export class Friends extends Component {
       <div className={styles.friends}>
         <div className={styles.shareLinkWrapper}>
           <Button
+            className={styles.friendsButton}
+            size="small"
             variant="contained"
             href={`https://t.me/share/url?url=${this._friendsStore.refLink}&text=Привіт! Го грати зі мною в клікера!`}
           >
@@ -39,7 +41,7 @@ export class Friends extends Component {
                   </div>
                 ) : (
                   <Button
-                    className={styles.friendsListItemClaimButton}
+                    className={styles.friendsButton}
                     size="small"
                     variant="contained"
                     disabled={loading}

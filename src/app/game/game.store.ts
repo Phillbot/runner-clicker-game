@@ -40,7 +40,6 @@ export class GameStore {
     @inject(EnergyStore) private readonly _energyStore: EnergyStore,
   ) {
     makeObservable(this);
-    this._energyStore.startRegeneration();
   }
 
   @computed

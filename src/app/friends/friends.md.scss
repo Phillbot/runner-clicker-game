@@ -9,14 +9,6 @@ $width: 21.875em;
   box-sizing: border-box;
   padding: 1em;
 
-  &__referral-link {
-    font-size: 0.65em;
-    word-wrap: break-word;
-    user-select: all;
-
-    @include main-text-light;
-  }
-
   &__list {
     height: 80%;
     margin: 2em auto;
@@ -42,7 +34,7 @@ $width: 21.875em;
     align-items: center;
   }
 
-  &__list-item-claim-button {
+  &__button {
     font-size: 0.7em;
     padding: 0.1em;
 
@@ -53,11 +45,4 @@ $width: 21.875em;
 .share-link-wrapper {
   margin: 0 auto;
   text-align: center;
-}
-
-.share-link {
-  display: inline-block;
-  width: auto;
-  height: 1em;
-  background: red;
 }

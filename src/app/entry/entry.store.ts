@@ -31,11 +31,8 @@ export class EntryStore {
   @observable
   private _resourcesLoadProgress: number = 0;
   @observable
-  private _lastLogout: number = 0;
-  @observable
   private _userStatus: UserStatus = 1;
 
-  private readonly _loginDate = Date.now();
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   constructor(
@@ -47,17 +44,6 @@ export class EntryStore {
     @inject(UpgradesStore) private readonly _upgradesStore: UpgradesStore,
   ) {
     makeObservable(this);
-    window.addEventListener('beforeunload', this.syncOnUnload);
-    if (!this.isLoading) {
-      !this.isUnsupportedScreen && this.startSyncInterval();
-      !this.isUnsupportedScreen && this._energyStore.syncEnergyWithServer();
-    }
-  }
-
-  private startSyncInterval() {
-    setInterval(() => {
-      this.syncOnUnload();
-    }, 3000);
   }
 
   @action
@@ -92,6 +78,10 @@ export class EntryStore {
     try {
       await this.loadServerData(initData);
       this.setAuthorized(true);
+
+      this.updateLastLogin();
+      this._energyStore.startRegeneration();
+      this._energyStore.startSyncWithServer();
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 404) {
@@ -141,11 +131,9 @@ export class EntryStore {
     this._gameStore.setInitialData(user.abilities);
 
     this._balanceStore.setBalance(user.balance);
-    this._lastLogout = user.lastLogout ?? 0;
     this._energyStore.setAvailableEnergy(
       user.activeEnergy?.availablePoints ?? 0,
     );
-    this._energyStore.calculateEnergyBasedOnLastLogout(this._lastLogout);
     this._boostStore.setInitialBoostData(user.boost?.lastBoostRun ?? 0);
     this._friendsStore.setRefLink(bot.username, user?.id);
     this._friendsStore.setFriendsList(user.referrals ?? []);
@@ -290,23 +278,15 @@ export class EntryStore {
     return this._userStatus;
   }
 
-  @action
-  private readonly syncOnUnload = () => {
+  private readonly updateLastLogin = () => {
     const initData = window.Telegram.WebApp.initData;
-    const lastLogoutTimestamp = Date.now();
-    const lastLoginTimestamp = this._loginDate;
-    const balance = this._balanceStore.balance;
-    const activeEnergy = Math.ceil(this._energyStore.availableEnergyValue);
 
     try {
       axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/logout`,
+        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-last-login`,
         {
           initData,
-          balance,
-          lastLogoutTimestamp,
-          lastLoginTimestamp,
-          activeEnergy,
+          lastLogin: Date.now(),
         },
       );
     } catch (error) {
