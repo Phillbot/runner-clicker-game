@@ -6,6 +6,7 @@ import {
   EnvUtils,
   preloadResourcesWithProgress,
   isDesktop,
+  generateAuthTokenHeaders,
 } from '@utils/index';
 import { GameStore } from '@app/game/game.store';
 import { BalanceStore } from '@app/balance/balance.store';
@@ -93,6 +94,9 @@ export class EntryStore {
                   window.Telegram.WebApp.initDataUnsafe.start_param ??
                   undefined,
               },
+              {
+                headers: { ...generateAuthTokenHeaders() },
+              },
             );
 
             if (!createUserResponse.data.ok) {
@@ -150,8 +154,11 @@ export class EntryStore {
     try {
       const response = await axios.post(
         `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/get-me`,
-        { initData },
         {
+          initData,
+        },
+        {
+          headers: { ...generateAuthTokenHeaders() },
           onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
             const progress = Math.round(
               (progressEvent.loaded * 100) / (progressEvent.total || 1),
@@ -286,6 +293,9 @@ export class EntryStore {
         {
           initData,
           lastLogin: Date.now(),
+        },
+        {
+          headers: { ...generateAuthTokenHeaders() },
         },
       );
     } catch (error) {

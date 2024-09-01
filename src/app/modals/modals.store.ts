@@ -65,7 +65,6 @@ export class ModalsStore {
     abilityType: AbilityType,
     nextLevelCoast: number | undefined,
   ): void {
-    console.log(`Opening LevelUpModal with ability type: ${abilityType}`);
     this._modalsState.set(Modals.LevelUpModal, true);
     this._levelUpModalAbilityType = abilityType;
     this._levelUpModalNextLevelCoast = nextLevelCoast;
@@ -73,7 +72,6 @@ export class ModalsStore {
 
   @action.bound
   closeLevelUpModal(): void {
-    console.log(`Closing LevelUpModal`);
     this._modalsState.set(Modals.LevelUpModal, false);
     this._levelUpModalAbilityType = null;
     this._levelUpModalNextLevelCoast = undefined;

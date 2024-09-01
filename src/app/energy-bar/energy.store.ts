@@ -8,7 +8,7 @@ import {
 } from 'mobx';
 import axios from 'axios';
 
-import { EnvUtils, isSomething } from '@utils/index';
+import { EnvUtils, generateAuthTokenHeaders, isSomething } from '@utils/index';
 import {
   EnergyRegenLevel,
   EnergyValueLevel,
@@ -125,6 +125,9 @@ export class EnergyStore {
         {
           initData: window.Telegram.WebApp.initData,
           activeEnergy: Math.ceil(this._availableEnergyValue),
+        },
+        {
+          headers: { ...generateAuthTokenHeaders() },
         },
       );
 

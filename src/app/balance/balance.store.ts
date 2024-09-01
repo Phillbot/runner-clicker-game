@@ -2,6 +2,7 @@ import { injectable } from 'inversify';
 import { observable, action, makeObservable, runInAction } from 'mobx';
 import axios from 'axios';
 import { EnvUtils } from '@utils/env';
+import { generateAuthTokenHeaders } from '@utils/common';
 
 @injectable()
 export class BalanceStore {
@@ -45,6 +46,9 @@ export class BalanceStore {
         {
           balance: this._pendingChanges,
           initData: window.Telegram.WebApp.initData,
+        },
+        {
+          headers: { ...generateAuthTokenHeaders() },
         },
       );
       runInAction(() => {
