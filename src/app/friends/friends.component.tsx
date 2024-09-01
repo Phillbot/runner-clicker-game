@@ -2,7 +2,7 @@ import React, { Component, ReactNode } from 'react';
 import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
 import { Button, CircularProgress } from '@mui/material';
-import { Check } from '@mui/icons-material';
+import { Check, IosShareOutlined } from '@mui/icons-material';
 
 import { FriendsStore } from './friends.store';
 
@@ -16,17 +16,6 @@ export class Friends extends Component {
   override render(): ReactNode {
     return (
       <div className={styles.friends}>
-        <div className={styles.shareLinkWrapper}>
-          <Button
-            className={styles.friendsButton}
-            size="small"
-            variant="contained"
-            href={`https://t.me/share/url?url=${this._friendsStore.refLink}&text=Привіт! Го грати зі мною в клікера!`}
-          >
-            Invite Friends!
-          </Button>
-        </div>
-
         <div className={styles.friendsList}>
           {[...this._friendsStore.friendsList].map(
             ({ firstName, userName, userId, rewardClaim, loading }) => (
@@ -41,7 +30,6 @@ export class Friends extends Component {
                   </div>
                 ) : (
                   <Button
-                    className={styles.friendsButton}
                     size="small"
                     variant="contained"
                     disabled={loading}
@@ -55,6 +43,17 @@ export class Friends extends Component {
               </div>
             ),
           )}
+        </div>
+        <div className={styles.shareLinkWrapper}>
+          <Button
+            className={styles.friendsButton}
+            size="small"
+            endIcon={<IosShareOutlined />}
+            variant="contained"
+            href={`https://t.me/share/url?url=${this._friendsStore.refLink}&text=Привіт! Го грати зі мною в клікера!`}
+          >
+            Invite Friends!
+          </Button>
         </div>
       </div>
     );

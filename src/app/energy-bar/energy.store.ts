@@ -8,7 +8,7 @@ import {
 } from 'mobx';
 import axios from 'axios';
 
-import { EnvUtils } from '@utils/index';
+import { EnvUtils, isSomething } from '@utils/index';
 import {
   EnergyRegenLevel,
   EnergyValueLevel,
@@ -26,6 +26,7 @@ export class EnergyStore {
   private _energyRegenLevel: EnergyRegenLevel = EnergyRegenLevel.LEVEL_1;
   @observable
   private _isEnergyAvailable: boolean = true;
+  private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   private readonly _regenerationSpeed: number = 100;
   private _intervalId: NodeJS.Timeout | null = null;
@@ -135,6 +136,11 @@ export class EnergyStore {
         this._availableEnergyValue = response.data.activeEnergy;
       });
     } catch (error) {
+      if (axios.isAxiosError(error) && isSomething(this._telegram)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this._telegram.close();
+        }
+      }
       console.error('Failed to sync active energy with server', error);
     }
   }

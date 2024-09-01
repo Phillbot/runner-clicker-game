@@ -32,7 +32,6 @@ export class EntryStore {
   private _resourcesLoadProgress: number = 0;
   @observable
   private _userStatus: UserStatus = 1;
-
   private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   constructor(
