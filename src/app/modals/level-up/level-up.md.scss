@@ -1,14 +1,14 @@
 @import '~@styles/mixins.scss';
 
-.levelUpModal {
+.level-up-modal {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
-  height: 30vh;
+  height: 40vh;
 
   &__title {
-    font-size: 1em;
+    font-size: 0.8em;
     text-align: center;
     margin-bottom: 1em;
 

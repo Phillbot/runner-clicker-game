@@ -9,6 +9,8 @@ export class BalanceStore {
   @observable private _pendingChanges: number = 0;
   private _syncTimeoutId: NodeJS.Timeout | null = null;
 
+  private _telegram: WebApp = window.Telegram.WebApp;
+
   constructor() {
     makeObservable(this);
   }
@@ -35,6 +37,8 @@ export class BalanceStore {
   public async syncWithServer() {
     if (this._pendingChanges === 0) return;
 
+    this._telegram.disableClosingConfirmation();
+
     try {
       await axios.post(
         `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-balance`,
@@ -54,11 +58,12 @@ export class BalanceStore {
 
   @action
   private scheduleSync() {
+    this._telegram.enableClosingConfirmation();
     if (this._syncTimeoutId) {
       clearTimeout(this._syncTimeoutId);
     }
     this._syncTimeoutId = setTimeout(() => {
       this.syncWithServer();
-    }, 5000); // Adjust the delay as needed
+    }, 500); // Adjust the delay as needed
   }
 }

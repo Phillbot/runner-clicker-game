@@ -11,7 +11,6 @@
 @mixin main-text-light {
   color: #ffffff;
   -webkit-text-stroke: 0.025em #000000;
-  text-shadow: 0.0125em 0em 1.385em #f1f1f1;
 
   @include font-press-start;
 }

@@ -1,10 +1,10 @@
 import React from 'react';
 
-type Props = {
+type Props = Readonly<{
   svgClasses: string;
   reactElementsClasses: string;
   reactDotsClasses: string;
-};
+}>;
 
 export const ReactSVG = ({
   svgClasses,

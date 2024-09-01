@@ -17,13 +17,19 @@
 
 .modal-content {
   background: #fff;
-  padding: 2em;
+  padding: 2em 0 2em 2em;
   border-radius: 8px;
   position: relative;
   min-width: 300px;
   max-width: 80vw;
   max-height: 80vh;
-  overflow-y: auto;
+  overflow: hidden;
+
+  &__scrollable {
+    padding-right: 2em;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
 
   &_open {
     animation: fade-in 300ms forwards;

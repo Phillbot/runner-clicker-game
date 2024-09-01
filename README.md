@@ -1,5 +1,6 @@
-- configure logger
-- configure interlayer for using interfaces by server and client
-- fix typing of transfers
-- animation of modals
-- setup data from server and remove mock data
+- configure logger []
+- configure interlayer for using interfaces by server and client []
+- fix typing of transfers []
+- animation of modals [x]
+- setup data from server and remove mock data [x]
+- delegate counters to server []

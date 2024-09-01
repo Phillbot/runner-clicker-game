@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-type Props = {
+type Props = Readonly<{
   children: React.ReactNode;
   className?: string;
-};
+}>;
 
 export const Fit: React.FC<Props> = ({ children, className }) => {
   const containerRef = useRef<HTMLDivElement>(null);

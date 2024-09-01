@@ -20,6 +20,7 @@ export class Game extends Component {
   private declare readonly _gameStore: GameStore;
   @resolve
   private declare readonly _boostStore: BoostStore;
+
   private subscription: Subscription | null = null;
 
   override componentDidMount(): void {

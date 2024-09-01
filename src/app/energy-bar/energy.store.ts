@@ -8,7 +8,7 @@ import {
 } from 'mobx';
 import axios from 'axios';
 
-import { EnvUtils } from '@utils/index';
+import { EnvUtils, isSomething } from '@utils/index';
 import {
   EnergyRegenLevel,
   EnergyValueLevel,
@@ -26,6 +26,7 @@ export class EnergyStore {
   private _energyRegenLevel: EnergyRegenLevel = EnergyRegenLevel.LEVEL_1;
   @observable
   private _isEnergyAvailable: boolean = true;
+  private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   private readonly _regenerationSpeed: number = 100;
   private _intervalId: NodeJS.Timeout | null = null;
@@ -33,8 +34,6 @@ export class EnergyStore {
 
   constructor() {
     makeObservable(this);
-    this.startRegeneration();
-    this.startSyncWithServer();
 
     if (this._availableEnergyValue !== this.energyTotalValue) {
       window.Telegram.WebApp.enableClosingConfirmation();
@@ -116,21 +115,6 @@ export class EnergyStore {
   }
 
   @action
-  calculateEnergyBasedOnLastLogout(lastLogout: number) {
-    const currentTime = new Date().getTime();
-    const regenTimeMS = currentTime - lastLogout;
-    const regenCycles = Math.floor(regenTimeMS / this._regenerationSpeed);
-    const regeneratedEnergy = regenCycles * this.energyRegenValue;
-
-    this._availableEnergyValue = Math.min(
-      this._availableEnergyValue + regeneratedEnergy,
-      this.energyTotalValue,
-    );
-
-    this.setEnergyAvailable(this._availableEnergyValue > 0);
-  }
-
-  @action
   async syncEnergyWithServer() {
     if (this._availableEnergyValue === this.energyTotalValue) {
       return;
@@ -152,6 +136,11 @@ export class EnergyStore {
         this._availableEnergyValue = response.data.activeEnergy;
       });
     } catch (error) {
+      if (axios.isAxiosError(error) && isSomething(this._telegram)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          this._telegram.close();
+        }
+      }
       console.error('Failed to sync active energy with server', error);
     }
   }
@@ -170,21 +159,7 @@ export class EnergyStore {
     if (!this._syncIntervalId) {
       this._syncIntervalId = setInterval(() => {
         this.syncEnergyWithServer();
-      }, 15000); // Sync with server every 15 seconds
-    }
-  }
-
-  stopRegeneration() {
-    if (this._intervalId) {
-      clearInterval(this._intervalId);
-      this._intervalId = null;
-    }
-  }
-
-  stopSyncWithServer() {
-    if (this._syncIntervalId) {
-      clearInterval(this._syncIntervalId);
-      this._syncIntervalId = null;
+      }, 5000);
     }
   }
 }

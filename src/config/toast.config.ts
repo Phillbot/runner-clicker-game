@@ -1,10 +1,10 @@
 import { Slide, ToastOptions } from 'react-toastify';
 
 export const toastConfig: ToastOptions = {
-  position: 'bottom-right',
+  position: 'top-right',
   hideProgressBar: true,
   closeButton: false,
-  autoClose: 1500,
+  autoClose: 1000,
   icon: false,
   transition: Slide,
   style: {

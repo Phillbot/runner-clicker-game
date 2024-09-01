@@ -25,6 +25,9 @@ export class FriendsStore {
   @observable
   private _refLink: string = '';
 
+  @observable
+  private _botName = '';
+
   constructor(
     @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
     @inject(UpgradesStore) private readonly _upgradesStore: UpgradesStore,
@@ -40,6 +43,7 @@ export class FriendsStore {
   @action
   setRefLink(botName: string, userId: number): void {
     this._refLink = `https://t.me/${botName}/app?startapp=${userId}`;
+    this._botName = botName;
   }
 
   @action
@@ -89,5 +93,10 @@ export class FriendsStore {
   @computed
   get refLink(): string {
     return this._refLink;
+  }
+
+  @computed
+  get botName(): string {
+    return this._botName;
   }
 }

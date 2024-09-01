@@ -10,20 +10,28 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 
-const isProduction = process.env.REACT_CLICKER_APP_ENV === 'production';
+require('dotenv').config();
+
+const isDevelopment = process.env.REACT_CLICKER_APP_ENV === 'development';
+
+console.table({
+  mode: process.env.REACT_CLICKER_APP_ENV,
+  isProd: process.env.REACT_CLICKER_APP_ENV === 'production',
+  isDev: process.env.REACT_CLICKER_APP_ENV === 'development',
+});
 
 module.exports = {
   entry: './src/index.tsx',
-  mode: isProduction ? 'production' : 'development',
+  mode: isDevelopment ? 'development' : 'production',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: isProduction ? '[name].[contenthash].js' : '[name].bundle.js',
-    chunkFilename: isProduction
-      ? '[name].[contenthash].chunk.js'
-      : '[name].chunk.bundle.js',
+    filename: isDevelopment ? '[name].bundle.js' : '[name].[contenthash].js',
+    chunkFilename: isDevelopment
+      ? '[name].chunk.bundle.js'
+      : '[name].[contenthash].chunk.js',
     publicPath: '/',
   },
-  devtool: isProduction ? 'source-map' : 'eval-source-map',
+  devtool: isDevelopment ? 'eval-source-map' : 'source-map',
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.scss', '.json'],
     plugins: [
@@ -90,15 +98,15 @@ module.exports = {
           {
             test: /\.(module|md)\.scss$/,
             use: [
-              isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+              MiniCssExtractPlugin.loader,
               'css-modules-typescript-loader',
               {
                 loader: 'css-loader',
                 options: {
                   modules: {
-                    localIdentName: isProduction
-                      ? '[local]-[hash:base64:6]'
-                      : '[local]--[hash:base64:6]',
+                    localIdentName: isDevelopment
+                      ? '[local]--[hash:base64:6]'
+                      : '[local]-[hash:base64:6]',
                     exportLocalsConvention: 'camelCaseOnly',
                   },
                 },
@@ -106,24 +114,24 @@ module.exports = {
               {
                 loader: 'sass-loader',
                 options: {
-                  sourceMap: !isProduction,
+                  sourceMap: isDevelopment,
                 },
               },
             ],
           },
           {
             use: [
-              isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+              isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
               {
                 loader: 'css-loader',
                 options: {
-                  sourceMap: !isProduction,
+                  sourceMap: isDevelopment,
                 },
               },
               {
                 loader: 'sass-loader',
                 options: {
-                  sourceMap: !isProduction,
+                  sourceMap: isDevelopment,
                 },
               },
             ],
@@ -159,15 +167,18 @@ module.exports = {
     }),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
-      filename: isProduction ? '[name].[contenthash].css' : '[name].css',
-      chunkFilename: isProduction ? '[id].[contenthash].css' : '[id].css',
+      filename: isDevelopment ? '[name].css' : '[name].[contenthash].css',
+      chunkFilename: isDevelopment ? '[id].css' : '[id].[contenthash].css',
     }),
-    new Dotenv(),
+    new Dotenv({
+      path: './.env',
+      systemvars: true,
+    }),
     new CopyWebpackPlugin({
       patterns: [{ from: 'src/@fonts', to: 'assets/fonts' }],
     }),
     new ForkTsCheckerWebpackPlugin({
-      async: !isProduction,
+      async: isDevelopment,
       typescript: {
         configFile: './tsconfig.json',
       },
@@ -176,7 +187,7 @@ module.exports = {
       extensions: ['ts', 'tsx', 'js', 'jsx'],
       context: path.resolve(__dirname, 'src'),
     }),
-  ].filter(Boolean),
+  ],
   devServer: {
     static: {
       directory: path.join(__dirname, 'dist'),

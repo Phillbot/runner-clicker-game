@@ -78,7 +78,7 @@ export class Modal extends React.Component<ModalProps> {
           <button className={styles.closeButton} onClick={onClose}>
             &times;
           </button>
-          {children}
+          <div className={styles.modalContentScrollable}>{children}</div>
         </div>
       </div>,
       modalContainer,
