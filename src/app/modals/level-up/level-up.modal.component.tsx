@@ -11,9 +11,9 @@ import { AbilityType } from '@app/game/game-levels';
 import { BalanceStore } from '@app/balance/balance.store';
 import { UpgradesStore } from '@app/upgrades/upgrades.store';
 
-import { ModalsStore } from './modals.store';
-import { Modal } from './modal.component';
-import { Modals } from './types';
+import { ModalsStore } from '../modals.store';
+import { Modal } from '../modal.component';
+import { Modals } from '../types';
 
 import styles from './level-up.md.scss';
 

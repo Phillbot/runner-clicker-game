@@ -22,6 +22,7 @@ export class ModalsStore {
   constructor() {
     this._modalsState = observable.map<Modals, boolean>([
       [Modals.LevelUpModal, false],
+      [Modals.GameInfoModal, false],
     ]);
     makeObservable(this);
   }
@@ -47,6 +48,16 @@ export class ModalsStore {
   @computed
   get levelUpModalNextLevelCoast(): AbilityType | undefined {
     return this._levelUpModalNextLevelCoast;
+  }
+
+  @action.bound
+  openModal(modalType: Modals): void {
+    this._modalsState.set(modalType, true);
+  }
+
+  @action.bound
+  closeModal(modalType: Modals): void {
+    this._modalsState.set(modalType, false);
   }
 
   @action.bound

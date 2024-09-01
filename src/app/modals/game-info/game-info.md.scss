@@ -1,0 +1,25 @@
+@import '~@styles/mixins.scss';
+
+.game-info-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+
+  &__title {
+    font-size: 1em;
+    text-align: center;
+    margin-bottom: 1em;
+
+    @include main-text-contrast;
+  }
+
+  &__text {
+    font-size: 0.75em;
+    margin: 1em auto;
+
+    &_bold {
+      font-weight: 700;
+    }
+  }
+}
