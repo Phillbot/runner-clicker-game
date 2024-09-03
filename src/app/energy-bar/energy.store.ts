@@ -1,11 +1,5 @@
 import { injectable } from 'inversify';
-import {
-  makeObservable,
-  observable,
-  action,
-  computed,
-  runInAction,
-} from 'mobx';
+import { makeObservable, observable, action, computed } from 'mobx';
 import axios from 'axios';
 
 import { EnvUtils, generateAuthTokenHeaders, isSomething } from '@utils/index';
@@ -99,18 +93,18 @@ export class EnergyStore {
 
   @action
   decrementEnergy(amount: number) {
-    this._availableEnergyValue = Math.max(
-      this._availableEnergyValue - amount,
-      0,
+    this.setAvailableEnergyValue(
+      Math.max(this._availableEnergyValue - amount, 0),
     );
-    this.setEnergyAvailable(this._availableEnergyValue >= amount);
   }
 
   @action
   regeneratePoints() {
-    this._availableEnergyValue = Math.min(
-      this._availableEnergyValue + this.energyRegenValue,
-      this.energyTotalValue,
+    this.setAvailableEnergyValue(
+      Math.min(
+        this._availableEnergyValue + this.energyRegenValue,
+        this.energyTotalValue,
+      ),
     );
   }
 
@@ -135,9 +129,7 @@ export class EnergyStore {
         throw new Error('Energy sync failed');
       }
 
-      runInAction(() => {
-        this._availableEnergyValue = response.data.activeEnergy;
-      });
+      this.setAvailableEnergyValue(response.data.activeEnergy);
     } catch (error) {
       if (axios.isAxiosError(error) && isSomething(this._telegram)) {
         if (error.response?.status === 401 || error.response?.status === 403) {
@@ -151,9 +143,7 @@ export class EnergyStore {
   startRegeneration() {
     if (!this._intervalId) {
       this._intervalId = setInterval(() => {
-        runInAction(() => {
-          this.regeneratePoints();
-        });
+        this.regeneratePoints();
       }, this._regenerationSpeed);
     }
   }
