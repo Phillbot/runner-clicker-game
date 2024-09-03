@@ -10,7 +10,7 @@ import axios from 'axios';
 
 import { GameStore } from '@app/game/game.store';
 import { BalanceStore } from '@app/balance/balance.store';
-import { EnvUtils } from '@utils/index';
+import { EnvUtils, generateAuthTokenHeaders } from '@utils/index';
 
 export enum BoostType {
   Mega = 'MEGA',
@@ -240,6 +240,9 @@ export class BoostStore {
         {
           initData: window.Telegram.WebApp.initData,
           lastBoostRun: this._lastBoostRun,
+        },
+        {
+          headers: { ...generateAuthTokenHeaders() },
         },
       );
 

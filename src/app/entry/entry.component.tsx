@@ -40,14 +40,9 @@ export class Entry extends Component {
       isUnsupportedScreen,
     } = this._entryStore;
 
-    console.table({
-      env: process.env.REACT_CLICKER_APP_ENV,
-      url: process.env.REACT_CLICKER_APP_BASE_TELEGRAM_GAME_ENDPOINT_URL,
-      tgAvoid: process.env.REACT_CLICKER_APP_AVOID_TELEGRAM_AUTH,
-      screenAvoid: process.env.REACT_CLICKER_APP_AVOID_UNSUPPORTED_SCREEN,
-    });
-
     if (isUnsupportedScreen) {
+      this._entryStore.telegram.disableClosingConfirmation();
+
       return (
         <div className={classNames(styles.entry, styles.entryUnsupported)}>
           <ScreenUnsupported />

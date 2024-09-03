@@ -14,12 +14,6 @@ require('dotenv').config();
 
 const isDevelopment = process.env.REACT_CLICKER_APP_ENV === 'development';
 
-console.table({
-  mode: process.env.REACT_CLICKER_APP_ENV,
-  isProd: process.env.REACT_CLICKER_APP_ENV === 'production',
-  isDev: process.env.REACT_CLICKER_APP_ENV === 'development',
-});
-
 module.exports = {
   entry: './src/index.tsx',
   mode: isDevelopment ? 'development' : 'production',
@@ -31,7 +25,7 @@ module.exports = {
       : '[name].[contenthash].chunk.js',
     publicPath: '/',
   },
-  devtool: isDevelopment ? 'eval-source-map' : 'source-map',
+  devtool: isDevelopment ? 'eval-source-map' : false,
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.scss', '.json'],
     plugins: [
@@ -52,6 +46,7 @@ module.exports = {
     minimizer: [
       new TerserPlugin({
         terserOptions: {
+          mangle: true,
           format: {
             comments: false,
           },

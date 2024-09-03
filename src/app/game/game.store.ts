@@ -5,6 +5,7 @@ import {
   makeObservable,
   runInAction,
   computed,
+  reaction,
 } from 'mobx';
 
 import { BalanceStore } from '@app/balance/balance.store';
@@ -40,6 +41,12 @@ export class GameStore {
     @inject(EnergyStore) private readonly _energyStore: EnergyStore,
   ) {
     makeObservable(this);
+    reaction(
+      () => this.availableEnergyValue >= this.clickCost,
+      isEnergyAvailable => {
+        this._energyStore.setEnergyAvailable(isEnergyAvailable);
+      },
+    );
   }
 
   @computed
@@ -59,6 +66,7 @@ export class GameStore {
 
   @computed
   get availableEnergyValue(): number {
+    console.log('123123123123123123', this._energyStore.availableEnergyValue);
     return this._energyStore.availableEnergyValue;
   }
 
@@ -136,9 +144,6 @@ export class GameStore {
       this.addClickMessage({ id: newClickId, x, y, removeAt });
       this._energyStore.decrementEnergy(this.clickCost);
       this._isScaled = true;
-      this._energyStore.setEnergyAvailable(
-        this.availableEnergyValue >= this.clickCost,
-      );
 
       this._balanceStore.incrementBalance(this.clickCost);
 

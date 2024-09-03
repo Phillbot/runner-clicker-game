@@ -9,6 +9,7 @@ import {
 import axios from 'axios';
 
 import { EnvUtils } from '@utils/env';
+import { generateAuthTokenHeaders } from '@utils/common';
 import { BalanceStore } from '@app/balance/balance.store';
 import { UpgradesStore } from '@app/upgrades/upgrades.store';
 import { Referral } from '@app/entry/types';
@@ -62,6 +63,9 @@ export class FriendsStore {
           initData: window.Telegram.WebApp.initData,
           userId: this._upgradesStore.userId,
           referredUserId,
+        },
+        {
+          headers: { ...generateAuthTokenHeaders() },
         },
       );
       runInAction(() => {

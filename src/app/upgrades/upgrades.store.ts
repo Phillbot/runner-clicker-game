@@ -9,7 +9,7 @@ import {
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-import { formatNumber } from '@utils/common';
+import { formatNumber, generateAuthTokenHeaders } from '@utils/common';
 import { EnvUtils } from '@utils/env';
 
 import { EnergyStore } from '@app/energy-bar/energy.store';
@@ -114,6 +114,9 @@ export class UpgradesStore {
       const response = await axios.post(
         `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-ability`,
         { initData, abilityType },
+        {
+          headers: { ...generateAuthTokenHeaders() },
+        },
       );
 
       if (response.data.ok) {
