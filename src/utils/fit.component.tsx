@@ -1,11 +1,11 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 type Props = Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }>;
 
-export const Fit: React.FC<Props> = ({ children, className }) => {
+export const Fit: FC<Props> = ({ children, className }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [fontSize, setFontSize] = useState('inherit');
 

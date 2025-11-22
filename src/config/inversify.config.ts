@@ -1,16 +1,16 @@
 import { Container } from 'inversify';
 
-import { EntryStore } from '@app/entry/entry.store';
-import { GameStore } from '@app/game/game.store';
-import { BoostStore } from '@app/boost-button/boost-button.store';
 import { BalanceStore } from '@app/balance/balance.store';
-import { ModalsStore } from '@app/modals/modals.store';
-import { ModalFactory } from '@app/modals/modal-factory';
-import { IModalFactory } from '@app/modals/types';
+import { BoostStore } from '@app/boost-button/boost-button.store';
 import { EnergyStore } from '@app/energy-bar/energy.store';
-import { UpgradesStore } from '@app/upgrades/upgrades.store';
-import { LoadingOverlayStore } from '@app/loading-overlay/loading-overlay.store';
+import { EntryStore } from '@app/entry/entry.store';
 import { FriendsStore } from '@app/friends/friends.store';
+import { GameStore } from '@app/game/game.store';
+import { LoadingOverlayStore } from '@app/loading-overlay/loading-overlay.store';
+import { ModalFactory } from '@app/modals/modal-factory';
+import { ModalsStore } from '@app/modals/modals.store';
+import { IModalFactory } from '@app/modals/types';
+import { UpgradesStore } from '@app/upgrades/upgrades.store';
 
 export const container = new Container({ defaultScope: 'Singleton' });
 
