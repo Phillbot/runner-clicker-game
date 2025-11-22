@@ -1,18 +1,18 @@
+import axios from 'axios';
 import { inject, injectable } from 'inversify';
 import {
-  observable,
   action,
-  makeObservable,
-  runInAction,
   computed,
+  makeObservable,
+  observable,
+  runInAction,
 } from 'mobx';
-import axios from 'axios';
 
-import { EnvUtils } from '@utils/env';
-import { generateAuthTokenHeaders } from '@utils/common';
 import { BalanceStore } from '@app/balance/balance.store';
-import { UpgradesStore } from '@app/upgrades/upgrades.store';
 import { Referral } from '@app/entry/types';
+import { UpgradesStore } from '@app/upgrades/upgrades.store';
+import { generateAuthTokenHeaders } from '@utils/common';
+import { EnvUtils } from '@utils/env';
 
 interface ReferralWithLoading extends Referral {
   loading?: boolean;
@@ -54,6 +54,19 @@ export class FriendsStore {
       runInAction(() => {
         friend.loading = true;
       });
+    }
+
+    // Mock mode: instantly grant reward without server
+    if (EnvUtils.isDev && EnvUtils.enableMock) {
+      runInAction(() => {
+        this._friendsList = this._friendsList.map(f =>
+          f.userId === referredUserId
+            ? { ...f, rewardClaim: true, loading: false }
+            : f,
+        );
+        this._balanceStore.incrementBalance(1000);
+      });
+      return;
     }
 
     try {
@@ -102,5 +115,21 @@ export class FriendsStore {
   @computed
   get botName(): string {
     return this._botName;
+  }
+
+  @action
+  addMockFriend(): void {
+    const randomId = Math.floor(Math.random() * 1_000_000_000);
+    const newFriend: ReferralWithLoading = {
+      userId: randomId,
+      firstName: 'Mock',
+      userName: `mock_friend_${randomId}`,
+      rewardClaim: false,
+      regData: Date.now(),
+      userStatus: 1,
+      balance: 0,
+      referralId: null,
+    };
+    this._friendsList = [...this._friendsList, newFriend];
   }
 }

@@ -1,16 +1,18 @@
-import { injectable, inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import {
-  observable,
   action,
-  makeObservable,
-  runInAction,
   computed,
+  makeObservable,
+  observable,
   reaction,
+  runInAction,
 } from 'mobx';
 
 import { BalanceStore } from '@app/balance/balance.store';
-import { Abilities, getClickCostByLevel, ClickCostLevel } from './game-levels';
 import { EnergyStore } from '@app/energy-bar/energy.store';
+import { GAME_CONSTANTS } from '@config/game.constants';
+
+import { Abilities, ClickCostLevel, getClickCostByLevel } from './game-levels';
 
 type ClickMessage = { id: number; x: number; y: number; removeAt: number };
 
@@ -66,7 +68,6 @@ export class GameStore {
 
   @computed
   get availableEnergyValue(): number {
-    console.log('123123123123123123', this._energyStore.availableEnergyValue);
     return this._energyStore.availableEnergyValue;
   }
 
@@ -104,12 +105,12 @@ export class GameStore {
   @action
   readonly handleEvent = (x: number, y: number) => {
     const now = Date.now();
-    const precisionThreshold = 5;
+    const precisionThreshold = GAME_CONSTANTS.CLICK_PRECISION_THRESHOLD;
 
     if (this._lastClickTimestamp) {
       const timeBetweenClicks = now - this._lastClickTimestamp;
 
-      if (timeBetweenClicks < 60) {
+      if (timeBetweenClicks < GAME_CONSTANTS.CLICK_DEBOUNCE_MS) {
         if (
           this._lastClickX !== null &&
           this._lastClickY !== null &&
@@ -124,7 +125,9 @@ export class GameStore {
         this._suspiciousClickCount = 0;
       }
 
-      if (this._suspiciousClickCount > 5) {
+      if (
+        this._suspiciousClickCount > GAME_CONSTANTS.SUSPICIOUS_CLICK_THRESHOLD
+      ) {
         // this._isAutoClickerDetected = true;
         this._telegram.showAlert('Auto-clicker detected! (Beta)');
       }
@@ -139,7 +142,7 @@ export class GameStore {
       this.availableEnergyValue >= this.clickCost
     ) {
       const newClickId = this.generateClickMessageId();
-      const removeAt = now + 500;
+      const removeAt = now + GAME_CONSTANTS.CLICK_MESSAGE_LIFETIME_MS;
 
       this.addClickMessage({ id: newClickId, x, y, removeAt });
       this._energyStore.decrementEnergy(this.clickCost);
@@ -151,7 +154,7 @@ export class GameStore {
         runInAction(() => {
           this.removeClickMessage(newClickId);
         });
-      }, 800);
+      }, GAME_CONSTANTS.CLICK_MESSAGE_REMOVE_DELAY_MS);
 
       this.restartScaleAnimation();
       if (this._telegram) {
@@ -168,7 +171,7 @@ export class GameStore {
         this.setScaled(true);
         setTimeout(() => {
           this.setScaled(false);
-        }, 100);
+        }, GAME_CONSTANTS.SCALE_ANIMATION_DURATION_MS);
       });
     }, 0);
   };

@@ -62,11 +62,9 @@ export function generateAuthTokenHeaders(): {
 } {
   const timestamp = Date.now();
 
-  const data = `${process.env.REACT_CLICKER_APP_SALT!}${timestamp}${timestamp % 2 === 0 ? '{' : '}'}${window.Telegram.WebApp.initData}`;
-  const token = CryptoJS.HmacSHA256(
-    data,
-    process.env.REACT_CLICKER_APP_SALT!,
-  ).toString(CryptoJS.enc.Hex);
+  const salt = import.meta.env.REACT_CLICKER_SALT ?? '';
+  const data = `${salt}${timestamp}${timestamp % 2 === 0 ? '{' : '}'}${window.Telegram.WebApp.initData}`;
+  const token = CryptoJS.HmacSHA256(data, salt).toString(CryptoJS.enc.Hex);
 
   return {
     'X-Token': token,
