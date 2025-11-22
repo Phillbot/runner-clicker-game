@@ -5,7 +5,6 @@ import classNames from 'classnames';
 import { resolve } from 'inversify-react';
 import { observer } from 'mobx-react';
 
-import { BalanceStore } from '@app/balance/balance.store';
 import { ScreenMain } from '@app/screen-main/screen-main.component';
 import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
 import { EnvUtils } from '@utils/env';
@@ -19,8 +18,6 @@ import styles from './entry.module.scss';
 export class Entry extends Component {
   @resolve
   private declare readonly _entryStore: EntryStore;
-  @resolve
-  private declare readonly _balanceStore: BalanceStore;
 
   override async componentDidMount(): Promise<void> {
     if (this._entryStore.isUnsupportedScreen) {
@@ -41,7 +38,7 @@ export class Entry extends Component {
     } = this._entryStore;
 
     if (isUnsupportedScreen) {
-      this._entryStore.telegram.disableClosingConfirmation();
+      this._entryStore.disableClosingConfirmation();
 
       return (
         <div className={classNames(styles.entry, styles.entryUnsupported)}>

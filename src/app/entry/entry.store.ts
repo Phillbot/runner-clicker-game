@@ -1,21 +1,8 @@
-import axios, { AxiosProgressEvent } from 'axios';
 import { inject, injectable } from 'inversify';
 import { action, computed, makeObservable, observable } from 'mobx';
 
-import { BalanceStore } from '@app/balance/balance.store';
-import { BoostStore } from '@app/boost-button/boost-button.store';
-import { EnergyStore } from '@app/energy-bar/energy.store';
-import { FriendsStore } from '@app/friends/friends.store';
-import { GameStore } from '@app/game/game.store';
-import { UpgradesStore } from '@app/upgrades/upgrades.store';
-import {
-  EnvUtils,
-  generateAuthTokenHeaders,
-  isDesktop,
-  preloadResourcesWithProgress,
-} from '@utils';
-
-import type { Bot, User, UserStatus } from './types';
+import { StartupCoordinator } from './startup-coordinator';
+import type { UserStatus } from './types';
 
 @injectable()
 export class EntryStore {
@@ -28,235 +15,23 @@ export class EntryStore {
   @observable
   private _loadProgress: number = 0;
   @observable
-  private _serverLoadProgress: number = 0;
-  @observable
-  private _resourcesLoadProgress: number = 0;
-  @observable
   private _userStatus: UserStatus = 1;
-  private readonly _telegram: WebApp = window.Telegram.WebApp;
 
   constructor(
-    @inject(GameStore) private readonly _gameStore: GameStore,
-    @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
-    @inject(EnergyStore) private readonly _energyStore: EnergyStore,
-    @inject(BoostStore) private readonly _boostStore: BoostStore,
-    @inject(FriendsStore) private readonly _friendsStore: FriendsStore,
-    @inject(UpgradesStore) private readonly _upgradesStore: UpgradesStore,
+    @inject(StartupCoordinator)
+    private readonly _startupCoordinator: StartupCoordinator,
   ) {
     makeObservable(this);
   }
 
   @action
   async initialize() {
-    if (EnvUtils.isDev && EnvUtils.enableMock) {
-      this.initializeMockUser();
-      this._energyStore.startRegeneration();
-      this.setLoading(false);
-      await this.loadResources();
-      return;
-    }
-
-    await this.setupTelegramWebApp();
-
-    await this.checkAuth();
-  }
-
-  @action
-  private setupTelegramWebApp() {
-    if (this._telegram) {
-      this._telegram.setHeaderColor('#1d2256');
-      this._telegram.ready();
-      this._telegram.disableVerticalSwipes();
-      this._telegram.expand();
-      this._telegram.disableClosingConfirmation();
-    }
-  }
-
-  @action
-  private async checkAuth() {
-    const initData = window.Telegram.WebApp.initData;
-
-    try {
-      await this.loadServerData(initData);
-      this.setAuthorized(true);
-
-      this.updateLastLogin();
-      this._energyStore.startRegeneration();
-      this._energyStore.startSyncWithServer();
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 404) {
-          try {
-            const createUserResponse = await axios.post(
-              `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/create-user`,
-              {
-                initData,
-                referralId:
-                  window.Telegram.WebApp.initDataUnsafe.start_param ??
-                  undefined,
-              },
-              {
-                headers: { ...generateAuthTokenHeaders() },
-              },
-            );
-
-            if (!createUserResponse.data.ok) {
-              throw new Error('Failed to create user');
-            }
-
-            const { user, bot } = createUserResponse.data;
-            this.initializeUser(user, bot);
-          } catch (creationError) {
-            console.error('Failed to create user:', creationError);
-            if (this._telegram) {
-              this._telegram.close();
-            }
-          }
-        } else if (
-          error.response?.status === 401 ||
-          error.response?.status === 403
-        ) {
-          this._telegram.close();
-        } else {
-          console.error('Authorization failed: Access Denied', error);
-          throw error;
-        }
-      } else {
-        console.error('Authorization failed: Network or Server Error', error);
-        throw error;
-      }
-    } finally {
-      await this.loadResources();
-      this.setLoading(false);
-    }
-  }
-
-  @action
-  private initializeUser(user: User, bot: Bot) {
-    this.setUserStatus(user.status);
-    this._upgradesStore.setUserId(user.id);
-    this._gameStore.setInitialData(user.abilities);
-
-    this._balanceStore.setBalance(user.balance);
-    this._energyStore.setAvailableEnergy(
-      user.activeEnergy?.availablePoints ?? 0,
-    );
-    this._boostStore.setInitialBoostData(user.boost?.lastBoostRun ?? 0);
-    this._friendsStore.setRefLink(bot.username, user?.id);
-    this._friendsStore.setFriendsList(user.referrals ?? []);
-
-    this.setAuthorized(true);
-  }
-
-  @action
-  private async loadServerData(initData: string) {
-    const updateProgress = (progress: number) => {
-      this.setServerLoadProgress(progress);
-      this.updateCombinedProgress();
-    };
-
-    try {
-      const response = await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/get-me`,
-        {
-          initData,
-        },
-        {
-          headers: { ...generateAuthTokenHeaders() },
-          onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
-            const progress = Math.round(
-              (progressEvent.loaded * 100) / (progressEvent.total || 1),
-            );
-            updateProgress(progress);
-          },
-        },
-      );
-
-      if (!response.data.ok) {
-        throw new Error('Unauthorized');
-      }
-
-      const { user, bot } = response.data;
-      this.initializeUser(user, bot);
-    } catch (error) {
-      console.error('Failed to load server data', error);
-      throw error;
-    }
-  }
-
-  @action
-  private async loadResources(): Promise<void> {
-    const imageUrls = this.imageUrls;
-    const fontNames = this.fontNames;
-    const totalResources = imageUrls.length + fontNames.length;
-
-    if (totalResources === 0) {
-      this.setResourcesLoadProgress(100);
-      this.updateCombinedProgress();
-      this.setResourcesLoaded(true);
-      return;
-    }
-
-    const updateProgress = (progress: number) => {
-      const next = Math.min(100, Math.max(0, progress));
-      this.setResourcesLoadProgress(next);
-      this.updateCombinedProgress();
-    };
-
-    try {
-      const preloadPromise = preloadResourcesWithProgress(
-        imageUrls,
-        fontNames,
-        updateProgress,
-      );
-
-      // Do not block UI forever on slow networks: give up after 4s and continue.
-      const timeoutFallback = new Promise<void>(resolve =>
-        setTimeout(resolve, 4000),
-      );
-
-      await Promise.race([preloadPromise, timeoutFallback]);
-
-      // Ensure progress completes.
-      this.setResourcesLoadProgress(100);
-      this.updateCombinedProgress();
-      this.setResourcesLoaded(true);
-      document.fonts.ready.then(() => {
-        document.body.classList.add('fonts-loaded');
-      });
-    } catch (error) {
-      console.error('Resource preloading failed', error);
-      this.setResourcesLoadProgress(100);
-      this.updateCombinedProgress();
-      this.setResourcesLoaded(true);
-    }
-  }
-
-  @action
-  private updateCombinedProgress() {
-    const totalProgress =
-      (this._serverLoadProgress + this._resourcesLoadProgress) / 2;
-    this.setLoadProgress(totalProgress);
-  }
-
-  private get imageUrls(): string[] {
-    return [
-      // require('../../images/test.jpg')
-    ];
-  }
-
-  private get fontNames(): string[] {
-    return ['OverdoseSans', 'Rubik', 'PressStart'];
-  }
-
-  get telegram(): WebApp {
-    return this._telegram;
+    await this._startupCoordinator.run(this.setters);
   }
 
   @computed
   get isUnsupportedScreen(): boolean {
-    const isWebA = this.telegram && this._telegram.platform === 'weba';
-    return EnvUtils.avoidUnsupportedScreen ? false : isDesktop() || isWebA;
+    return this._startupCoordinator.isUnsupportedScreen;
   }
 
   @action
@@ -277,16 +52,6 @@ export class EntryStore {
   @action
   private setLoadProgress(value: number) {
     this._loadProgress = value;
-  }
-
-  @action
-  private setServerLoadProgress(value: number) {
-    this._serverLoadProgress = value;
-  }
-
-  @action
-  private setResourcesLoadProgress(value: number) {
-    this._resourcesLoadProgress = value;
   }
 
   @action
@@ -314,62 +79,17 @@ export class EntryStore {
     return this._userStatus;
   }
 
-  private readonly updateLastLogin = () => {
-    const initData = window.Telegram.WebApp.initData;
-
-    try {
-      axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-last-login`,
-        {
-          initData,
-          lastLogin: Date.now(),
-        },
-        {
-          headers: { ...generateAuthTokenHeaders() },
-        },
-      );
-    } catch (error) {
-      console.log('logout error');
-    }
-  };
-
-  @action
-  private initializeMockUser() {
-    const mockUser: User = {
-      id: 123456789,
-      isBot: false,
-      firstName: 'Test',
-      lastName: 'User',
-      userName: 'testuser',
-      languageCode: 'en',
-      isPremium: false,
-      status: 1,
-      balance: 10000,
-      abilities: {
-        clickCoastLevel: 1,
-        energyLevel: 1,
-        energyRegenirationLevel: 1,
-      },
-      activeEnergy: {
-        availablePoints: 500,
-      },
-      boost: {
-        lastBoostRun: 0,
-      },
-      referrals: [],
+  get setters() {
+    return {
+      setLoading: (value: boolean) => this.setLoading(value),
+      setAuthorized: (value: boolean) => this.setAuthorized(value),
+      setResourcesLoaded: (value: boolean) => this.setResourcesLoaded(value),
+      setLoadProgress: (value: number) => this.setLoadProgress(value),
+      setUserStatus: (value: UserStatus) => this.setUserStatus(value),
     };
+  }
 
-    const mockBot: Bot = {
-      id: 987654321,
-      isBot: true,
-      firstName: 'Test Bot',
-      username: 'test_bot',
-      canConnectToBusiness: false,
-      canJoinGroups: true,
-      canReadAllGroupMessages: false,
-      supportsInlineQueries: false,
-    };
-
-    this.initializeUser(mockUser, mockBot);
+  disableClosingConfirmation(): void {
+    this._startupCoordinator.disableClosingConfirmation();
   }
 }

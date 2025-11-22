@@ -4,7 +4,7 @@ export enum UserStatus {
   BLOCKED = 3,
 }
 
-export type User = {
+export type User = Readonly<{
   id: number;
   isBot: boolean;
   firstName: string;
@@ -20,9 +20,9 @@ export type User = {
   lastLogout?: number;
   referrals: Referral[];
   boost?: BoostMapping;
-};
+}>;
 
-export type Bot = {
+export type Bot = Readonly<{
   canConnectToBusiness: boolean | undefined;
   canJoinGroups: boolean;
   canReadAllGroupMessages: boolean;
@@ -31,23 +31,23 @@ export type Bot = {
   isBot: boolean;
   supportsInlineQueries: boolean;
   username: string;
-};
+}>;
 
-export type AbilitiesMapping = {
+export type AbilitiesMapping = Readonly<{
   clickCoastLevel: number;
   energyLevel: number;
   energyRegenirationLevel: number;
-};
+}>;
 
-export type ActiveEnergyMapping = {
+export type ActiveEnergyMapping = Readonly<{
   availablePoints: number;
-};
+}>;
 
-export type BoostMapping = {
+export type BoostMapping = Readonly<{
   lastBoostRun?: number;
-};
+}>;
 
-export type Referral = {
+export type Referral = Readonly<{
   userId: number;
   regData: number;
   userName: string | null;
@@ -56,4 +56,4 @@ export type Referral = {
   balance: number;
   referralId: number | null;
   rewardClaim: boolean | undefined;
-};
+}>;
