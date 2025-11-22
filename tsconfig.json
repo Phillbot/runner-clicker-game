@@ -51,9 +51,8 @@
       "@app/*": [
         "app/*"
       ],
-      "@utils/*": [
-        "utils/*"
-      ],
+      "@utils": ["utils/index"],
+      "@utils/*": ["utils/*"],
       "@localization/*": [
         "i18n/*"
       ]

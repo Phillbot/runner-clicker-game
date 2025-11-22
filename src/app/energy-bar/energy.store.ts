@@ -8,7 +8,7 @@ import {
   getEnergyRegenValueByLevel,
   getEnergyValueByLevel,
 } from '@app/game/game-levels';
-import { EnvUtils, generateAuthTokenHeaders, isSomething } from '@utils/index';
+import { EnvUtils, generateAuthTokenHeaders, isSomething } from '@utils';
 
 @injectable()
 export class EnergyStore {
