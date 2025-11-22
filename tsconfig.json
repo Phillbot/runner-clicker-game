@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "noImplicitAny": true,
     "noImplicitOverride": true,
     "allowJs": true,
@@ -9,13 +13,14 @@
     "esModuleInterop": true,
     "strictPropertyInitialization": false,
     "strict": true,
+    "useDefineForClassFields": false,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
     "moduleResolution": "node",
     "isolatedModules": true,
     "resolveJsonModule": true,
     "noEmit": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "sourceMap": true,
@@ -23,15 +28,43 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./src",
+    "rootDirs": [
+      "./src",
+      "./src/__generated__/styles"
+    ],
+    "types": [
+      "reflect-metadata",
+      "vite/client",
+      "node",
+      "telegram-web-app"
+    ],
     "paths": {
-      "@config/*": ["config/*"],
-      "@fonts/*": ["@fonts/*"],
-      "@styles/*": ["styles/*"],
-      "@types/*": ["@types/*"],
-      "@app/*": ["app/*"],
-      "@utils/*": ["utils/*"]
+      "@config/*": [
+        "config/*"
+      ],
+      "@fonts/*": [
+        "@fonts/*"
+      ],
+      "@styles/*": [
+        "styles/*"
+      ],
+      "@app/*": [
+        "app/*"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@localization/*": [
+        "i18n/*"
+      ]
     }
   },
-  "include": ["./src/**/*", "src/@types", "global.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "./src/**/*",
+    "src/@types",
+    "global.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
