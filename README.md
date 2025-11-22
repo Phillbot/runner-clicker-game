@@ -38,3 +38,6 @@ Copy `.env.example` → `.env` and set:
 If `REACT_CLICKER_ENABLE_MOCK=true`:
 - User is initialized locally without API calls
 - Energy regeneration/balance updates run locally; server sync is skipped
+
+## TODO
+- Need test with server after huge rework.
