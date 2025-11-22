@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { inject, injectable } from 'inversify';
 import {
   action,
@@ -8,9 +7,12 @@ import {
   runInAction,
 } from 'mobx';
 
-import { BalanceStore } from '@app/balance/balance.store';
+import { ApiClient } from '@app/common/api-client';
+import { Scheduler } from '@app/common/scheduler';
+import { EnergyStore } from '@app/energy-bar/energy.store';
+import { TelegramService } from '@app/entry/services/telegram.service';
 import { GameStore } from '@app/game/game.store';
-import { EnvUtils, generateAuthTokenHeaders } from '@utils';
+import { EnvUtils } from '@utils';
 
 export enum BoostType {
   Mega = 'MEGA',
@@ -18,63 +20,71 @@ export enum BoostType {
   Tiny = 'TINY',
 }
 
+type SyncBoostResponse = Readonly<{
+  ok: boolean;
+}>;
+
+interface BoostConfig {
+  boostMultipliers: Record<BoostType | 'DEFAULT', number>;
+  boostDurations: Record<BoostType | 'DEFAULT', number>;
+  boostIntervals: Record<BoostType | 'DEFAULT', number>;
+  cooldown: number;
+  updateInterval: number;
+}
+
 @injectable()
 export class BoostStore {
-  @observable private _isBoosted: boolean = false;
-  @observable private _boostType: BoostType | null = null;
-  @observable private _canUseDailyBoost: boolean = false;
-  @observable private _timeUntilNextBoost: string = '00:00:00';
-  @observable private _lastBoostRun: number = 0;
-  @observable private _isTooltipVisible: boolean = false;
+  @observable
+  private _boostType: BoostType | null = null;
+  @observable
+  private _lastBoostRun: number = 0;
+  @observable
+  private _isCooldownActive: boolean = false;
+  @observable
+  private _lastBoostTime: number | null = null;
+  @observable
+  private _isTooltipVisible: boolean = false;
+  @observable
+  private _cooldownMs: number = 0;
 
-  private _boostIntervalId: NodeJS.Timeout | null = null;
-  private _boostTimeoutId: NodeJS.Timeout | null = null;
-  private readonly _telegram: WebApp = window.Telegram.WebApp;
-
-  private readonly config = {
-    boostDurations: {
-      MEGA: 60000,
-      NORMAL: 30000,
-      TINY: 15000,
-      DEFAULT: 30000,
-    },
-    boostIntervals: {
-      MEGA: 500,
-      NORMAL: 1000,
-      TINY: 1000,
-      DEFAULT: 1000,
-    },
-    boostMultipliers: {
-      MEGA: 20,
-      NORMAL: 10,
-      TINY: 5,
-      DEFAULT: 1,
-    },
-    dailyBoostCooldown: 6 * 60 * 60 * 1000, // 6 hours
-    updateInterval: 1000,
-  };
+  private _boostTimeoutId: number | null = null;
+  private _boostIntervalId: number | null = null;
+  private _cooldownIntervalId: number | null = null;
 
   constructor(
+    @inject(EnergyStore) private readonly energyStore: EnergyStore,
     @inject(GameStore) private readonly _gameStore: GameStore,
-    @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
+    @inject(ApiClient) private readonly _apiClient: ApiClient,
+    @inject(TelegramService)
+    private readonly _telegramService: TelegramService,
+    @inject(Scheduler) private readonly _scheduler: Scheduler,
   ) {
     makeObservable(this);
-    this.startUpdateTimer();
   }
 
-  @computed
-  get lastBoostRun(): number {
-    return this._lastBoostRun;
-  }
-
-  @computed
-  get timeUntilNextBoost(): string {
-    return this._timeUntilNextBoost;
-  }
-
-  @computed
-  get isBoosted(): boolean {
-    return this._isBoosted;
+  get config(): BoostConfig {
+    return {
+      boostMultipliers: {
+        DEFAULT: 1,
+        [BoostType.Mega]: 20,
+        [BoostType.Normal]: 10,
+        [BoostType.Tiny]: 5,
+      },
+      boostDurations: {
+        DEFAULT: EnvUtils.enableMock ? 10000 : 60000,
+        [BoostType.Mega]: EnvUtils.enableMock ? 10000 : 60000,
+        [BoostType.Normal]: EnvUtils.enableMock ? 8000 : 30000,
+        [BoostType.Tiny]: EnvUtils.enableMock ? 5000 : 15000,
+      },
+      boostIntervals: {
+        DEFAULT: 1000,
+        [BoostType.Mega]: 500,
+        [BoostType.Normal]: 1000,
+        [BoostType.Tiny]: 1000,
+      },
+      cooldown: EnvUtils.enableMock ? 15000 : 21600000,
+      updateInterval: 3000,
+    };
   }
 
   @computed
@@ -83,8 +93,29 @@ export class BoostStore {
   }
 
   @computed
+  get isBoosted(): boolean {
+    return this._boostType !== null;
+  }
+
+  @computed
+  get boostMultiplier(): number {
+    return this._boostType ? this.getBoostMultiplier(this._boostType) : 1;
+  }
+
+  @computed
   get canUseDailyBoost(): boolean {
-    return this._canUseDailyBoost;
+    return !this._isCooldownActive;
+  }
+
+  @computed
+  get timeUntilNextBoost(): string {
+    const ms = this.remainingCooldown;
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60)
+      .toString()
+      .padStart(2, '0');
+    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
   }
 
   @computed
@@ -92,131 +123,26 @@ export class BoostStore {
     return this._isTooltipVisible;
   }
 
+  @computed
+  get remainingCooldown(): number {
+    return this._cooldownMs;
+  }
+
   @action
-  setTooltipVisible(visible: boolean) {
-    this._isTooltipVisible = visible;
+  setBoostType(boostType: BoostType | null) {
+    this._boostType = boostType;
   }
 
   @action
   setInitialBoostData(lastBoostRun: number) {
     this._lastBoostRun = lastBoostRun;
-    this.updateBoostAvailability();
-  }
-
-  @action
-  private updateBoostAvailability() {
-    const now = Date.now();
-    const elapsedTime = now - this._lastBoostRun;
-    const remainingTime = this.config.dailyBoostCooldown - elapsedTime;
-
-    if (remainingTime > 0) {
-      const hours = Math.floor((remainingTime / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
-      const seconds = Math.floor((remainingTime / 1000) % 60);
-
-      runInAction(() => {
-        this._timeUntilNextBoost = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        this._canUseDailyBoost = false;
-      });
-    } else {
-      runInAction(() => {
-        this._timeUntilNextBoost = '00:00:00';
-        this._canUseDailyBoost = true;
-      });
+    const remaining = this.getRemainingFromLastRun();
+    this._cooldownMs = remaining;
+    this._isCooldownActive = remaining > 0;
+    if (remaining > 0) {
+      this._lastBoostTime = Date.now() - (this.config.cooldown - remaining);
+      this.startCooldownTimer();
     }
-  }
-
-  @action
-  async useDailyBoost() {
-    if (!this._canUseDailyBoost) return;
-
-    this.toggleBoosted();
-    this.saveBoostTimestamp();
-    await this.syncBoostData();
-  }
-
-  @action
-  private toggleBoosted() {
-    if (!this._isBoosted) {
-      const randomBoostType = this.getRandomBoostType();
-      this.startBoost(randomBoostType);
-
-      const boostDuration = this.getBoostDuration(randomBoostType);
-      this._boostTimeoutId = setTimeout(() => {
-        runInAction(() => {
-          this.stopBoost();
-        });
-      }, boostDuration);
-    }
-  }
-
-  @action
-  private startBoost(boostType: BoostType) {
-    this._isBoosted = true;
-    this._boostType = boostType;
-    this._telegram.enableClosingConfirmation();
-
-    const interval = this.getBoostInterval(boostType);
-    if (!this._boostIntervalId) {
-      this._boostIntervalId = setInterval(() => {
-        runInAction(() => {
-          const boostMultiplier = this.getBoostMultiplier(boostType);
-          this._balanceStore.incrementBalance(
-            this._gameStore.clickCost * boostMultiplier,
-          );
-          const newClickId = this._gameStore.generateClickMessageId();
-          const removeAt = Date.now() + 500;
-          this._gameStore.addClickMessage({
-            id: newClickId,
-            x: 0,
-            y: 0,
-            removeAt,
-          });
-
-          setTimeout(() => {
-            runInAction(() => {
-              this._gameStore.removeClickMessage(newClickId);
-            });
-          }, 500);
-        });
-      }, interval);
-    }
-  }
-
-  @action
-  private stopBoost() {
-    if (this._boostIntervalId) {
-      clearInterval(this._boostIntervalId);
-      this._boostIntervalId = null;
-    }
-    if (this._boostTimeoutId) {
-      clearTimeout(this._boostTimeoutId);
-      this._boostTimeoutId = null;
-    }
-    this._isBoosted = false;
-    this._boostType = null;
-    this._telegram.disableClosingConfirmation();
-    this._balanceStore.syncWithServer();
-  }
-
-  private getRandomBoostType(): BoostType {
-    const types = Object.values(BoostType);
-    const randomIndex = Math.floor(Math.random() * types.length);
-    return types[randomIndex];
-  }
-
-  private getBoostDuration(boostType: BoostType): number {
-    return (
-      this.config.boostDurations[boostType] ||
-      this.config.boostDurations.DEFAULT
-    );
-  }
-
-  private getBoostInterval(boostType: BoostType): number {
-    return (
-      this.config.boostIntervals[boostType] ||
-      this.config.boostIntervals.DEFAULT
-    );
   }
 
   private getBoostMultiplier(boostType: BoostType): number {
@@ -226,31 +152,19 @@ export class BoostStore {
     );
   }
 
-  private startUpdateTimer() {
-    setInterval(() => {
-      this.updateBoostAvailability();
-    }, this.config.updateInterval);
-  }
-
   @action
   private async syncBoostData() {
     try {
-      const response = await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-boost`,
+      const response = await this._apiClient.post<SyncBoostResponse>(
+        EnvUtils.apiEndpoints.updateBoost,
         {
-          initData: window.Telegram.WebApp.initData,
+          initData: this._telegramService.initData,
           lastBoostRun: this._lastBoostRun,
-        },
-        {
-          headers: { ...generateAuthTokenHeaders() },
         },
       );
 
-      if (!response.data.ok) {
-        if (this._telegram) {
-          this._telegram.close();
-        }
-
+      if (!response.ok) {
+        this._telegramService.close();
         throw new Error('Failed to sync boost data');
       }
     } catch (error) {
@@ -259,10 +173,133 @@ export class BoostStore {
   }
 
   @action
-  private saveBoostTimestamp() {
-    const now = Date.now();
-    this._lastBoostRun = now;
-    this._canUseDailyBoost = false;
-    this.updateBoostAvailability();
+  startBoost(boostType: BoostType) {
+    if (this._isCooldownActive) {
+      return;
+    }
+
+    runInAction(() => {
+      this._boostType = boostType;
+      this._lastBoostTime = Date.now();
+      this._lastBoostRun = Date.now();
+      this._cooldownMs = this.config.cooldown;
+      this.energyStore.setEnergyAvailable(true);
+    });
+
+    this._boostTimeoutId = this._scheduler.setTimeout(() => {
+      this.stopBoost();
+    }, this.getBoostDuration(boostType));
+
+    // Auto-click while boost is active.
+    this._boostIntervalId = this._scheduler.setInterval(() => {
+      this.energyStore.setAvailableEnergyValue(
+        this.energyStore.energyTotalValue,
+      );
+      const randomX = Math.random() * 100;
+      const randomY = Math.random() * 100;
+      this._gameStore.handleEvent(randomX, randomY, this.boostMultiplier);
+    }, this.getBoostInterval(boostType));
+
+    this._isCooldownActive = true;
+    if (!EnvUtils.enableMock) {
+      this.syncBoostData();
+    }
+
+    this.startCooldownTimer();
+  }
+
+  @action
+  stopBoost() {
+    this.setBoostType(null);
+    if (this._boostIntervalId) {
+      this._scheduler.clearInterval(this._boostIntervalId);
+      this._boostIntervalId = null;
+    }
+    if (this._boostTimeoutId) {
+      this._scheduler.clearTimeout(this._boostTimeoutId);
+      this._boostTimeoutId = null;
+    }
+    this.startCooldownTimer();
+  }
+
+  @action
+  useDailyBoost() {
+    this.startBoost(this.getRandomBoostType());
+  }
+
+  @action
+  setTooltipVisible(visible: boolean) {
+    this._isTooltipVisible = visible;
+  }
+
+  private getRandomBoostType(): BoostType {
+    const types: BoostType[] = [
+      BoostType.Mega,
+      BoostType.Normal,
+      BoostType.Tiny,
+    ];
+    const randomIndex = Math.floor(Math.random() * types.length);
+    return types[randomIndex];
+  }
+
+  private startCooldownTimer() {
+    if (this._cooldownIntervalId) {
+      this._scheduler.clearInterval(this._cooldownIntervalId);
+    }
+
+    if (!this._isCooldownActive || !this._lastBoostTime) {
+      runInAction(() => {
+        this._cooldownMs = 0;
+      });
+      return;
+    }
+
+    this._cooldownIntervalId = this._scheduler.setInterval(() => {
+      if (!this._isCooldownActive || !this._lastBoostTime) {
+        runInAction(() => {
+          this._cooldownMs = 0;
+        });
+        this._scheduler.clearInterval(this._cooldownIntervalId!);
+        this._cooldownIntervalId = null;
+        return;
+      }
+
+      const elapsed = Date.now() - this._lastBoostTime;
+      const remaining = Math.max(0, this.config.cooldown - elapsed);
+      runInAction(() => {
+        this._cooldownMs = remaining;
+      });
+
+      if (remaining === 0) {
+        runInAction(() => {
+          this._isCooldownActive = false;
+          this._lastBoostTime = null;
+        });
+        this._scheduler.clearInterval(this._cooldownIntervalId!);
+        this._cooldownIntervalId = null;
+      }
+    }, 1000);
+  }
+
+  private getBoostDuration(boostType: BoostType): number {
+    return (
+      this.config.boostDurations[boostType] ??
+      this.config.boostDurations.DEFAULT
+    );
+  }
+
+  private getBoostInterval(boostType: BoostType): number {
+    return (
+      this.config.boostIntervals[boostType] ??
+      this.config.boostIntervals.DEFAULT
+    );
+  }
+
+  private getRemainingFromLastRun(): number {
+    if (!this._lastBoostRun) {
+      return 0;
+    }
+    const elapsed = Date.now() - this._lastBoostRun;
+    return Math.max(0, this.config.cooldown - elapsed);
   }
 }
