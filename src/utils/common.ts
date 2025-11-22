@@ -33,14 +33,16 @@ export function isNothing<T>(
   return value === null || value === undefined;
 }
 
-export function generateAuthTokenHeaders(): {
+export function generateAuthTokenHeaders(
+  initData: string,
+  salt: string = import.meta.env.REACT_CLICKER_SALT ?? '',
+): {
   'X-Token': string;
   'X-Timestamp': number;
 } {
   const timestamp = Date.now();
 
-  const salt = import.meta.env.REACT_CLICKER_SALT ?? '';
-  const data = `${salt}${timestamp}${timestamp % 2 === 0 ? '{' : '}'}${window.Telegram.WebApp.initData}`;
+  const data = `${salt}${timestamp}${timestamp % 2 === 0 ? '{' : '}'}${initData}`;
   const token = CryptoJS.HmacSHA256(data, salt).toString(CryptoJS.enc.Hex);
 
   return {
