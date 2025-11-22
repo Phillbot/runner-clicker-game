@@ -1,12 +1,13 @@
-import { AbilityType } from '@app/game/game-levels';
 import { injectable } from 'inversify';
 import {
-  computed,
-  observable,
   action,
+  computed,
   makeObservable,
+  observable,
   ObservableMap,
 } from 'mobx';
+
+import { AbilityType } from '@app/game/game-levels';
 
 import { Modals } from './types';
 

@@ -1,15 +1,15 @@
+import axios from 'axios';
 import { inject, injectable } from 'inversify';
 import {
-  observable,
   action,
-  makeObservable,
-  runInAction,
   computed,
+  makeObservable,
+  observable,
+  runInAction,
 } from 'mobx';
-import axios from 'axios';
 
-import { GameStore } from '@app/game/game.store';
 import { BalanceStore } from '@app/balance/balance.store';
+import { GameStore } from '@app/game/game.store';
 import { EnvUtils, generateAuthTokenHeaders } from '@utils/index';
 
 export enum BoostType {

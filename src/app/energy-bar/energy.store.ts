@@ -1,14 +1,14 @@
-import { injectable } from 'inversify';
-import { makeObservable, observable, action, computed } from 'mobx';
 import axios from 'axios';
+import { injectable } from 'inversify';
+import { action, computed, makeObservable, observable } from 'mobx';
 
-import { EnvUtils, generateAuthTokenHeaders, isSomething } from '@utils/index';
 import {
   EnergyRegenLevel,
   EnergyValueLevel,
   getEnergyRegenValueByLevel,
   getEnergyValueByLevel,
 } from '@app/game/game-levels';
+import { EnvUtils, generateAuthTokenHeaders, isSomething } from '@utils/index';
 
 @injectable()
 export class EnergyStore {

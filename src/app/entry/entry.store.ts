@@ -1,21 +1,21 @@
-import { injectable, inject } from 'inversify';
-import { makeObservable, observable, action, computed } from 'mobx';
 import axios, { AxiosProgressEvent } from 'axios';
+import { inject, injectable } from 'inversify';
+import { action, computed, makeObservable, observable } from 'mobx';
 
+import { BalanceStore } from '@app/balance/balance.store';
+import { BoostStore } from '@app/boost-button/boost-button.store';
+import { EnergyStore } from '@app/energy-bar/energy.store';
+import { FriendsStore } from '@app/friends/friends.store';
+import { GameStore } from '@app/game/game.store';
+import { UpgradesStore } from '@app/upgrades/upgrades.store';
 import {
   EnvUtils,
-  preloadResourcesWithProgress,
-  isDesktop,
   generateAuthTokenHeaders,
+  isDesktop,
+  preloadResourcesWithProgress,
 } from '@utils/index';
-import { GameStore } from '@app/game/game.store';
-import { BalanceStore } from '@app/balance/balance.store';
-import { EnergyStore } from '@app/energy-bar/energy.store';
-import { BoostStore } from '@app/boost-button/boost-button.store';
-import { FriendsStore } from '@app/friends/friends.store';
-import { UpgradesStore } from '@app/upgrades/upgrades.store';
 
-import type { UserStatus, User, Bot } from './types';
+import type { Bot, User, UserStatus } from './types';
 
 @injectable()
 export class EntryStore {
@@ -48,8 +48,9 @@ export class EntryStore {
 
   @action
   async initialize() {
-    if (EnvUtils.avoidTelegramAuth) {
-      this.setAuthorized(true);
+    if (EnvUtils.isDev && EnvUtils.enableMock) {
+      this.initializeMockUser();
+      this._energyStore.startRegeneration();
       this.setLoading(false);
       await this.loadResources();
       return;
@@ -117,9 +118,12 @@ export class EntryStore {
         ) {
           this._telegram.close();
         } else {
-          console.error('Authorization failed', error);
+          console.error('Authorization failed: Access Denied', error);
           throw error;
         }
+      } else {
+        console.error('Authorization failed: Network or Server Error', error);
+        throw error;
       }
     } finally {
       await this.loadResources();
@@ -302,4 +306,44 @@ export class EntryStore {
       console.log('logout error');
     }
   };
+
+  @action
+  private initializeMockUser() {
+    const mockUser: User = {
+      id: 123456789,
+      isBot: false,
+      firstName: 'Test',
+      lastName: 'User',
+      userName: 'testuser',
+      languageCode: 'en',
+      isPremium: false,
+      status: 1,
+      balance: 10000,
+      abilities: {
+        clickCoastLevel: 1,
+        energyLevel: 1,
+        energyRegenirationLevel: 1,
+      },
+      activeEnergy: {
+        availablePoints: 500,
+      },
+      boost: {
+        lastBoostRun: 0,
+      },
+      referrals: [],
+    };
+
+    const mockBot: Bot = {
+      id: 987654321,
+      isBot: true,
+      firstName: 'Test Bot',
+      username: 'test_bot',
+      canConnectToBusiness: false,
+      canJoinGroups: true,
+      canReadAllGroupMessages: false,
+      supportsInlineQueries: false,
+    };
+
+    this.initializeUser(mockUser, mockBot);
+  }
 }

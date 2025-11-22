@@ -1,8 +1,9 @@
-import { injectable } from 'inversify';
-import { observable, action, makeObservable, runInAction } from 'mobx';
 import axios from 'axios';
-import { EnvUtils } from '@utils/env';
+import { injectable } from 'inversify';
+import { action, makeObservable, observable, runInAction } from 'mobx';
+
 import { generateAuthTokenHeaders } from '@utils/common';
+import { EnvUtils } from '@utils/env';
 
 @injectable()
 export class BalanceStore {
@@ -37,6 +38,13 @@ export class BalanceStore {
   @action
   public async syncWithServer() {
     if (this._pendingChanges === 0) return;
+
+    if (EnvUtils.enableMock) {
+      runInAction(() => {
+        this.resetPendingChanges();
+      });
+      return;
+    }
 
     this._telegram.disableClosingConfirmation();
 

@@ -1,3 +1,5 @@
+import { toast } from 'react-toastify';
+import axios from 'axios';
 import { inject, injectable } from 'inversify';
 import {
   action,
@@ -6,27 +8,24 @@ import {
   observable,
   runInAction,
 } from 'mobx';
-import axios from 'axios';
-import { toast } from 'react-toastify';
 
-import { formatNumber, generateAuthTokenHeaders } from '@utils/common';
-import { EnvUtils } from '@utils/env';
-
+import { BalanceStore } from '@app/balance/balance.store';
 import { EnergyStore } from '@app/energy-bar/energy.store';
+import { GameStore } from '@app/game/game.store';
 import {
   AbilityType,
   ClickCostLevelMax,
   EnergyRegenLevelMax,
   EnergyValueLevelMax,
   getClickCostUpdateLevelCost,
-  getEnergyValueUpdateLevelCost,
   getEnergyRegenUpgradeLevelCost,
+  getEnergyValueUpdateLevelCost,
 } from '@app/game/game-levels';
-import { GameStore } from '@app/game/game.store';
-import { BalanceStore } from '@app/balance/balance.store';
-import { ModalsStore } from '@app/modals/modals.store';
 import { LoadingOverlayStore } from '@app/loading-overlay/loading-overlay.store';
+import { ModalsStore } from '@app/modals/modals.store';
 import { toastConfig } from '@config/toast.config';
+import { formatNumber, generateAuthTokenHeaders } from '@utils/common';
+import { EnvUtils } from '@utils/env';
 
 @injectable()
 export class UpgradesStore {
@@ -107,6 +106,48 @@ export class UpgradesStore {
   async incrementAbility(abilityType: AbilityType) {
     try {
       this._loadingOverlayStore.setIsLoading(true);
+
+      if (EnvUtils.enableMock) {
+        // Mock Logic
+        let cost = 0;
+        let newLevel = 0;
+        const currentAbilities = {
+          clickCoastLevel: this._gameStore.clickCostLevel,
+          energyLevel: this._energyStore.energyTotalLevel,
+          energyRegenirationLevel: this._energyStore.energyRegenLevel,
+        };
+
+        switch (abilityType) {
+          case AbilityType.ClickCost:
+            newLevel = this._gameStore.clickCostLevel + 1;
+            cost = getClickCostUpdateLevelCost(newLevel);
+            currentAbilities.clickCoastLevel = newLevel;
+            break;
+          case AbilityType.EnergyLimit:
+            newLevel = this._energyStore.energyTotalLevel + 1;
+            cost = getEnergyValueUpdateLevelCost(newLevel);
+            currentAbilities.energyLevel = newLevel;
+            break;
+          case AbilityType.EnergyRegen:
+            newLevel = this._energyStore.energyRegenLevel + 1;
+            cost = getEnergyRegenUpgradeLevelCost(newLevel);
+            currentAbilities.energyRegenirationLevel = newLevel;
+            break;
+        }
+
+        if (this._balanceStore.balance >= cost) {
+          runInAction(() => {
+            this._balanceStore.incrementBalance(-cost);
+            this._gameStore.setInitialData(currentAbilities);
+            this.updateAbilities();
+            toast.success('Ability upgraded successfully! (Mock)', toastConfig);
+          });
+          this._modalsStore.closeLevelUpModal();
+        } else {
+          toast.error('Not enough balance (Mock)', toastConfig);
+        }
+        return;
+      }
 
       await this._balanceStore.syncWithServer();
 
