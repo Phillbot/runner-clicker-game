@@ -5,25 +5,6 @@ export enum ENV_MODE {
   DEV = 'development',
 }
 
-export function formatNumber(num: number): string {
-  const thresholds = [
-    { value: 1e9, suffix: 'B' },
-    { value: 1e6, suffix: 'M' },
-    { value: 1e3, suffix: 'K' },
-  ];
-
-  for (const { value, suffix } of thresholds) {
-    if (num >= value) {
-      return (
-        (num / value).toFixed(2).replace(/(\.0+|(\.\d*[1-9])0+)$/, '$2') +
-        suffix
-      );
-    }
-  }
-
-  return num.toString();
-}
-
 export function isDesktop(): boolean {
   const userAgent = navigator.userAgent.toLowerCase();
   const platform = navigator.platform.toLowerCase();
@@ -40,10 +21,6 @@ export function isDesktop(): boolean {
   const isMobileAgent = /mobile|android|touch|tablet/.test(userAgent);
 
   return isDesktopPlatform && !isTouchDevice && !isMobileAgent;
-}
-
-export function assertNever(value: never): never {
-  throw new Error(`Unexpected value: ${value}`);
 }
 
 export function isSomething<T>(value: T | null | undefined): value is T {

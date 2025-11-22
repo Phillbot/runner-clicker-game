@@ -4,7 +4,8 @@ import { resolve } from 'inversify-react';
 import { observer } from 'mobx-react';
 
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
-import { Fit, formatNumber } from '@utils/index';
+import { Fit } from '@utils/fit.component';
+import { formatCompactNumber } from '@utils/number';
 
 import { BalanceStore } from './balance.store';
 
@@ -27,7 +28,7 @@ export class GameBalance extends Component {
                 this._boostStore.boostType === BoostType.Mega,
             })}
           >
-            {formatNumber(this._balanceStore.balance)}
+            {formatCompactNumber(this._balanceStore.balance)}
           </div>
         </div>
       </Fit>

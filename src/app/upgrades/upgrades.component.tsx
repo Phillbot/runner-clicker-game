@@ -24,7 +24,7 @@ import {
   getEnergyValueUpdateLevelCost,
 } from '@app/game/game-levels';
 import { ModalsStore } from '@app/modals/modals.store';
-import { formatNumber } from '@utils/common';
+import { formatCompactNumber } from '@utils/number';
 
 import { UpgradesStore } from './upgrades.store';
 
@@ -50,7 +50,7 @@ export class Upgrades extends Component {
           <BoostButtonWithNavigate />
         </div>
         <div className={styles.upgradesBalanceInline}>
-          Balance: {formatNumber(this._balanceStore.balance)}
+          Balance: {formatCompactNumber(this._balanceStore.balance)}
         </div>
         <div className={styles.upgradesBonusesContainer}>
           {this.abilities.map(
@@ -124,7 +124,7 @@ export class Upgrades extends Component {
         id: AbilityType.ClickCost,
         title: 'Click level',
         value: `${this._gameStore.clickCostLevel}/${ClickCostLevelMax}`,
-        tooltip: `Points per click - ${formatNumber(this._gameStore.clickCost)} `,
+        tooltip: `Points per click - ${formatCompactNumber(this._gameStore.clickCost)} `,
         isMaxLevel: this._gameStore.clickCostLevel === ClickCostLevelMax,
         nextLevelCoast: getClickCostUpdateLevelCost(
           this._gameStore.clickCostLevel + 1,
@@ -134,7 +134,7 @@ export class Upgrades extends Component {
         id: AbilityType.EnergyLimit,
         title: 'Energy level',
         value: `${this._energyStore.energyTotalLevel}/${EnergyValueLevelMax}`,
-        tooltip: `Energy limit - ${formatNumber(this._gameStore.energyTotalValue)}`,
+        tooltip: `Energy limit - ${formatCompactNumber(this._gameStore.energyTotalValue)}`,
         isMaxLevel: this._energyStore.energyTotalLevel === EnergyValueLevelMax,
         nextLevelCoast: getEnergyValueUpdateLevelCost(
           this._energyStore.energyTotalLevel + 1,
@@ -144,7 +144,7 @@ export class Upgrades extends Component {
         id: AbilityType.EnergyRegen,
         title: 'Regen level',
         value: `${this._energyStore.energyRegenLevel}/${EnergyRegenLevelMax}`,
-        tooltip: `Point regen per tic - ${formatNumber(this._gameStore.energyRegenValue)}`,
+        tooltip: `Point regen per tic - ${formatCompactNumber(this._gameStore.energyRegenValue)}`,
         isMaxLevel: this._energyStore.energyRegenLevel === EnergyRegenLevelMax,
         nextLevelCoast: getEnergyRegenUpgradeLevelCost(
           this._energyStore.energyRegenLevel + 1,

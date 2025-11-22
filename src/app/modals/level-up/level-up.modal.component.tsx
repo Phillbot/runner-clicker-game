@@ -2,13 +2,14 @@ import { Component, ReactNode } from 'react';
 import { RocketLaunchOutlined } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import classNames from 'classnames';
+import { assertNever } from 'handy-ts-tools';
 import { resolve } from 'inversify-react';
 import { observer } from 'mobx-react';
 
 import { BalanceStore } from '@app/balance/balance.store';
 import { AbilityType } from '@app/game/game-levels';
 import { UpgradesStore } from '@app/upgrades/upgrades.store';
-import { assertNever, isNothing, isSomething } from '@utils/common';
+import { isNothing, isSomething } from '@utils/common';
 import { Fit } from '@utils/fit.component';
 
 import { Modal } from '../modal.component';

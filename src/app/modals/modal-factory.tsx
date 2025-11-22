@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
+import { assertNever } from 'handy-ts-tools';
 import { injectable } from 'inversify';
-
-import { assertNever } from '@utils/common';
 
 import { GameInfoModal } from './game-info/game-info.modal.component';
 import { LevelUpModal } from './level-up/level-up.modal.component';

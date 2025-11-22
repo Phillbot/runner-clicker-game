@@ -24,8 +24,9 @@ import {
 import { LoadingOverlayStore } from '@app/loading-overlay/loading-overlay.store';
 import { ModalsStore } from '@app/modals/modals.store';
 import { toastConfig } from '@config/toast.config';
-import { formatNumber, generateAuthTokenHeaders } from '@utils/common';
+import { generateAuthTokenHeaders } from '@utils/common';
 import { EnvUtils } from '@utils/env';
+import { formatCompactNumber } from '@utils/number';
 
 @injectable()
 export class UpgradesStore {
@@ -73,7 +74,7 @@ export class UpgradesStore {
         id: AbilityType.ClickCost,
         title: 'Click level',
         value: `${this._gameStore.clickCostLevel}/${ClickCostLevelMax}`,
-        tooltip: `Points per click - ${formatNumber(this._gameStore.clickCost)} `,
+        tooltip: `Points per click - ${formatCompactNumber(this._gameStore.clickCost)} `,
         isMaxLevel: this._gameStore.clickCostLevel === ClickCostLevelMax,
         nextLevelCoast: getClickCostUpdateLevelCost(
           this._gameStore.clickCostLevel + 1,
@@ -83,7 +84,7 @@ export class UpgradesStore {
         id: AbilityType.EnergyLimit,
         title: 'Energy level',
         value: `${this._energyStore.energyTotalLevel}/${EnergyValueLevelMax}`,
-        tooltip: `Energy limit - ${formatNumber(this._gameStore.energyTotalValue)}`,
+        tooltip: `Energy limit - ${formatCompactNumber(this._gameStore.energyTotalValue)}`,
         isMaxLevel: this._energyStore.energyTotalLevel === EnergyValueLevelMax,
         nextLevelCoast: getEnergyValueUpdateLevelCost(
           this._energyStore.energyTotalLevel + 1,
@@ -93,7 +94,7 @@ export class UpgradesStore {
         id: AbilityType.EnergyRegen,
         title: 'Regen level',
         value: `${this._energyStore.energyRegenLevel}/${EnergyRegenLevelMax}`,
-        tooltip: `Point regen per tic - ${formatNumber(this._gameStore.energyRegenValue)}`,
+        tooltip: `Point regen per tic - ${formatCompactNumber(this._gameStore.energyRegenValue)}`,
         isMaxLevel: this._energyStore.energyRegenLevel === EnergyRegenLevelMax,
         nextLevelCoast: getEnergyRegenUpgradeLevelCost(
           this._energyStore.energyRegenLevel + 1,
