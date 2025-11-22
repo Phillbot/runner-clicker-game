@@ -16,6 +16,7 @@ export const ScreenMain: FC = () => {
   const modalContainerRef = useRef<HTMLDivElement>(null);
   const balanceStore = useInjection(BalanceStore);
   const [devAmount, setDevAmount] = useState<number>(1_000_000);
+  const [isRouteLoading, setIsRouteLoading] = useState(false);
 
   useEffect(() => {
     if (modalContainerRef.current) {
@@ -80,9 +81,9 @@ export const ScreenMain: FC = () => {
           </button>
         </div>
       )}
-      <AppRoutes />
-      <NavPanel />
-      <div ref={modalContainerRef} />
+      <AppRoutes onRouteLoadingChange={setIsRouteLoading} />
+      <NavPanel disabled={isRouteLoading} />
+      <div ref={modalContainerRef} className={styles.modalContainer} />
       <ModalRenderer />
       <LoadingOverlay />
       <ToastContainer />
