@@ -41,8 +41,6 @@ export class BoostStore {
   @observable
   private _isCooldownActive: boolean = false;
   @observable
-  private _lastBoostTime: number | null = null;
-  @observable
   private _isTooltipVisible: boolean = false;
   @observable
   private _cooldownMs: number = 0;
@@ -136,13 +134,7 @@ export class BoostStore {
   @action
   setInitialBoostData(lastBoostRun: number) {
     this._lastBoostRun = lastBoostRun;
-    const remaining = this.getRemainingFromLastRun();
-    this._cooldownMs = remaining;
-    this._isCooldownActive = remaining > 0;
-    if (remaining > 0) {
-      this._lastBoostTime = Date.now() - (this.config.cooldown - remaining);
-      this.startCooldownTimer();
-    }
+    this.startCooldownTimer();
   }
 
   private getBoostMultiplier(boostType: BoostType): number {
@@ -150,6 +142,28 @@ export class BoostStore {
       this.config.boostMultipliers[boostType] ||
       this.config.boostMultipliers.DEFAULT
     );
+  }
+
+  private getBoostDuration(boostType: BoostType): number {
+    return (
+      this.config.boostDurations[boostType] ??
+      this.config.boostDurations.DEFAULT
+    );
+  }
+
+  private getBoostInterval(boostType: BoostType): number {
+    return (
+      this.config.boostIntervals[boostType] ??
+      this.config.boostIntervals.DEFAULT
+    );
+  }
+
+  private getRemainingFromLastRun(): number {
+    if (!this._lastBoostRun) {
+      return 0;
+    }
+    const elapsed = Date.now() - this._lastBoostRun;
+    return Math.max(0, this.config.cooldown - elapsed);
   }
 
   @action
@@ -180,10 +194,9 @@ export class BoostStore {
 
     runInAction(() => {
       this._boostType = boostType;
-      this._lastBoostTime = Date.now();
       this._lastBoostRun = Date.now();
-      this._cooldownMs = this.config.cooldown;
       this.energyStore.setEnergyAvailable(true);
+      this._isCooldownActive = true;
     });
 
     this._boostTimeoutId = this._scheduler.setTimeout(() => {
@@ -200,7 +213,6 @@ export class BoostStore {
       this._gameStore.handleEvent(randomX, randomY, this.boostMultiplier);
     }, this.getBoostInterval(boostType));
 
-    this._isCooldownActive = true;
     if (!EnvUtils.enableMock) {
       this.syncBoostData();
     }
@@ -247,59 +259,33 @@ export class BoostStore {
       this._scheduler.clearInterval(this._cooldownIntervalId);
     }
 
-    if (!this._isCooldownActive || !this._lastBoostTime) {
-      runInAction(() => {
-        this._cooldownMs = 0;
-      });
+    if (!this.refreshCooldown()) {
       return;
     }
 
     this._cooldownIntervalId = this._scheduler.setInterval(() => {
-      if (!this._isCooldownActive || !this._lastBoostTime) {
-        runInAction(() => {
-          this._cooldownMs = 0;
-        });
-        this._scheduler.clearInterval(this._cooldownIntervalId!);
-        this._cooldownIntervalId = null;
-        return;
-      }
-
-      const elapsed = Date.now() - this._lastBoostTime;
-      const remaining = Math.max(0, this.config.cooldown - elapsed);
-      runInAction(() => {
-        this._cooldownMs = remaining;
-      });
-
-      if (remaining === 0) {
-        runInAction(() => {
-          this._isCooldownActive = false;
-          this._lastBoostTime = null;
-        });
+      if (!this.refreshCooldown()) {
         this._scheduler.clearInterval(this._cooldownIntervalId!);
         this._cooldownIntervalId = null;
       }
     }, 1000);
   }
 
-  private getBoostDuration(boostType: BoostType): number {
-    return (
-      this.config.boostDurations[boostType] ??
-      this.config.boostDurations.DEFAULT
-    );
-  }
-
-  private getBoostInterval(boostType: BoostType): number {
-    return (
-      this.config.boostIntervals[boostType] ??
-      this.config.boostIntervals.DEFAULT
-    );
-  }
-
-  private getRemainingFromLastRun(): number {
-    if (!this._lastBoostRun) {
-      return 0;
+  private refreshCooldown(): boolean {
+    const remaining = this.getRemainingFromLastRun();
+    if (remaining <= 0) {
+      runInAction(() => {
+        this._cooldownMs = 0;
+        this._isCooldownActive = false;
+      });
+      return false;
     }
-    const elapsed = Date.now() - this._lastBoostRun;
-    return Math.max(0, this.config.cooldown - elapsed);
+
+    runInAction(() => {
+      this._cooldownMs = remaining;
+      this._isCooldownActive = true;
+    });
+
+    return true;
   }
 }
