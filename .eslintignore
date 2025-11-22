@@ -5,3 +5,4 @@ build/
 package.json
 global.d.ts
 webpack.config.js
+src/__generated__/styles/**/*.d.ts
