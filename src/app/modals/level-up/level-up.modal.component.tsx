@@ -1,24 +1,24 @@
-import React from 'react';
-import { observer } from 'mobx-react';
-import { resolve } from 'inversify-react';
-import classNames from 'classnames';
-import { Button } from '@mui/material';
+import { Component, ReactNode } from 'react';
 import { RocketLaunchOutlined } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import classNames from 'classnames';
+import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
 
-import { Fit } from '@utils/fit.component';
-import { assertNever, isNothing, isSomething } from '@utils/common';
-import { AbilityType } from '@app/game/game-levels';
 import { BalanceStore } from '@app/balance/balance.store';
+import { AbilityType } from '@app/game/game-levels';
 import { UpgradesStore } from '@app/upgrades/upgrades.store';
+import { assertNever, isNothing, isSomething } from '@utils/common';
+import { Fit } from '@utils/fit.component';
 
-import { ModalsStore } from '../modals.store';
 import { Modal } from '../modal.component';
+import { ModalsStore } from '../modals.store';
 import { Modals } from '../types';
 
-import styles from './level-up.md.scss';
+import styles from './level-up.module.scss';
 
 @observer
-export class LevelUpModal extends React.Component {
+export class LevelUpModal extends Component {
   @resolve
   private declare readonly _modalStore: ModalsStore;
   @resolve
@@ -26,7 +26,7 @@ export class LevelUpModal extends React.Component {
   @resolve
   private declare readonly _upgradesStore: UpgradesStore;
 
-  override render() {
+  override render(): ReactNode {
     const isOpen = this._modalStore.isOpen(Modals.LevelUpModal);
     const abilityType = this._modalStore.levelUpModalAbilityType;
     const nextLevelCoast = this._modalStore.levelUpModalNextLevelCoast;

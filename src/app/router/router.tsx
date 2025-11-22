@@ -1,12 +1,12 @@
-import React, { FC, useRef } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import { FC, useRef } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
-import { Home } from '@app/home/home.component';
-import { Upgrades } from '@app/upgrades/upgrades.component';
 import { Friends } from '@app/friends/friends.component';
-import { Tasks } from '@app/tasks/tasks.component';
+import { Home } from '@app/home/home.component';
 import { Stats } from '@app/stats/stats.component';
+import { Tasks } from '@app/tasks/tasks.component';
+import { Upgrades } from '@app/upgrades/upgrades.component';
 
 import './router.scss';
 

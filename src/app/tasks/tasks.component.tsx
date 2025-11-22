@@ -1,6 +1,6 @@
-import React, { PureComponent, ReactNode } from 'react';
+import { PureComponent, ReactNode } from 'react';
 
-import styles from './tasks.md.scss';
+import styles from './tasks.module.scss';
 
 export class Tasks extends PureComponent {
   override render(): ReactNode {

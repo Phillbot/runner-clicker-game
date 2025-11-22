@@ -1,0 +1,131 @@
+@use '@fonts/fonts.scss' as fonts;
+
+$size: 18.3em;
+
+.game {
+  position: relative;
+
+  &__icon {
+    width: $size;
+    position: relative;
+    outline: none;
+    transition:
+      transform,
+      box-shadow 300ms linear;
+    animation: rotate-turn linear 10s infinite;
+    pointer-events: auto;
+
+    &::before {
+      content: '';
+      position: absolute;
+      pointer-events: none;
+      width: 4.9em;
+      height: 4.9em;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 5.025em 2em #00ffff;
+      border-radius: 100%;
+      background: transparent;
+      z-index: -1;
+    }
+
+    &_unclickable {
+      animation: none;
+      &::before {
+        box-shadow: none;
+      }
+    }
+
+    &_boosted-tiny {
+      pointer-events: none;
+      animation: rotate-turn linear 5s infinite;
+    }
+
+    &_boosted-mega,
+    &_boosted-normal {
+      pointer-events: none;
+      animation: rotate-turn linear 1s infinite;
+
+      &::before {
+        box-shadow: 0 0 3.125em 0.7em #ff0000;
+      }
+    }
+  }
+
+  &__icon-svg {
+    width: $size;
+    height: $size;
+    display: block;
+    outline: none;
+    pointer-events: none;
+    transition:
+      transform,
+      opacity 300ms ease-in;
+
+    &_scale {
+      transform: scale(1.1);
+    }
+
+    &_disabled {
+      opacity: 0.5;
+    }
+  }
+
+  &_icon-svg-elements {
+    fill: #ffffff;
+
+    &_boosted-mega {
+      fill: #ff5900;
+      box-shadow: 120px 80px 40px 20px #00ffff;
+    }
+  }
+
+  &_icon-svg-dots {
+    fill: #2f4bff;
+
+    &_boosted-mega {
+      fill: #ff0000;
+    }
+  }
+
+  &__click-message {
+    pointer-events: none;
+    position: absolute;
+    font-size: 2em;
+    color: #050d42;
+    -webkit-text-stroke: 1.25px #00ffff;
+    text-shadow: 2px 2px 2px #00ffff;
+    transform: translate(-50%, -50%);
+    animation: fly-up 2000ms forwards;
+
+    @include fonts.font-press-start;
+
+    &_boost-mega {
+      -webkit-text-stroke: 0.025em #ff0000;
+      text-shadow: 2px 2px 2px #ff0000;
+    }
+  }
+}
+
+@keyframes rotate-turn {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes fly-up {
+  0% {
+    opacity: 1;
+    transform: translateY(-90px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-200px);
+  }
+}

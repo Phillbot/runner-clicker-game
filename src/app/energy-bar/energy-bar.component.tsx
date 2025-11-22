@@ -1,23 +1,23 @@
-import React from 'react';
+import { Component, CSSProperties, ReactNode } from 'react';
 import classNames from 'classnames';
-import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
 
-import { assertNever, Fit } from '@utils/index';
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
+import { assertNever, Fit } from '@utils/index';
 
 import { EnergyStore } from './energy.store';
 
-import styles from './energy-bar.md.scss';
+import styles from './energy-bar.module.scss';
 
 @observer
-export class EnergyBar extends React.Component {
+export class EnergyBar extends Component {
   @resolve
   private readonly _energyStore: EnergyStore;
   @resolve
   private readonly _boostStore: BoostStore;
 
-  override render(): React.ReactNode {
+  override render(): ReactNode {
     const { energyTotalValue, availableEnergyValue } = this._energyStore;
     const scalePercentage = (availableEnergyValue / energyTotalValue) * 100;
     const scaleColor = getScaleColor(scalePercentage);
@@ -41,7 +41,7 @@ export class EnergyBar extends React.Component {
         style={
           {
             '--box-shadow-brightness': boxShadowBrightness,
-          } as React.CSSProperties
+          } as CSSProperties
         }
       >
         <div

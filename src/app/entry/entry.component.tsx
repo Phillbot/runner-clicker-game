@@ -1,19 +1,19 @@
-import React, { Component, ReactNode } from 'react';
+import { Component, ReactNode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import classNames from 'classnames';
-import { observer } from 'mobx-react';
-import { resolve } from 'inversify-react';
 import { Box, LinearProgress } from '@mui/material';
+import classNames from 'classnames';
+import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
 
-import { EnvUtils } from '@utils/env';
+import { BalanceStore } from '@app/balance/balance.store';
 import { ScreenMain } from '@app/screen-main/screen-main.component';
 import { ScreenUnsupported } from '@app/screen-unsupported/screen-unsupported.component';
-import { BalanceStore } from '@app/balance/balance.store';
+import { EnvUtils } from '@utils/env';
 
 import { EntryStore } from './entry.store';
 import { UserStatus } from './types';
 
-import styles from './entry.md.scss';
+import styles from './entry.module.scss';
 
 @observer
 export class Entry extends Component {

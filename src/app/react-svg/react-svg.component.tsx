@@ -1,5 +1,3 @@
-import React from 'react';
-
 type Props = Readonly<{
   svgClasses: string;
   reactElementsClasses: string;

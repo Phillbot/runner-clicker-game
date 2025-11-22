@@ -1,19 +1,19 @@
-import React from 'react';
-import { observer } from 'mobx-react';
+import { Component, ReactNode } from 'react';
 import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
 
-import { ModalsStore } from '../modals.store';
 import { Modal } from '../modal.component';
+import { ModalsStore } from '../modals.store';
 import { Modals } from '../types';
 
-import styles from './game-info.md.scss';
+import styles from './game-info.module.scss';
 
 @observer
-export class GameInfoModal extends React.Component {
+export class GameInfoModal extends Component {
   @resolve
   private declare readonly _modalStore: ModalsStore;
 
-  override render() {
+  override render(): ReactNode {
     const isOpen = this._modalStore.isOpen(Modals.GameInfoModal);
 
     return (

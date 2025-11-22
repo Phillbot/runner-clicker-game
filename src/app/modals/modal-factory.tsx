@@ -1,14 +1,15 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { injectable } from 'inversify';
+
 import { assertNever } from '@utils/common';
 
-import { IModalFactory, Modals } from './types';
-import { LevelUpModal } from './level-up/level-up.modal.component';
 import { GameInfoModal } from './game-info/game-info.modal.component';
+import { LevelUpModal } from './level-up/level-up.modal.component';
+import { IModalFactory, Modals } from './types';
 
 @injectable()
 export class ModalFactory implements IModalFactory {
-  createModal(modalName: Modals): React.ReactNode {
+  createModal(modalName: Modals): ReactNode {
     switch (modalName) {
       case Modals.LevelUpModal:
         return <LevelUpModal />;

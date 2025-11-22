@@ -1,5 +1,4 @@
-import React, { useState, useEffect, FC } from 'react';
-import classNames from 'classnames';
+import { FC, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   BadgeOutlined,
@@ -9,8 +8,9 @@ import {
   SportsEsportsOutlined,
 } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
+import classNames from 'classnames';
 
-import styles from './nav-panel.md.scss';
+import styles from './nav-panel.module.scss';
 
 export const NavPanel: FC = () => {
   const location = useLocation();

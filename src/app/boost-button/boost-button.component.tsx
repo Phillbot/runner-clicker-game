@@ -1,15 +1,15 @@
-import React, { Component, ReactNode } from 'react';
-import classNames from 'classnames';
-import Tooltip from 'rc-tooltip';
+import { Component, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { resolve } from 'inversify-react';
-import { observer } from 'mobx-react';
 import { RocketLaunchOutlined } from '@mui/icons-material';
 import { Button } from '@mui/material';
+import classNames from 'classnames';
+import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
+import Tooltip from 'rc-tooltip';
 
 import { BoostStore } from './boost-button.store';
 
-import styles from './boost-button.md.scss';
+import styles from './boost-button.module.scss';
 
 type Props = Readonly<{
   navigate: ReturnType<typeof useNavigate>;
