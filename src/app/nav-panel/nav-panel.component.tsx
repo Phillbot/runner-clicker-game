@@ -9,6 +9,9 @@ import {
 } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import classNames from 'classnames';
+import { useInjection } from 'inversify-react';
+
+import { TelegramService } from '@app/entry/services/telegram.service';
 
 import styles from './nav-panel.module.scss';
 
@@ -21,7 +24,8 @@ export const NavPanel: FC<Props> = ({ disabled = false }) => {
   const navigate = useNavigate();
   const [value, setValue] = useState(location.pathname);
   const [historyCount, setHistoryCount] = useState<number>(0);
-  const telegram = window.Telegram.WebApp;
+  const telegramService = useInjection(TelegramService);
+  const telegram = telegramService.webApp;
 
   useEffect(() => {
     setValue(location.pathname);
