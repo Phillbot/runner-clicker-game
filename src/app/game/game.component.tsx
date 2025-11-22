@@ -1,6 +1,6 @@
-import React, { Component, createRef, ReactNode } from 'react';
-import { resolve } from 'inversify-react';
+import { Component, createRef, ReactNode } from 'react';
 import classNames from 'classnames';
+import { resolve } from 'inversify-react';
 import { observer } from 'mobx-react';
 import { fromEvent, race, Subscription } from 'rxjs';
 import { map, throttleTime } from 'rxjs/operators';
@@ -10,7 +10,7 @@ import { ReactSVG } from '@app/react-svg/react-svg.component';
 
 import { GameStore } from './game.store';
 
-import styles from './game.md.scss';
+import styles from './game.module.scss';
 
 @observer
 export class Game extends Component {

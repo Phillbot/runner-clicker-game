@@ -1,13 +1,13 @@
-import React, { PureComponent, ReactNode } from 'react';
-import { resolve } from 'inversify-react';
+import { PureComponent, ReactNode } from 'react';
 import { HelpOutlineOutlined } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
+import { resolve } from 'inversify-react';
 
 import { GameContainer } from '@app/game/game-container.component';
 import { ModalsStore } from '@app/modals/modals.store';
 import { Modals } from '@app/modals/types';
 
-import styles from './home.md.scss';
-import { IconButton } from '@mui/material';
+import styles from './home.module.scss';
 
 export class Home extends PureComponent {
   @resolve

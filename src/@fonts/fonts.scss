@@ -1,16 +1,16 @@
 @font-face {
   font-family: OverdoseSans;
-  src: url('~@fonts/overdozesans.woff2') format('woff2');
+  src: url('@fonts/overdozesans.woff2') format('woff2');
 }
 
 @font-face {
   font-family: Rubik;
-  src: url('~@fonts/rubik.woff2') format('woff2');
+  src: url('@fonts/rubik.woff2') format('woff2');
 }
 
 @font-face {
   font-family: PressStart;
-  src: url('~@fonts/press-start.woff2') format('woff2');
+  src: url('@fonts/press-start.woff2') format('woff2');
 }
 
 @mixin font-overdoze {

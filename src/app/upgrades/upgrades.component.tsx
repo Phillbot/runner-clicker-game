@@ -1,22 +1,19 @@
-import React, { Component, ReactNode } from 'react';
-import { observer } from 'mobx-react';
-import { resolve } from 'inversify-react';
-import classNames from 'classnames';
-import Tooltip from 'rc-tooltip';
-
+import { Component, ReactNode } from 'react';
 import {
   AddCircleOutline,
   DoneAllOutlined,
   WalletOutlined,
 } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
+import classNames from 'classnames';
+import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
+import Tooltip from 'rc-tooltip';
 
-import { ModalsStore } from '@app/modals/modals.store';
+import { BalanceStore } from '@app/balance/balance.store';
 import BoostButtonWithNavigate from '@app/boost-button/boost-button.component';
-
-import { UpgradesStore } from './upgrades.store';
-
-import styles from './upgrades.md.scss';
+import { EnergyStore } from '@app/energy-bar/energy.store';
+import { GameStore } from '@app/game/game.store';
 import {
   AbilityType,
   ClickCostLevelMax,
@@ -26,9 +23,12 @@ import {
   getEnergyRegenUpgradeLevelCost,
   getEnergyValueUpdateLevelCost,
 } from '@app/game/game-levels';
+import { ModalsStore } from '@app/modals/modals.store';
 import { formatNumber } from '@utils/common';
-import { EnergyStore } from '@app/energy-bar/energy.store';
-import { GameStore } from '@app/game/game.store';
+
+import { UpgradesStore } from './upgrades.store';
+
+import styles from './upgrades.module.scss';
 
 @observer
 export class Upgrades extends Component {
@@ -40,12 +40,17 @@ export class Upgrades extends Component {
   private declare readonly _gameStore: GameStore;
   @resolve
   private declare readonly _energyStore: EnergyStore;
+  @resolve
+  private declare readonly _balanceStore: BalanceStore;
 
   override render(): ReactNode {
     return (
       <div className={styles.upgrades}>
         <div className={styles.upgradesBoost}>
           <BoostButtonWithNavigate />
+        </div>
+        <div className={styles.upgradesBalanceInline}>
+          Balance: {formatNumber(this._balanceStore.balance)}
         </div>
         <div className={styles.upgradesBonusesContainer}>
           {this.abilities.map(

@@ -1,12 +1,14 @@
-import React, { Component, ReactNode } from 'react';
-import { observer } from 'mobx-react';
-import { resolve } from 'inversify-react';
-import { Button, CircularProgress } from '@mui/material';
+import { Component, ReactNode } from 'react';
 import { Check, IosShareOutlined } from '@mui/icons-material';
+import { Button, CircularProgress } from '@mui/material';
+import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
+
+import { EnvUtils } from '@utils/env';
 
 import { FriendsStore } from './friends.store';
 
-import styles from './friends.md.scss';
+import styles from './friends.module.scss';
 
 @observer
 export class Friends extends Component {
@@ -50,9 +52,20 @@ export class Friends extends Component {
             size="small"
             endIcon={<IosShareOutlined />}
             variant="contained"
-            href={`https://t.me/share/url?url=${this._friendsStore.refLink}&text=Привіт! Го грати зі мною в клікера!`}
+            href={
+              EnvUtils.isDev && EnvUtils.enableMock
+                ? undefined
+                : `https://t.me/share/url?url=${this._friendsStore.refLink}&text=Привіт! Го грати зі мною в клікера!`
+            }
+            onClick={
+              EnvUtils.isDev && EnvUtils.enableMock
+                ? () => this._friendsStore.addMockFriend()
+                : undefined
+            }
           >
-            Invite Friends!
+            {EnvUtils.isDev && EnvUtils.enableMock
+              ? 'Add mock friend'
+              : 'Invite Friends!'}
           </Button>
         </div>
       </div>

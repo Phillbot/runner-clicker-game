@@ -1,10 +1,10 @@
-import React, { ReactNode } from 'react';
+import { Component, createRef, ReactNode } from 'react';
 import ReactDOM from 'react-dom';
-import classNames from 'classnames';
+import { CSSTransition } from 'react-transition-group';
 import { fromEvent, Subject } from 'rxjs';
-import { takeUntil, filter } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 
-import styles from './modal.md.scss';
+import styles from './modal.module.scss';
 
 type ModalProps = {
   isOpen: boolean;
@@ -12,9 +12,10 @@ type ModalProps = {
   children: ReactNode;
 };
 
-export class Modal extends React.Component<ModalProps> {
+export class Modal extends Component<ModalProps> {
   private destroy$ = new Subject<void>();
   private modalContainer: HTMLElement | null = null;
+  private modalRef = createRef<HTMLDivElement>();
 
   override componentDidMount() {
     this.addKeydownListener();
@@ -63,24 +64,32 @@ export class Modal extends React.Component<ModalProps> {
     }
 
     return ReactDOM.createPortal(
-      <div
-        className={classNames(styles.modalOverlay, {
-          [styles.modalOverlayOpen]: isOpen,
-        })}
-        onClick={onClose}
+      <CSSTransition
+        in={isOpen}
+        timeout={200}
+        classNames={{
+          enter: styles.modalEnter,
+          enterActive: styles.modalEnterActive,
+          exit: styles.modalExit,
+          exitActive: styles.modalExitActive,
+        }}
+        mountOnEnter
+        unmountOnExit
+        nodeRef={this.modalRef}
       >
-        <div
-          className={classNames(styles.modalContent, {
-            [styles.modalContentOpen]: isOpen,
-          })}
-          onClick={e => e.stopPropagation()}
-        >
-          <button className={styles.closeButton} onClick={onClose}>
-            &times;
-          </button>
-          <div className={styles.modalContentScrollable}>{children}</div>
+        <div ref={this.modalRef} className={styles.modalRoot}>
+          <div className={styles.modalOverlay} onClick={onClose} />
+          <div
+            className={styles.modalContent}
+            onClick={e => e.stopPropagation()}
+          >
+            <button className={styles.closeButton} onClick={onClose}>
+              &times;
+            </button>
+            <div className={styles.modalContentScrollable}>{children}</div>
+          </div>
         </div>
-      </div>,
+      </CSSTransition>,
       modalContainer,
     );
   }

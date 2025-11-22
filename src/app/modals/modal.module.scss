@@ -1,0 +1,104 @@
+.modal-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 200ms ease;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2em 0 2em 2em;
+  border-radius: 8px;
+  position: relative;
+  min-width: 300px;
+  max-width: 80vw;
+  max-height: 80vh;
+  overflow: hidden;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+  pointer-events: auto;
+}
+
+.modal-content__scrollable {
+  padding-right: 2em;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 0;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.modal-enter {
+  .modal-overlay {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .modal-content {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+    pointer-events: none;
+  }
+}
+
+.modal-enter-active,
+.modal-enter-done {
+  .modal-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-content {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+}
+
+.modal-exit {
+  .modal-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-content {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+}
+
+.modal-exit-active {
+  .modal-overlay {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .modal-content {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+    pointer-events: none;
+  }
+}

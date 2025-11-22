@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
-import { observer } from 'mobx-react';
-import { resolve } from 'inversify-react';
+import { Component } from 'react';
 import { createPortal } from 'react-dom';
+import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
+
 import { ModalsStore } from './modals.store';
 import type { IModalFactory, Modals } from './types';
 

@@ -1,12 +1,12 @@
-import React, { Component, ReactNode } from 'react';
+import { Component, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CircularProgress } from '@mui/material';
-import { observer } from 'mobx-react';
 import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
 
 import { LoadingOverlayStore } from './loading-overlay.store';
 
-import styles from './loading-overlay.md.scss';
+import styles from './loading-overlay.module.scss';
 
 @observer
 export class LoadingOverlay extends Component {

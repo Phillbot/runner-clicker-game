@@ -1,12 +1,12 @@
-import React, { Component, ReactNode } from 'react';
-import { t } from 'i18next';
-import { observer } from 'mobx-react';
+import { Component, ReactNode } from 'react';
 import { resolve } from 'inversify-react';
+import { observer } from 'mobx-react';
 
-import { Fit } from '@utils/fit.component';
 import { EntryStore } from '@app/entry/entry.store';
+import { t } from '@localization/typed-translation';
+import { Fit } from '@utils/fit.component';
 
-import styles from './screen-unsupported.md.scss';
+import styles from './screen-unsupported.module.scss';
 
 @observer
 export class ScreenUnsupported extends Component {
@@ -24,7 +24,7 @@ export class ScreenUnsupported extends Component {
           <div className={styles.unsupportedTitle}>
             <Fit>
               <span>
-                {t('translation:greetings', {
+                {t('greetings', {
                   name: initDataUnsafe?.user?.first_name,
                   lng,
                 })}
@@ -32,9 +32,7 @@ export class ScreenUnsupported extends Component {
             </Fit>
           </div>
           <div className={styles.unsupportedRedirect}>
-            {t('translation:unsupported', {
-              lng,
-            })}
+            {t('unsupported', { lng })}
           </div>
         </div>
       </div>
