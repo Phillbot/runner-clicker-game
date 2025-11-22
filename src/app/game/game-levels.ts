@@ -59,72 +59,75 @@ export const EnergyValueLevelMax = 10;
 export const EnergyRegenLevelMax = 5;
 
 const clickCoefficient = 1;
-const evergyCoefficient = 1000;
-const evergyRegenCoefficient = 0.11;
+const energyCoefficient = 1000;
+const energyRegenCoefficient = 0.11;
+
+const CLICK_COST_LEVEL_COST: Record<ClickCostLevel, number> = {
+  [ClickCostLevel.LEVEL_1]: 0,
+  [ClickCostLevel.LEVEL_2]: 1000,
+  [ClickCostLevel.LEVEL_3]: 2000,
+  [ClickCostLevel.LEVEL_4]: 4000,
+  [ClickCostLevel.LEVEL_5]: 8000,
+  [ClickCostLevel.LEVEL_6]: 12500,
+  [ClickCostLevel.LEVEL_7]: 15000,
+  [ClickCostLevel.LEVEL_8]: 17500,
+  [ClickCostLevel.LEVEL_9]: 20000,
+  [ClickCostLevel.LEVEL_10]: 30000,
+  [ClickCostLevel.LEVEL_11]: 50000,
+  [ClickCostLevel.LEVEL_12]: 100000,
+  [ClickCostLevel.LEVEL_13]: 125000,
+  [ClickCostLevel.LEVEL_14]: 150000,
+  [ClickCostLevel.LEVEL_15]: 175000,
+  [ClickCostLevel.LEVEL_16]: 200000,
+  [ClickCostLevel.LEVEL_17]: 350000,
+  [ClickCostLevel.LEVEL_18]: 500000,
+  [ClickCostLevel.LEVEL_19]: 750000,
+  [ClickCostLevel.LEVEL_20]: 1000000,
+};
+
+const ENERGY_VALUE_LEVEL_COST: Record<EnergyValueLevel, number> = {
+  [EnergyValueLevel.LEVEL_1]: 0,
+  [EnergyValueLevel.LEVEL_2]: 5000,
+  [EnergyValueLevel.LEVEL_3]: 10000,
+  [EnergyValueLevel.LEVEL_4]: 15000,
+  [EnergyValueLevel.LEVEL_5]: 20000,
+  [EnergyValueLevel.LEVEL_6]: 25000,
+  [EnergyValueLevel.LEVEL_7]: 50000,
+  [EnergyValueLevel.LEVEL_8]: 75000,
+  [EnergyValueLevel.LEVEL_9]: 100000,
+  [EnergyValueLevel.LEVEL_10]: 125000,
+};
+
+const ENERGY_REGEN_LEVEL_COST: Record<EnergyRegenLevel, number> = {
+  [EnergyRegenLevel.LEVEL_1]: 0,
+  [EnergyRegenLevel.LEVEL_2]: 15000,
+  [EnergyRegenLevel.LEVEL_3]: 20000,
+  [EnergyRegenLevel.LEVEL_4]: 25000,
+  [EnergyRegenLevel.LEVEL_5]: 50000,
+};
 
 export function getClickCostByLevel(level: ClickCostLevel): number {
   return Math.round(level * clickCoefficient);
 }
 
 export function getEnergyValueByLevel(level: EnergyValueLevel): number {
-  return Math.round(level * evergyCoefficient);
+  return Math.round(level * energyCoefficient);
 }
 
 export function getEnergyRegenValueByLevel(level: EnergyRegenLevel): number {
-  return Number((level * evergyRegenCoefficient).toFixed(2));
+  return Number((level * energyRegenCoefficient).toFixed(2));
 }
 
 export function getClickCostUpdateLevelCost(level: ClickCostLevel): number {
-  const costMap = new Map<ClickCostLevel, number>([
-    [ClickCostLevel.LEVEL_1, 0],
-    [ClickCostLevel.LEVEL_2, 1000],
-    [ClickCostLevel.LEVEL_3, 2000],
-    [ClickCostLevel.LEVEL_4, 4000],
-    [ClickCostLevel.LEVEL_5, 8000],
-    [ClickCostLevel.LEVEL_6, 12500],
-    [ClickCostLevel.LEVEL_7, 15000],
-    [ClickCostLevel.LEVEL_8, 17500],
-    [ClickCostLevel.LEVEL_9, 20000],
-    [ClickCostLevel.LEVEL_10, 30000],
-    [ClickCostLevel.LEVEL_11, 50000],
-    [ClickCostLevel.LEVEL_12, 10000],
-    [ClickCostLevel.LEVEL_13, 125000],
-    [ClickCostLevel.LEVEL_14, 150000],
-    [ClickCostLevel.LEVEL_15, 175000],
-    [ClickCostLevel.LEVEL_16, 200000],
-    [ClickCostLevel.LEVEL_17, 350000],
-    [ClickCostLevel.LEVEL_18, 500000],
-    [ClickCostLevel.LEVEL_19, 750000],
-    [ClickCostLevel.LEVEL_20, 1000000],
-  ]);
-  return costMap.get(level) ?? 0;
+  return CLICK_COST_LEVEL_COST[level] ?? 0;
 }
 
 export function getEnergyValueUpdateLevelCost(level: EnergyValueLevel): number {
-  const costMap = new Map<EnergyValueLevel, number>([
-    [EnergyValueLevel.LEVEL_1, 0],
-    [EnergyValueLevel.LEVEL_2, 5000],
-    [EnergyValueLevel.LEVEL_3, 10000],
-    [EnergyValueLevel.LEVEL_4, 15000],
-    [EnergyValueLevel.LEVEL_5, 20000],
-    [EnergyValueLevel.LEVEL_6, 25000],
-    [EnergyValueLevel.LEVEL_7, 50000],
-    [EnergyValueLevel.LEVEL_8, 75000],
-    [EnergyValueLevel.LEVEL_9, 100000],
-    [EnergyValueLevel.LEVEL_10, 125000],
-  ]);
-  return costMap.get(level) ?? 0;
+  return ENERGY_VALUE_LEVEL_COST[level] ?? 0;
 }
 
 export function getEnergyRegenUpgradeLevelCost(
   level: EnergyRegenLevel,
 ): number {
-  const costMap = new Map<EnergyRegenLevel, number>([
-    [EnergyRegenLevel.LEVEL_1, 0],
-    [EnergyRegenLevel.LEVEL_2, 15000],
-    [EnergyRegenLevel.LEVEL_3, 20000],
-    [EnergyRegenLevel.LEVEL_4, 25000],
-    [EnergyRegenLevel.LEVEL_5, 50000],
-  ]);
-  return costMap.get(level) ?? 0;
+  return ENERGY_REGEN_LEVEL_COST[level] ?? 0;
 }
