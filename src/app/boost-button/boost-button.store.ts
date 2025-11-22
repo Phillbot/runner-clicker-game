@@ -10,7 +10,7 @@ import {
 
 import { BalanceStore } from '@app/balance/balance.store';
 import { GameStore } from '@app/game/game.store';
-import { EnvUtils, generateAuthTokenHeaders } from '@utils/index';
+import { EnvUtils, generateAuthTokenHeaders } from '@utils';
 
 export enum BoostType {
   Mega = 'MEGA',

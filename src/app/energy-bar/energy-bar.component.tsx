@@ -5,7 +5,7 @@ import { resolve } from 'inversify-react';
 import { observer } from 'mobx-react';
 
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
-import { Fit } from '@utils/index';
+import { Fit } from '@utils';
 
 import { EnergyStore } from './energy.store';
 

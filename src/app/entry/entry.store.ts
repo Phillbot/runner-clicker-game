@@ -13,7 +13,7 @@ import {
   generateAuthTokenHeaders,
   isDesktop,
   preloadResourcesWithProgress,
-} from '@utils/index';
+} from '@utils';
 
 import type { Bot, User, UserStatus } from './types';
 
@@ -188,20 +188,46 @@ export class EntryStore {
   private async loadResources(): Promise<void> {
     const imageUrls = this.imageUrls;
     const fontNames = this.fontNames;
+    const totalResources = imageUrls.length + fontNames.length;
+
+    if (totalResources === 0) {
+      this.setResourcesLoadProgress(100);
+      this.updateCombinedProgress();
+      this.setResourcesLoaded(true);
+      return;
+    }
 
     const updateProgress = (progress: number) => {
-      this.setResourcesLoadProgress(progress);
+      const next = Math.min(100, Math.max(0, progress));
+      this.setResourcesLoadProgress(next);
       this.updateCombinedProgress();
     };
 
     try {
-      await preloadResourcesWithProgress(imageUrls, fontNames, updateProgress);
+      const preloadPromise = preloadResourcesWithProgress(
+        imageUrls,
+        fontNames,
+        updateProgress,
+      );
+
+      // Do not block UI forever on slow networks: give up after 4s and continue.
+      const timeoutFallback = new Promise<void>(resolve =>
+        setTimeout(resolve, 4000),
+      );
+
+      await Promise.race([preloadPromise, timeoutFallback]);
+
+      // Ensure progress completes.
+      this.setResourcesLoadProgress(100);
+      this.updateCombinedProgress();
       this.setResourcesLoaded(true);
       document.fonts.ready.then(() => {
         document.body.classList.add('fonts-loaded');
       });
     } catch (error) {
       console.error('Resource preloading failed', error);
+      this.setResourcesLoadProgress(100);
+      this.updateCombinedProgress();
       this.setResourcesLoaded(true);
     }
   }
