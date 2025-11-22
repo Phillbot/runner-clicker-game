@@ -2,12 +2,11 @@ import { Component, createRef, ReactNode } from 'react';
 import classNames from 'classnames';
 import { resolve } from 'inversify-react';
 import { observer } from 'mobx-react';
-import { fromEvent, race, Subscription } from 'rxjs';
-import { map, throttleTime } from 'rxjs/operators';
 
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
 import { ReactSVG } from '@app/react-svg/react-svg.component';
 
+import { ClickInput } from './click-input';
 import { GameStore } from './game.store';
 
 import styles from './game.module.scss';
@@ -21,48 +20,27 @@ export class Game extends Component {
   @resolve
   private declare readonly _boostStore: BoostStore;
 
-  private subscription: Subscription | null = null;
+  private clickInput: ClickInput | null = null;
 
   override componentDidMount(): void {
-    if (this.gameIconRef.current) {
-      const clicks$ = fromEvent<MouseEvent>(
-        this.gameIconRef.current!,
-        'click',
-      ).pipe(
-        throttleTime(10),
-        map(event => {
-          const rect = this.gameContainerRef.current?.getBoundingClientRect();
-          const x = event.clientX - (rect?.left || 0);
-          const y = event.clientY - (rect?.top || 0);
-          return { x, y };
-        }),
-      );
-
-      const touches$ = fromEvent<TouchEvent>(
-        this.gameIconRef.current!,
-        'touchend',
-      ).pipe(
-        throttleTime(10),
-        map(event => {
-          const rect = this.gameContainerRef.current?.getBoundingClientRect();
-          const x = event.changedTouches[0].clientX - (rect?.left || 0);
-          const y = event.changedTouches[0].clientY - (rect?.top || 0);
-          return { x, y };
-        }),
-      );
-
-      this.subscription = race(clicks$, touches$).subscribe(event => {
-        if (event) {
-          this._gameStore.handleEvent(event.x, event.y);
-        }
-      });
+    const icon = this.gameIconRef.current;
+    const container = this.gameContainerRef.current;
+    if (!icon || !container) {
+      return;
     }
+
+    this.clickInput = new ClickInput(icon, container, point =>
+      this._gameStore.handleEvent(
+        point.x,
+        point.y,
+        this._boostStore.boostMultiplier,
+      ),
+    );
+    this.clickInput.start();
   }
 
   override componentWillUnmount(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.clickInput?.dispose();
   }
 
   override render(): ReactNode {
@@ -114,18 +92,8 @@ export class Game extends Component {
   }
 
   private get boostedClickCost() {
-    const { boostType } = this._boostStore;
+    const { boostMultiplier } = this._boostStore;
     const { clickCost } = this._gameStore;
-
-    switch (boostType) {
-      case BoostType.Mega:
-        return clickCost * 20;
-      case BoostType.Normal:
-        return clickCost * 10;
-      case BoostType.Tiny:
-        return clickCost * 5;
-      default:
-        return clickCost;
-    }
+    return clickCost * boostMultiplier;
   }
 }

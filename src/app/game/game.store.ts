@@ -9,12 +9,19 @@ import {
 } from 'mobx';
 
 import { BalanceStore } from '@app/balance/balance.store';
+import { Scheduler } from '@app/common/scheduler';
 import { EnergyStore } from '@app/energy-bar/energy.store';
+import { TelegramService } from '@app/entry/services/telegram.service';
 import { GAME_CONSTANTS } from '@config/game.constants';
 
 import { Abilities, ClickCostLevel, getClickCostByLevel } from './game-levels';
 
-type ClickMessage = { id: number; x: number; y: number; removeAt: number };
+type ClickMessage = Readonly<{
+  id: number;
+  x: number;
+  y: number;
+  removeAt: number;
+}>;
 
 @injectable()
 export class GameStore {
@@ -36,13 +43,17 @@ export class GameStore {
   private _isAutoClickerDetected: boolean = false;
 
   private _clickId: number = 0;
-  private readonly _telegram: WebApp = window.Telegram.WebApp;
+  private readonly _telegram: WebApp | undefined;
 
   constructor(
     @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
     @inject(EnergyStore) private readonly _energyStore: EnergyStore,
+    @inject(TelegramService)
+    private readonly _telegramService: TelegramService,
+    @inject(Scheduler) private readonly _scheduler: Scheduler,
   ) {
     makeObservable(this);
+    this._telegram = this._telegramService.webApp;
     reaction(
       () => this.availableEnergyValue >= this.clickCost,
       isEnergyAvailable => {
@@ -103,7 +114,7 @@ export class GameStore {
   }
 
   @action
-  readonly handleEvent = (x: number, y: number) => {
+  readonly handleEvent = (x: number, y: number, multiplier: number = 1) => {
     const now = Date.now();
     const precisionThreshold = GAME_CONSTANTS.CLICK_PRECISION_THRESHOLD;
 
@@ -148,9 +159,9 @@ export class GameStore {
       this._energyStore.decrementEnergy(this.clickCost);
       this._isScaled = true;
 
-      this._balanceStore.incrementBalance(this.clickCost);
+      this._balanceStore.incrementBalance(this.clickCost * multiplier);
 
-      setTimeout(() => {
+      this._scheduler.setTimeout(() => {
         runInAction(() => {
           this.removeClickMessage(newClickId);
         });
@@ -166,10 +177,10 @@ export class GameStore {
   @action
   readonly restartScaleAnimation = () => {
     this.setScaled(false);
-    setTimeout(() => {
+    this._scheduler.setTimeout(() => {
       runInAction(() => {
         this.setScaled(true);
-        setTimeout(() => {
+        this._scheduler.setTimeout(() => {
           this.setScaled(false);
         }, GAME_CONSTANTS.SCALE_ANIMATION_DURATION_MS);
       });
