@@ -12,7 +12,11 @@ import classNames from 'classnames';
 
 import styles from './nav-panel.module.scss';
 
-export const NavPanel: FC = () => {
+type Props = Readonly<{
+  disabled?: boolean;
+}>;
+
+export const NavPanel: FC<Props> = ({ disabled = false }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [value, setValue] = useState(location.pathname);
@@ -54,6 +58,9 @@ export const NavPanel: FC = () => {
         className={styles.navPanelBottomNavigation}
         value={value}
         onChange={(_, newValue) => {
+          if (disabled) {
+            return;
+          }
           setValue(newValue);
           setHistoryCount(count => count + 1);
         }}
@@ -65,10 +72,11 @@ export const NavPanel: FC = () => {
             className={classNames(styles.navPanelBottomNavigationElement, {
               [styles.navPanelBottomNavigationElementActive]:
                 item.value === value,
-              [styles.navPanelBottomNavigationElementDisabled]: item.disabled,
+              [styles.navPanelBottomNavigationElementDisabled]:
+                item.disabled || disabled,
             })}
             draggable={false}
-            disabled={item.value === value || item.disabled}
+            disabled={item.value === value || item.disabled || disabled}
             component={Link}
             value={item.value}
             icon={item.icon}
