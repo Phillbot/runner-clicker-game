@@ -1,19 +1,23 @@
-import axios from 'axios';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { action, makeObservable, observable, runInAction } from 'mobx';
 
-import { generateAuthTokenHeaders } from '@utils/common';
+import { ApiClient } from '@app/common/api-client';
+import { Scheduler } from '@app/common/scheduler';
+import { TelegramService } from '@app/entry/services/telegram.service';
 import { EnvUtils } from '@utils/env';
 
 @injectable()
 export class BalanceStore {
   @observable balance: number = 0;
   @observable private _pendingChanges: number = 0;
-  private _syncTimeoutId: NodeJS.Timeout | null = null;
+  private _syncTimeoutId: number | null = null;
 
-  private _telegram: WebApp = window.Telegram.WebApp;
-
-  constructor() {
+  constructor(
+    @inject(ApiClient) private readonly _apiClient: ApiClient,
+    @inject(TelegramService)
+    private readonly _telegramService: TelegramService,
+    @inject(Scheduler) private readonly _scheduler: Scheduler,
+  ) {
     makeObservable(this);
   }
 
@@ -46,19 +50,13 @@ export class BalanceStore {
       return;
     }
 
-    this._telegram.disableClosingConfirmation();
+    this._telegramService.disableClosingConfirmation();
 
     try {
-      await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-balance`,
-        {
-          balance: this._pendingChanges,
-          initData: window.Telegram.WebApp.initData,
-        },
-        {
-          headers: { ...generateAuthTokenHeaders() },
-        },
-      );
+      await this._apiClient.post(EnvUtils.apiEndpoints.updateBalance, {
+        balance: this._pendingChanges,
+        initData: this._telegramService.initData,
+      });
       runInAction(() => {
         this.resetPendingChanges();
       });
@@ -70,11 +68,11 @@ export class BalanceStore {
 
   @action
   private scheduleSync() {
-    this._telegram.enableClosingConfirmation();
+    this._telegramService.enableClosingConfirmation();
     if (this._syncTimeoutId) {
-      clearTimeout(this._syncTimeoutId);
+      this._scheduler.clearTimeout(this._syncTimeoutId);
     }
-    this._syncTimeoutId = setTimeout(() => {
+    this._syncTimeoutId = this._scheduler.setTimeout(() => {
       this.syncWithServer();
     }, 500); // Adjust the delay as needed
   }

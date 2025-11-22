@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { inject, injectable } from 'inversify';
 import {
   action,
@@ -9,14 +8,20 @@ import {
 } from 'mobx';
 
 import { BalanceStore } from '@app/balance/balance.store';
+import { ApiClient } from '@app/common/api-client';
+import { TelegramService } from '@app/entry/services/telegram.service';
 import { Referral } from '@app/entry/types';
 import { UpgradesStore } from '@app/upgrades/upgrades.store';
-import { generateAuthTokenHeaders } from '@utils/common';
 import { EnvUtils } from '@utils/env';
 
 interface ReferralWithLoading extends Referral {
   loading?: boolean;
 }
+
+type ReferralClaimResponse = Readonly<{
+  referrals: ReferralWithLoading[];
+  balance: number;
+}>;
 
 @injectable()
 export class FriendsStore {
@@ -32,6 +37,9 @@ export class FriendsStore {
   constructor(
     @inject(BalanceStore) private readonly _balanceStore: BalanceStore,
     @inject(UpgradesStore) private readonly _upgradesStore: UpgradesStore,
+    @inject(ApiClient) private readonly _apiClient: ApiClient,
+    @inject(TelegramService)
+    private readonly _telegramService: TelegramService,
   ) {
     makeObservable(this);
   }
@@ -70,27 +78,23 @@ export class FriendsStore {
     }
 
     try {
-      const response = await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/referral-claim-reward`,
+      const response = await this._apiClient.post<ReferralClaimResponse>(
+        EnvUtils.apiEndpoints.referralClaimReward,
         {
-          initData: window.Telegram.WebApp.initData,
+          initData: this._telegramService.initData,
           userId: this._upgradesStore.userId,
           referredUserId,
         },
-        {
-          headers: { ...generateAuthTokenHeaders() },
-        },
       );
       runInAction(() => {
-        // Обновляем баланс и список друзей с новыми данными
-        this._friendsList = response.data.referrals.map(
+        this._friendsList = response.referrals.map(
           (referral: ReferralWithLoading) => ({
             ...referral,
             loading: false,
           }),
         );
-        this._balanceStore.setBalance(response.data.balance);
-        this.setFriendsList(response.data.referrals);
+        this._balanceStore.setBalance(response.balance);
+        this.setFriendsList(response.referrals);
       });
     } catch (error) {
       if (friend) {

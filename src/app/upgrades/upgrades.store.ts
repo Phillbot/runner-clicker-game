@@ -1,5 +1,4 @@
 import { toast } from 'react-toastify';
-import axios from 'axios';
 import { inject, injectable } from 'inversify';
 import {
   action,
@@ -10,7 +9,9 @@ import {
 } from 'mobx';
 
 import { BalanceStore } from '@app/balance/balance.store';
+import { ApiClient } from '@app/common/api-client';
 import { EnergyStore } from '@app/energy-bar/energy.store';
+import { TelegramService } from '@app/entry/services/telegram.service';
 import { GameStore } from '@app/game/game.store';
 import {
   AbilityType,
@@ -24,9 +25,20 @@ import {
 import { LoadingOverlayStore } from '@app/loading-overlay/loading-overlay.store';
 import { ModalsStore } from '@app/modals/modals.store';
 import { toastConfig } from '@config/toast.config';
-import { generateAuthTokenHeaders } from '@utils/common';
+import { isSomething } from '@utils/common';
 import { EnvUtils } from '@utils/env';
 import { formatCompactNumber } from '@utils/number';
+
+type UpdateAbilityResponse = Readonly<{
+  ok: boolean;
+  balance: number;
+  abilities: {
+    clickCoastLevel: number;
+    energyLevel: number;
+    energyRegenirationLevel: number;
+  };
+  activeEnergy?: number;
+}>;
 
 @injectable()
 export class UpgradesStore {
@@ -43,8 +55,6 @@ export class UpgradesStore {
   @observable
   private _userId: number | string = 0;
 
-  private readonly _telegram = window.Telegram.WebApp;
-
   constructor(
     @inject(EnergyStore) private readonly _energyStore: EnergyStore,
     @inject(GameStore) private readonly _gameStore: GameStore,
@@ -52,6 +62,9 @@ export class UpgradesStore {
     @inject(ModalsStore) private readonly _modalsStore: ModalsStore,
     @inject(LoadingOverlayStore)
     private readonly _loadingOverlayStore: LoadingOverlayStore,
+    @inject(ApiClient) private readonly _apiClient: ApiClient,
+    @inject(TelegramService)
+    private readonly _telegramService: TelegramService,
   ) {
     makeObservable(this);
     this.updateAbilities();
@@ -152,21 +165,19 @@ export class UpgradesStore {
 
       await this._balanceStore.syncWithServer();
 
-      const initData = this._telegram.initData;
-      const response = await axios.post(
-        `${EnvUtils.REACT_CLICKER_APP_BASE_URL}/react-clicker-bot/update-ability`,
+      const initData = this._telegramService.initData;
+      const response = await this._apiClient.post<UpdateAbilityResponse>(
+        EnvUtils.apiEndpoints.updateAbility,
         { initData, abilityType },
-        {
-          headers: { ...generateAuthTokenHeaders() },
-        },
       );
 
-      if (response.data.ok) {
+      if (response.ok) {
         runInAction(() => {
-          const { balance, abilities, activeEnergy } = response.data;
+          const { balance, abilities, activeEnergy } = response;
           this._balanceStore.setBalance(balance);
 
-          activeEnergy > 0 &&
+          isSomething(activeEnergy) &&
+            activeEnergy > 0 &&
             this._energyStore.setAvailableEnergyValue(activeEnergy);
 
           this._gameStore.setInitialData(abilities);
@@ -177,9 +188,7 @@ export class UpgradesStore {
 
         this._modalsStore.closeLevelUpModal();
       } else {
-        if (this._telegram) {
-          this._telegram.close();
-        }
+        this._telegramService.close();
         throw new Error('Failed to update ability');
       }
     } catch (error) {
