@@ -1,10 +1,11 @@
 import { Component, CSSProperties, ReactNode } from 'react';
 import classNames from 'classnames';
+import { assertNever } from 'handy-ts-tools';
 import { resolve } from 'inversify-react';
 import { observer } from 'mobx-react';
 
 import { BoostStore, BoostType } from '@app/boost-button/boost-button.store';
-import { assertNever, Fit } from '@utils/index';
+import { Fit } from '@utils/index';
 
 import { EnergyStore } from './energy.store';
 
